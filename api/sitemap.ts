@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { sanityConfig, setCors } from "./_lib";
+import { sanityConfig, setCors } from "./_lib.js";
 
 const STATIC_ROUTES: Array<[string, number, string]> = [
   ["/", 1.0, "weekly"],

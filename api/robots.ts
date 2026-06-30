@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { setCors } from "./_lib";
+import { setCors } from "./_lib.js";
 
 function siteBase(req: VercelRequest): string {
   const fromEnv =

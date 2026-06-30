@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { sanityConfig, cdnUrl, setCors } from "./_lib";
+import { sanityConfig, cdnUrl, setCors } from "./_lib.js";
 
 /**
  * Public GROQ proxy. No auth token is forwarded — drafts stay hidden.

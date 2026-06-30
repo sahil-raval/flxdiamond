@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { sanityConfig, apiUrl, setCors, requireAdmin } from "./_lib";
+import { sanityConfig, apiUrl, setCors, requireAdmin } from "./_lib.js";
 
 /**
  * Admin-protected Sanity mutation proxy.
