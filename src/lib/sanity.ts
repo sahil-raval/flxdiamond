@@ -45,6 +45,7 @@ export async function sanityFetch<T>(query: string, params?: Record<string, unkn
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query, params: params ?? {} }),
+      cache: "no-store",
     });
     if (!res.ok) return null;
     const json = await res.json() as { result?: T };

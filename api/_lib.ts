@@ -30,6 +30,11 @@ export function apiUrl(projectId: string, apiVersion: string, dataset: string) {
 export function setCors(res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  // Never cache the proxy response (edge/CDN/browser) so freshly published
+  // Sanity content is always returned on the deployed (Vercel) site.
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  res.setHeader("CDN-Cache-Control", "no-store");
+  res.setHeader("Vercel-CDN-Cache-Control", "no-store");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type, X-Admin-Secret, Authorization",
