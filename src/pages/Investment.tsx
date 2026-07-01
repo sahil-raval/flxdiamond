@@ -150,117 +150,7 @@ const GIA_SCALE = [
   { grade: "I3",   full: "Included 3",            flx: false },
 ];
 
-function GIAClarityScale() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.7 }}
-      className="mb-14 p-6 md:p-8"
-      style={{ background: "rgba(28,169,201,0.04)", border: "1px solid rgba(28,169,201,0.12)" }}
-    >
-      {/* Header */}
-      <div className="flex flex-wrap items-baseline justify-between gap-3 mb-6">
-        <div>
-          <p className="text-[9px] uppercase tracking-[0.5em] mb-1.5" style={{ color: "rgba(28,169,201,0.6)" }}>
-            GIA Clarity Scale · Source: 4cs.gia.edu
-          </p>
-          <p className="font-serif text-base md:text-lg" style={{ color: "rgba(255,255,255,0.72)" }}>
-            11 grades from Flawless to Included — FL sits at the apex.
-          </p>
-        </div>
-        <a
-          href="https://4cs.gia.edu/en-us/diamond-clarity/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[9px] uppercase tracking-widest transition-opacity hover:opacity-100"
-          style={{ color: "rgba(28,169,201,0.5)", borderBottom: "1px solid rgba(28,169,201,0.2)", paddingBottom: "2px" }}
-        >
-          GIA Reference ↗
-        </a>
-      </div>
 
-      {/* Scale bar — desktop */}
-      <div className="hidden sm:flex w-full">
-        {GIA_SCALE.map((g, i) => (
-          <motion.div
-            key={g.grade}
-            initial={{ opacity: 0, scaleY: 0.5 }}
-            whileInView={{ opacity: 1, scaleY: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.05, duration: 0.4 }}
-            className="flex-1 flex flex-col items-center gap-2"
-          >
-            {/* Grade label */}
-            <span
-              className="text-[10px] font-medium tracking-wide"
-              style={{ color: g.flx ? "#1CA9C9" : `rgba(255,255,255,${0.48 - i * 0.03})` }}
-            >
-              {g.grade}
-            </span>
-            {/* Colour segment */}
-            <div
-              style={{
-                width: "100%",
-                height: g.flx ? "28px" : "20px",
-                background: g.flx
-                  ? "rgba(28,169,201,0.65)"
-                  : `rgba(255,255,255,${0.06 - i * 0.004})`,
-                border: g.flx ? "1px solid rgba(28,169,201,0.85)" : "1px solid rgba(255,255,255,0.06)",
-                transition: "background 0.2s",
-                boxShadow: g.flx ? "0 0 12px rgba(28,169,201,0.3)" : "none",
-              }}
-            />
-            {/* Full name on hover-friendly tooltip via title */}
-            <span
-              title={g.full}
-              className="text-[8px] text-center leading-snug hidden lg:block"
-              style={{ color: g.flx ? "rgba(28,169,201,0.55)" : "rgba(255,255,255,0.15)", maxWidth: "56px" }}
-            >
-              {g.flx ? g.full : ""}
-            </span>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Scale bar — mobile (horizontal scroll) */}
-      <div className="sm:hidden flex overflow-x-auto gap-1 pb-2" style={{ scrollbarWidth: "none" }}>
-        {GIA_SCALE.map((g, i) => (
-          <div key={g.grade} className="shrink-0 flex flex-col items-center gap-1.5" style={{ minWidth: "44px" }}>
-            <span className="text-[10px] font-medium" style={{ color: g.flx ? "#1CA9C9" : `rgba(255,255,255,${0.45 - i * 0.03})` }}>
-              {g.grade}
-            </span>
-            <div
-              style={{
-                width: "36px",
-                height: g.flx ? "24px" : "16px",
-                background: g.flx ? "rgba(28,169,201,0.6)" : `rgba(255,255,255,${0.06})`,
-                border: g.flx ? "1px solid rgba(28,169,201,0.8)" : "1px solid rgba(255,255,255,0.06)",
-                boxShadow: g.flx ? "0 0 10px rgba(28,169,201,0.25)" : "none",
-              }}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Caption */}
-      <div className="flex flex-wrap gap-6 mt-5 pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-        <div className="flex items-center gap-2">
-          <div style={{ width: "16px", height: "10px", background: "rgba(28,169,201,0.65)", border: "1px solid rgba(28,169,201,0.85)" }} />
-          <span className="text-[9px] uppercase tracking-widest" style={{ color: "rgba(28,169,201,0.6)" }}>FLX Focus — FL &amp; IF tier</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div style={{ width: "16px", height: "10px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.06)" }} />
-          <span className="text-[9px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.2)" }}>Lower clarity grades</span>
-        </div>
-        <span className="text-[9px] ml-auto" style={{ color: "rgba(255,255,255,0.15)" }}>
-          Source: Gemological Institute of America (GIA) · 4cs.gia.edu
-        </span>
-      </div>
-    </motion.div>
-  );
-}
 
 /* ── IF→FL Process Mindmap ─────────────────────────── */
 type FlowNode = {
@@ -1024,7 +914,7 @@ export default function Investment() {
             ))}
           </motion.div>
           <div className="mt-12">
-            <GIAClarityScale />
+       
           </div>
         </div>
       </section>

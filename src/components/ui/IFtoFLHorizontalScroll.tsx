@@ -162,8 +162,15 @@ function GalleryFrame({
   const distance   = Math.abs(index - activeIndex);
   const { scale, opacity, zIndex } = getSlotStyle(distance);
 
-  const frameSize = isActive ? "min(50vh, 46vw)" : "min(38vh, 36vw)";
-  const frameMax  = isActive ? "500px" : "360px";
+  // ── Responsive sizing ──────────────────────────────────────────────
+  // clamp(floor, preferred-vw, ceiling) gives a strong width on narrow
+  // mobile viewports (where vh is comparatively cheap) while min() folds
+  // in a vh cap so nothing overflows short/landscape viewports or blows
+  // up unreasonably large on big desktop screens.
+  const frameSize = isActive
+  ? "clamp(260px, min(50vh, 56vw), 520px)"
+  : "clamp(190px, min(36vh, 40vw), 380px)";
+  const frameMax  = isActive ? "520px" : "380px";
 
   return (
     <motion.div
