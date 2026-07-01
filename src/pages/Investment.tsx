@@ -779,6 +779,77 @@ export default function Investment() {
         </motion.div>
       </section>
 
+      {/* ── IF→FL Horizontal Scroll Journey — Full Width, Pinned ── */}
+      <IFtoFLHorizontalScroll />
+      {/* ── Before / After Results ── */}
+      <section className="relative py-20 md:py-28 px-6" style={{ background: "#02274A" }}>
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(28,169,201,0.02) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(28,169,201,0.02) 1px, transparent 1px)
+            `,
+            backgroundSize: "80px 80px",
+          }}
+        />
+        <div className="relative max-w-7xl mx-auto space-y-12 md:space-y-16">
+
+          {/* Section heading */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid md:grid-cols-2 gap-8 md:gap-16 items-end"
+          >
+            <div className="space-y-4">
+              <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em]" style={{ color: "#1CA9C9" }}>
+                Documented Results
+              </motion.p>
+              <motion.h2
+                variants={up}
+                className="font-serif leading-tight"
+                style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", color: "rgba(255,255,255,0.88)" }}
+              >
+                Before & after.<br />
+                <span style={{ color: "rgba(255,255,255,0.25)" }}>Three stones, three outcomes.</span>
+              </motion.h2>
+              <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
+            </div>
+            <motion.p
+              variants={up}
+              className="text-sm leading-relaxed"
+              style={{ color: "rgba(255,255,255,0.38)" }}
+            >
+              Each card shows the exact GIA Comments language from the IF certificate, the specific surface
+              characteristic removed, and the verified FL outcome with its indicative value uplift.
+              All stones were independently recertified by GIA with no pre-disclosure of the conversion.
+            </motion.p>
+          </motion.div>
+
+          {/* Stone cards */}
+          <div className="space-y-6 md:space-y-8">
+            {stones.map((stone, i) => (
+              <StoneCard key={stone.id} stone={stone} index={i} />
+            ))}
+          </div>
+
+          {/* Disclaimer */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-[10px] leading-relaxed max-w-2xl"
+            style={{ color: "rgba(255,255,255,0.2)" }}
+          >
+            All stone identifiers have been anonymised. Values are indicative and based on market references at time of transaction.
+            Actual results vary by carat weight, colour, cut, and market conditions. Past outcomes do not guarantee future returns.
+            GIA certification is conducted independently with no affiliation to FLXDIAMONDS.
+          </motion.p>
+        </div>
+      </section>
       {/* ── The Opportunity ── */}
       <section className="py-20 md:py-28 px-6" style={{ background: "white" }}>
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-start">
@@ -889,78 +960,9 @@ export default function Investment() {
         </div>
       </section>
 
-      {/* ── IF→FL Horizontal Scroll Journey — Full Width, Pinned ── */}
-      <IFtoFLHorizontalScroll />
 
-      {/* ── Before / After Results ── */}
-      <section className="relative py-20 md:py-28 px-6" style={{ background: "#02274A" }}>
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(28,169,201,0.02) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(28,169,201,0.02) 1px, transparent 1px)
-            `,
-            backgroundSize: "80px 80px",
-          }}
-        />
-        <div className="relative max-w-7xl mx-auto space-y-12 md:space-y-16">
 
-          {/* Section heading */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="grid md:grid-cols-2 gap-8 md:gap-16 items-end"
-          >
-            <div className="space-y-4">
-              <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em]" style={{ color: "#1CA9C9" }}>
-                Documented Results
-              </motion.p>
-              <motion.h2
-                variants={up}
-                className="font-serif leading-tight"
-                style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", color: "rgba(255,255,255,0.88)" }}
-              >
-                Before & after.<br />
-                <span style={{ color: "rgba(255,255,255,0.25)" }}>Three stones, three outcomes.</span>
-              </motion.h2>
-              <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
-            </div>
-            <motion.p
-              variants={up}
-              className="text-sm leading-relaxed"
-              style={{ color: "rgba(255,255,255,0.38)" }}
-            >
-              Each card shows the exact GIA Comments language from the IF certificate, the specific surface
-              characteristic removed, and the verified FL outcome with its indicative value uplift.
-              All stones were independently recertified by GIA with no pre-disclosure of the conversion.
-            </motion.p>
-          </motion.div>
 
-          {/* Stone cards */}
-          <div className="space-y-6 md:space-y-8">
-            {stones.map((stone, i) => (
-              <StoneCard key={stone.id} stone={stone} index={i} />
-            ))}
-          </div>
-
-          {/* Disclaimer */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-[10px] leading-relaxed max-w-2xl"
-            style={{ color: "rgba(255,255,255,0.2)" }}
-          >
-            All stone identifiers have been anonymised. Values are indicative and based on market references at time of transaction.
-            Actual results vary by carat weight, colour, cut, and market conditions. Past outcomes do not guarantee future returns.
-            GIA certification is conducted independently with no affiliation to FLXDIAMONDS.
-          </motion.p>
-        </div>
-      </section>
 
       {/* ── CTA ── */}
       <section className="py-20 md:py-28 px-6" style={{ background: "white" }}>

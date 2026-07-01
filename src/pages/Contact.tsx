@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import emailjs from "@emailjs/browser";
 import { EASE } from "@/lib/motion";
 import { Link } from "wouter";
 import { useSanityQuery } from "@/lib/useSanityData";
 import { isSanityConfigured } from "@/lib/sanity";
 import { CONTACT_PAGE_QUERY } from "@/lib/sanity-queries";
 import SeoHead from "@/components/SeoHead";
+
+/* ─── EmailJS config ────────────────────────────────────────── */
+/* Pulled from environment variables — set these in .env locally
+   and in Vercel → Project → Settings → Environment Variables. */
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EMAILJS_CONTACT_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_CONTACT_TMPL;
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
 /* ─── Floating label input ──────────────────────────────────── */
 function FloatInput({ label, type = "text", testId, value, onChange, required }: {
@@ -185,8 +193,46 @@ export default function Contact() {
 
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", company: "", type: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setSubmitted(true); };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (sending) return;
+
+    setSending(true);
+    setError("");
+
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_CONTACT_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
+      console.error("Missing EmailJS environment variables.");
+      setError("Enquiry form is misconfigured. Please email us directly at " + email + ".");
+      setSending(false);
+      return;
+    }
+
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_CONTACT_TEMPLATE_ID,
+        {
+          first_name: form.firstName,
+          last_name: form.lastName,
+          email: form.email,
+          company: form.company || "—",
+          enquiry_type: ENQUIRY_TYPES.find(t => t.value === form.type)?.label || form.type,
+          message: form.message,
+        },
+        EMAILJS_PUBLIC_KEY
+      );
+      setSubmitted(true);
+    } catch (err) {
+      console.error("EmailJS error:", err);
+      setError("Something went wrong sending your enquiry. Please try again or email us directly.");
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <>
@@ -365,8 +411,17 @@ export default function Contact() {
                     <FloatSelect label="Nature of Enquiry" testId="select-enquiry-type" value={form.type} onChange={v => set("type", v)} options={ENQUIRY_TYPES} required />
                     <FloatTextarea label="Message" testId="input-message" value={form.message} onChange={v => set("message", v)} required />
 
+                    {error && (
+                      <p style={{
+                        marginTop: "16px", fontSize: "11px", lineHeight: 1.6,
+                        color: "#C0392B", fontFamily: "'Inter', sans-serif",
+                      }}>
+                        {error}
+                      </p>
+                    )}
+
                     <div style={{ height: "28px" }} />
-                    <SubmitButton />
+                    <SubmitButton sending={sending} />
 
                     <p style={{
                       textAlign: "center", paddingTop: "14px",
@@ -421,19 +476,20 @@ export default function Contact() {
 }
 
 /* ─── Submit button ─────────────────────────────────────────── */
-function SubmitButton() {
+function SubmitButton({ sending }: { sending: boolean }) {
   const [hovered, setHovered] = useState(false);
   return (
     <button
       type="submit"
+      disabled={sending}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       data-testid="btn-submit"
       style={{
         position: "relative", width: "100%", height: "50px",
-        background: hovered ? "#1CA9C9" : "#02274A",
+        background: sending ? "rgba(2,39,74,0.4)" : (hovered ? "#1CA9C9" : "#02274A"),
         border: "none",
-        cursor: "pointer", overflow: "hidden",
+        cursor: sending ? "not-allowed" : "pointer", overflow: "hidden",
         transition: "background 0.3s ease",
         fontFamily: "'Inter', sans-serif",
       }}
@@ -444,7 +500,7 @@ function SubmitButton() {
         color: "#ffffff",
         fontWeight: 500,
       }}>
-        Submit Enquiry
+        {sending ? "Sending…" : "Submit Enquiry"}
       </span>
     </button>
   );

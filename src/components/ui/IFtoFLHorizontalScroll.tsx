@@ -85,58 +85,52 @@ type SanityPanel = {
 
 const TOTAL = H_PANELS.length;
 
-// Pure grey wall — no beige, no warm tones
-const WALL        = "#EBEBEB";
-const WALL_MID    = "#D8D8D8";
-const WALL_SHADOW = "#C2C2C2";
-const WALL_LIGHT  = "#F5F5F5";
+// ── Dark navy wall palette ─────────────────────────────────────────────
+// Base wall tone: #03274a. The rest of the palette is derived from it so
+// the rail, skirting, and vignette all stay in the same hue family.
+const WALL        = "#03274a";
+const WALL_MID     = "#02203d";
+const WALL_SHADOW = "#010b18";
+const WALL_LIGHT  = "#0f4172";
 
-// Teal palette
+// Teal palette — brightened slightly so it reads clearly on a dark ground
 const T = {
-  full:  "#1CA9C9",
-  mid:   "rgba(28,169,201,0.65)",
-  soft:  "rgba(28,169,201,0.35)",
-  dim:   "rgba(28,169,201,0.15)",
-  text:  "#0e6b80",
+  full:  "#2FC6E8",
+  mid:   "rgba(47,198,232,0.65)",
+  soft:  "rgba(47,198,232,0.35)",
+  dim:   "rgba(47,198,232,0.15)",
+  text:  "#5FDBF0",
 };
+
+// Text on the dark wall
+const INK       = "#F2F5F9";
+const INK_SOFT  = "rgba(242,245,249,0.58)";
+const INK_FAINT = "rgba(242,245,249,0.38)";
 
 // Single smooth easing curve used everywhere so nothing feels jerky
 // relative to anything else on the page.
 const EASE = [0.4, 0, 0.2, 1] as const;
 
-function getSlotStyle(distance: number) {
-  if (distance === 0) return { scale: 1,    opacity: 1,    zIndex: 10 };
-  if (distance === 1) return { scale: 0.81, opacity: 0.45, zIndex: 6  };
-  if (distance === 2) return { scale: 0.65, opacity: 0.20, zIndex: 2  };
-  return                      { scale: 0.52, opacity: 0.08, zIndex: 1  };
-}
-
-// ── Hanging wire ────────────────────────────────────────────────────────
-function HangingWire({ active }: { active: boolean }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
-      {/* Hook */}
-      <div style={{
-        width: 7, height: 7, borderRadius: "50%",
-        background: active
-          ? "radial-gradient(circle at 35% 35%, #e0e0e0, #888)"
-          : "radial-gradient(circle at 35% 35%, #d0d0d0, #aaa)",
-        boxShadow: active
-          ? "0 1px 4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.5)"
-          : "0 1px 2px rgba(0,0,0,0.25)",
-        transition: `all 0.6s ${cssEase(EASE)}`,
-        flexShrink: 0,
-      }} />
-      {/* Wire strand */}
-      <div style={{
-        width: "1.5px", height: "52px",
-        background: active
-          ? "linear-gradient(to bottom, rgba(160,160,160,0.85) 0%, rgba(110,110,110,0.35) 100%)"
-          : "linear-gradient(to bottom, rgba(160,160,160,0.35) 0%, rgba(110,110,110,0.08) 100%)",
-        transition: `background 0.6s ${cssEase(EASE)}`,
-      }} />
-    </div>
+// Subtle grain texture as an inline SVG noise tile — this is what gives
+// the whole scene a filmic, non-flat quality instead of looking like a
+// clean vector render.
+const GRAIN_URI =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'>
+      <filter id='n'>
+        <feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/>
+        <feColorMatrix type='saturate' values='0'/>
+      </filter>
+      <rect width='100%' height='100%' filter='url(#n)'/>
+    </svg>`
   );
+
+function getSlotStyle(distance: number) {
+  if (distance === 0) return { scale: 1,    opacity: 1,    zIndex: 10, blur: 0 };
+  if (distance === 1) return { scale: 0.81, opacity: 0.4,  zIndex: 6,  blur: 2 };
+  if (distance === 2) return { scale: 0.65, opacity: 0.16, zIndex: 2,  blur: 4 };
+  return                      { scale: 0.52, opacity: 0.06, zIndex: 1,  blur: 6 };
 }
 
 function cssEase(e: readonly [number, number, number, number]) {
@@ -160,13 +154,9 @@ function GalleryFrame({
   const isIntro    = panel.type === "intro";
   const isActive   = index === activeIndex;
   const distance   = Math.abs(index - activeIndex);
-  const { scale, opacity, zIndex } = getSlotStyle(distance);
+  const { scale, opacity, zIndex, blur } = getSlotStyle(distance);
 
   // ── Responsive sizing ──────────────────────────────────────────────
-  // clamp(floor, preferred-vw, ceiling) gives a strong width on narrow
-  // mobile viewports (where vh is comparatively cheap) while min() folds
-  // in a vh cap so nothing overflows short/landscape viewports or blows
-  // up unreasonably large on big desktop screens.
   const frameSize = isActive
   ? "clamp(260px, min(50vh, 56vw), 520px)"
   : "clamp(190px, min(36vh, 40vw), 380px)";
@@ -181,13 +171,13 @@ function GalleryFrame({
         position: "relative", flexShrink: 0,
         display: "flex", flexDirection: "column", alignItems: "center",
         zIndex, cursor: isActive ? "default" : "pointer",
-        width: "100vw", paddingTop: "4vh",
+        width: "100vw",
       }}
     >
-      <HangingWire active={isActive} />
-
-      {/* Image container — no moulding, just a soft-shadowed plate the
-          image sits centered inside of */}
+      {/* Image container — a plate the image sits centered inside of.
+          Depth-of-field blur (via getSlotStyle) does the work of pulling
+          focus toward the active frame, cinematic-lens style, instead of
+          a glow shape doing it. */}
       <div style={{
         position: "relative",
         width: frameSize, height: frameSize,
@@ -196,8 +186,8 @@ function GalleryFrame({
         overflow: "hidden",
         background: "transparent",
         boxShadow: isActive
-          ? "0 20px 60px rgba(0,0,0,0.22), 0 6px 18px rgba(0,0,0,0.12)"
-          : "0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08)",
+          ? "0 24px 70px rgba(0,0,0,0.6)"
+          : "0 8px 24px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4)",
         transition: [
           `width 0.85s ${cssEase(EASE)}`,
           `height 0.85s ${cssEase(EASE)}`,
@@ -219,12 +209,32 @@ function GalleryFrame({
             objectFit: "contain",
             objectPosition: "center",
             filter: isActive
-              ? "brightness(0.96) contrast(1.02) saturate(0.92)"
-              : "brightness(0.62) contrast(0.96) saturate(0.6)",
+              ? "brightness(1.1) contrast(1.1) saturate(1.05)"
+              : `brightness(0.32) contrast(0.92) saturate(0.5) blur(${blur}px)`,
             transition: `filter 0.7s ${cssEase(EASE)}`,
             zIndex: 1,
           }}
         />
+
+        {/* Rim-light sweep across the top of the active image, like a
+            spotlight grazing the surface */}
+        {isActive && (
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(160deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.05) 22%, transparent 46%)",
+            pointerEvents: "none", zIndex: 2, mixBlendMode: "screen",
+          }} />
+        )}
+
+        {/* Cool falloff at the base — the beam's light pools and fades
+            toward the bottom of the frame rather than stopping sharply */}
+        {isActive && (
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(to top, rgba(1,11,24,0.35) 0%, transparent 40%)",
+            pointerEvents: "none", zIndex: 2,
+          }} />
+        )}
 
         {/* Ghosted IF→FL on intro */}
         {isIntro && (
@@ -234,7 +244,7 @@ function GalleryFrame({
             fontFamily: "Georgia, serif",
             fontSize: "clamp(1.5rem, 5vw, 4rem)",
             letterSpacing: "-0.04em",
-            color: "rgba(28,169,201,0.06)",
+            color: "rgba(47,198,232,0.08)",
             pointerEvents: "none", zIndex: 2, userSelect: "none",
           }}>IF→FL</div>
         )}
@@ -247,8 +257,8 @@ function GalleryFrame({
             padding: "4px 10px",
             fontFamily: "Georgia, serif", fontSize: "10px", letterSpacing: "0.1em",
             color: isEnd ? T.full : T.text,
-            background: "rgba(235,235,235,0.9)",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
+            background: "rgba(1,11,24,0.72)",
+            boxShadow: "0 1px 6px rgba(0,0,0,0.4)",
             zIndex: 8,
           }}>{panel.step}</div>
         )}
@@ -261,8 +271,8 @@ function GalleryFrame({
             padding: "4px 10px", fontSize: "7px",
             fontFamily: "'Inter', sans-serif", letterSpacing: "0.35em", textTransform: "uppercase",
             color: T.text,
-            background: "rgba(235,235,235,0.9)",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
+            background: "rgba(1,11,24,0.72)",
+            boxShadow: "0 1px 6px rgba(0,0,0,0.4)",
             zIndex: 8,
           }}>~20% qualify</div>
         )}
@@ -275,8 +285,8 @@ function GalleryFrame({
             padding: "4px 12px", fontSize: "7px",
             fontFamily: "'Inter', sans-serif", letterSpacing: "0.35em", textTransform: "uppercase",
             color: T.full,
-            background: "rgba(235,235,235,0.9)",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
+            background: "rgba(1,11,24,0.72)",
+            boxShadow: "0 1px 6px rgba(0,0,0,0.4)",
             zIndex: 8,
           }}>Flawless</div>
         )}
@@ -301,27 +311,27 @@ function GalleryFrame({
           fontFamily: "Georgia, serif",
           fontSize: "clamp(1rem, 1.9vw, 1.3rem)",
           letterSpacing: "0.14em", textTransform: "uppercase",
-          color: "#02274A", lineHeight: 1.35, whiteSpace: "pre-line", marginBottom: "10px",
+          color: INK, lineHeight: 1.35, whiteSpace: "pre-line", marginBottom: "10px",
         }}>{panel.title}</h2>
 
         <p style={{
           fontFamily: "Georgia, serif", fontStyle: "italic",
           fontSize: "clamp(0.7rem, 1vw, 0.82rem)",
-          color: "rgba(2,39,74,0.48)", letterSpacing: "0.02em", lineHeight: 1.7,
+          color: INK_SOFT, letterSpacing: "0.02em", lineHeight: 1.7,
         }}>{panel.body}</p>
 
         {isDecision && (
           <div style={{
             display: "inline-flex", alignItems: "flex-start", gap: "10px",
             marginTop: "14px", padding: "10px 16px",
-            background: "rgba(28,169,201,0.04)", maxWidth: "340px", textAlign: "left",
+            background: "rgba(47,198,232,0.06)", maxWidth: "340px", textAlign: "left",
           }}>
             <span style={{
               fontSize: "7px", letterSpacing: "0.35em", textTransform: "uppercase",
               color: T.text, marginTop: "2px", flexShrink: 0,
               fontFamily: "'Inter', sans-serif",
             }}>If no →</span>
-            <p style={{ fontSize: "11px", color: "rgba(2,39,74,0.45)", lineHeight: 1.55, fontFamily: "'Inter', sans-serif" }}>
+            <p style={{ fontSize: "11px", color: INK_FAINT, lineHeight: 1.55, fontFamily: "'Inter', sans-serif" }}>
               Stone returned unchanged. No cost. No risk. Full discretion maintained.
             </p>
           </div>
@@ -373,8 +383,6 @@ export default function IFtoFLHorizontalScroll() {
     setActiveIndex(Math.max(0, Math.min(TOTAL - 1, idx)));
   }), [scrollYProgress]);
 
-  // Spring-smoothed horizontal scroll instead of a raw linear map — this
-  // is what removes the last bit of jerkiness from the drag itself.
   const x           = useTransform(scrollYProgress, [0, 1], [0, -(TOTAL - 1) * vpWidth]);
   const hintOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
 
@@ -387,97 +395,97 @@ export default function IFtoFLHorizontalScroll() {
 
   return (
     <div ref={containerRef} style={{ height: `${TOTAL * 100}vh`, position: "relative" }}>
+
       <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", background: WALL }}>
 
-        {/* Wall: pure grey radial — bright centre, darker edges, zero beige */}
+        {/* Wall: dark navy radial — brighter navy centre fading to near-black edges */}
         <div style={{
           position: "absolute", inset: 0,
           background: `radial-gradient(ellipse 80% 75% at 50% 40%, ${WALL_LIGHT} 0%, ${WALL} 52%, ${WALL_SHADOW} 100%)`,
           zIndex: 0, pointerEvents: "none",
         }} />
 
-        {/* Ceiling spotlight — neutral white, no colour cast */}
+        {/* Ambient ceiling wash — very large, very soft, just enough to
+            suggest the light source without ever forming a visible shape */}
         <div style={{
           position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
-          width: "65vw", height: "88vh",
-          background: "radial-gradient(ellipse 50% 54% at 50% 0%, rgba(255,255,255,0.55) 0%, transparent 65%)",
+          width: "70vw", height: "92vh",
+          background: "radial-gradient(ellipse 48% 56% at 50% 0%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 40%, transparent 68%)",
           pointerEvents: "none", zIndex: 1,
         }} />
 
-        {/* Very subtle teal tint at ceiling apex only */}
+        {/* Teal ambient bleed from the ceiling apex */}
         <div style={{
           position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
-          width: "50vw", height: "40vh",
-          background: "radial-gradient(ellipse 45% 50% at 50% 0%, rgba(28,169,201,0.04) 0%, transparent 70%)",
+          width: "50vw", height: "42vh",
+          background: "radial-gradient(ellipse 45% 50% at 50% 0%, rgba(47,198,232,0.09) 0%, transparent 70%)",
           pointerEvents: "none", zIndex: 1,
         }} />
 
-        {/* ── Picture rail — pure grey 3-D moulding ── */}
-        {/* Shadow above */}
+        {/* ── Picture rail — dark brushed-metal moulding ── */}
         <div style={{
           position: "absolute", top: "57px", left: 0, right: 0, height: "4px",
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.10), transparent)",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.35), transparent)",
           zIndex: 3, pointerEvents: "none",
         }} />
-        {/* Rail body */}
         <div style={{
           position: "absolute", top: "61px", left: 0, right: 0, height: "10px",
           background: `linear-gradient(to bottom, ${WALL_LIGHT} 0%, ${WALL_MID} 45%, ${WALL_SHADOW} 100%)`,
           boxShadow: [
-            "0 4px 10px rgba(0,0,0,0.16)",
-            "0 1px 3px rgba(0,0,0,0.10)",
-            "inset 0 1px 0 rgba(255,255,255,0.95)",
-            "inset 0 -1px 0 rgba(0,0,0,0.06)",
+            "0 4px 10px rgba(0,0,0,0.45)",
+            "0 1px 3px rgba(0,0,0,0.30)",
+            "inset 0 1px 0 rgba(255,255,255,0.18)",
+            "inset 0 -1px 0 rgba(0,0,0,0.3)",
           ].join(", "),
           zIndex: 3, pointerEvents: "none",
         }} />
-        {/* Rail bottom drop shadow */}
         <div style={{
           position: "absolute", top: "71px", left: 0, right: 0, height: "10px",
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.12), transparent)",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.35), transparent)",
           zIndex: 3, pointerEvents: "none",
         }} />
-        {/* Teal accent line under rail */}
         <div style={{
           position: "absolute", top: "81px", left: "12%", right: "12%", height: "1px",
           background: `linear-gradient(90deg, transparent, ${T.dim} 20%, ${T.soft} 50%, ${T.dim} 80%, transparent)`,
           zIndex: 3, pointerEvents: "none",
         }} />
 
-        {/* ── Skirting board — pure grey ── */}
+        {/* ── Skirting board — dark navy metal ── */}
         <div style={{
           position: "absolute", bottom: "48px", left: 0, right: 0, height: "1px",
-          background: "rgba(255,255,255,0.75)",
+          background: "rgba(255,255,255,0.10)",
           zIndex: 3, pointerEvents: "none",
         }} />
         <div style={{
           position: "absolute", bottom: "30px", left: 0, right: 0, height: "18px",
           background: `linear-gradient(to bottom, ${WALL_LIGHT} 0%, ${WALL_MID} 45%, ${WALL_SHADOW} 100%)`,
           boxShadow: [
-            "0 -3px 8px rgba(0,0,0,0.10)",
-            "inset 0 1px 0 rgba(255,255,255,0.9)",
+            "0 -3px 8px rgba(0,0,0,0.35)",
+            "inset 0 1px 0 rgba(255,255,255,0.14)",
           ].join(", "),
           zIndex: 3, pointerEvents: "none",
         }} />
         {/* Baseboard */}
         <div style={{
           position: "absolute", bottom: 0, left: 0, right: 0, height: "30px",
-          background: `linear-gradient(to bottom, ${WALL_SHADOW} 0%, #B8B8B8 100%)`,
-          boxShadow: "inset 0 2px 5px rgba(0,0,0,0.12)",
+          background: `linear-gradient(to bottom, ${WALL_SHADOW} 0%, #010509 100%)`,
+          boxShadow: "inset 0 2px 5px rgba(0,0,0,0.4)",
           zIndex: 3, pointerEvents: "none",
         }} />
 
         {/* Side wall shadow vignette */}
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(to right, rgba(170,170,170,0.58) 0%, transparent 13%, transparent 87%, rgba(170,170,170,0.58) 100%)",
+          background: "linear-gradient(to right, rgba(0,0,0,0.55) 0%, transparent 13%, transparent 87%, rgba(0,0,0,0.55) 100%)",
           pointerEvents: "none", zIndex: 9,
         }} />
 
-        {/* Gallery track */}
+        {/* Gallery track — vertically centered so the frame sits with
+            balanced space above and below, instead of hugging the rail
+            and leaving a large empty gap at the bottom */}
         <motion.div style={{
-          x, display: "flex", alignItems: "flex-start",
-          height: "100%", willChange: "transform", paddingTop: "61px",
+          x, display: "flex", alignItems: "center",
+          height: "100%", willChange: "transform", paddingTop: "40px",
         }}>
           {panels.map((panel, i) => (
             <GalleryFrame
@@ -487,19 +495,39 @@ export default function IFtoFLHorizontalScroll() {
           ))}
         </motion.div>
 
+        {/* Cinematic vignette — darkens the corners so the eye is pulled
+            toward the lit frame at centre, like a stage seen from the
+            audience rather than a flat screenshot */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "radial-gradient(ellipse 100% 100% at 50% 48%, transparent 45%, rgba(0,0,0,0.22) 78%, rgba(0,0,0,0.5) 100%)",
+          pointerEvents: "none", zIndex: 11,
+        }} />
+
+        {/* Film grain — subtle texture so the scene reads as photographed
+            light rather than a flat vector render */}
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: `url("${GRAIN_URI}")`,
+          backgroundSize: "140px 140px",
+          opacity: 0.05,
+          mixBlendMode: "overlay",
+          pointerEvents: "none", zIndex: 12,
+        }} />
+
         {/* FLX wordmark — top left */}
         <div style={{
           position: "absolute", top: "16px", left: "28px",
           fontFamily: "Georgia, serif", fontSize: "10px",
           letterSpacing: "0.45em", textTransform: "uppercase",
-          color: "rgba(2,39,74,0.42)", zIndex: 15, userSelect: "none",
+          color: INK_FAINT, zIndex: 15, userSelect: "none",
         }}>FLX · IF→FL</div>
 
         {/* Step counter — top right */}
         <div style={{
           position: "absolute", top: "16px", right: "28px",
           fontFamily: "'Inter', sans-serif", fontSize: "9px",
-          letterSpacing: "0.35em", color: "rgba(2,39,74,0.35)",
+          letterSpacing: "0.35em", color: INK_FAINT,
           zIndex: 15, userSelect: "none",
         }}>{String(activeIndex + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}</div>
 
@@ -511,7 +539,7 @@ export default function IFtoFLHorizontalScroll() {
           {panels.map((_, i) => (
             <button key={i} onClick={() => scrollToPanel(i)} aria-label={`Go to step ${i + 1}`} style={{
               width: i === activeIndex ? "30px" : "5px", height: "2px",
-              background: i === activeIndex ? T.full : "rgba(28,169,201,0.25)",
+              background: i === activeIndex ? T.full : "rgba(47,198,232,0.28)",
               border: "none", padding: 0, cursor: "pointer",
               transition: `all 0.6s ${cssEase(EASE)}`,
             }} />
@@ -525,7 +553,7 @@ export default function IFtoFLHorizontalScroll() {
           <p style={{
             fontFamily: "'Inter', sans-serif", fontSize: "8px",
             letterSpacing: "0.45em", textTransform: "uppercase",
-            color: "rgba(2,39,74,0.38)", marginBottom: "7px",
+            color: INK_FAINT, marginBottom: "7px",
           }}>Scroll to explore</p>
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <div style={{ width: "22px", height: "1px", background: T.soft }} />
