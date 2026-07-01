@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from "framer-motion";
 import { useSanityQuery } from "@/lib/useSanityData";
 import { isSanityConfigured } from "@/lib/sanity";
-import { HOME_PAGE_QUERY } from "@/lib/sanity-queries";
+import { HOME_PAGE_QUERY, FEATURED_DIAMONDS_QUERY } from "@/lib/sanity-queries";
 import SeoHead from "@/components/SeoHead";
 import { EASE } from "@/lib/motion";
 import { Marquee, ScrollReveal, StaggerGroup, StaggerItem, LineMask, ParallaxLayer } from "@/lib/scroll";
@@ -696,14 +696,23 @@ function FeaturedDiamondSVG({ shape }: { shape: string }) {
   );
 }
 
-function FeaturedStoneCard({
-  stockId, shape, carat, color, clarity, cut, measurements, polish, symmetry, fluorescence, certification,
-}: {
+interface FeaturedStone {
   stockId: string; shape: string; carat: number; color: string; clarity: string;
-  cut: string; measurements: string; polish: string; symmetry: string;
-  fluorescence: string; certification: "GIA" | "IGI";
-}) {
+  cut: string; certification: string; imageUrl?: string;
+}
+const FEATURED_FALLBACK: FeaturedStone[] = [
+  { stockId: "FLX-2401-RB", shape: "Round Brilliant",   carat: 2.01, color: "D", clarity: "FL",   cut: "Excellent",  certification: "GIA" },
+  { stockId: "FLX-2402-OV", shape: "Oval Cut",          carat: 1.52, color: "E", clarity: "IF",   cut: "Excellent",  certification: "GIA" },
+  { stockId: "FLX-2403-EM", shape: "Emerald Cut",       carat: 3.15, color: "F", clarity: "IF",   cut: "Excellent",  certification: "GIA" },
+  { stockId: "FLX-2404-PR", shape: "Princess Cut",      carat: 1.75, color: "D", clarity: "VVS1", cut: "Excellent",  certification: "GIA" },
+  { stockId: "FLX-2405-CU", shape: "Cushion Brilliant", carat: 2.40, color: "G", clarity: "VS1",  cut: "Very Good",  certification: "GIA" },
+  { stockId: "FLX-2406-OV", shape: "Oval Cut",          carat: 1.89, color: "E", clarity: "VVS2", cut: "Excellent",  certification: "GIA" },
+];
+function FeaturedStoneCard({
+  stockId, shape, carat, color, clarity, cut, certification, imageUrl,
+}: FeaturedStone) {
   const isFLX = FLX_CLARITY.has(clarity);
+  const isCert = certification === "GIA" || certification === "IGI";
   const certColor = certification === "GIA" ? "#1CA9C9" : "#8B5CF6";
   const certBg    = certification === "GIA" ? "rgba(28,169,201,0.12)" : "rgba(139,92,246,0.12)";
   const certBorder= certification === "GIA" ? "rgba(28,169,201,0.4)"  : "rgba(139,92,246,0.4)";
@@ -721,13 +730,15 @@ function FeaturedStoneCard({
       >
         {/* Top bar: stock ID + cert badge */}
         <div
-          className="flex items-center justify-between px-4 py-2.5 shrink-0"
+          className="flex items-center justify-between px-3 sm:px-4 py-2.5 shrink-0"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         >
           <span className="font-mono text-[9px] tracking-widest" style={{ color: "rgba(28,169,201,0.7)" }}>
             {stockId}
           </span>
           <div className="flex items-center gap-1.5">
+            {isCert ? (
+              <>
             {certification === "GIA" && (
               <img src="/gia-logo.png" alt="GIA" style={{ width: "14px", height: "14px", objectFit: "contain", opacity: 0.9, mixBlendMode: "screen" }} />
             )}
@@ -737,6 +748,15 @@ function FeaturedStoneCard({
             >
               {certification} Certified
             </span>
+            </>
+            ) : (
+              <span
+                className="text-[8px] font-medium uppercase tracking-[0.22em] px-2 py-0.5"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.3)", borderRadius: "4px", fontStyle: "italic" }}
+              >
+                Uncertified
+              </span>
+            )}
           </div>
         </div>
 
@@ -745,6 +765,14 @@ function FeaturedStoneCard({
           className="relative flex items-center justify-center"
           style={{ aspectRatio: "1", background: "radial-gradient(circle at 40% 35%, rgba(28,169,201,0.06) 0%, #011F3A 70%)", overflow: "hidden" }}
         >
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={`${carat.toFixed(2)}ct ${shape} diamond`}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            />
+          ) : (
+            <>
           {/* Sparkle corners */}
           <div className="absolute top-3 right-3 w-0.5 h-0.5 rounded-full" style={{ background: "#1CA9C9", boxShadow: "0 0 6px #1CA9C9", opacity: 0.6 }} />
           <div className="absolute bottom-5 left-4 w-0.5 h-0.5 rounded-full" style={{ background: "white", boxShadow: "0 0 4px white", opacity: 0.4 }} />
@@ -754,6 +782,8 @@ function FeaturedStoneCard({
           <div className="w-full h-full flex items-center justify-center group-hover:scale-105 transition-transform duration-700" style={{ padding: "10%" }}>
             <FeaturedDiamondSVG shape={shape} />
           </div>
+          </>
+          )}
 
           {/* FL/IF conversion badge */}
           {isFLX && (
@@ -764,7 +794,7 @@ function FeaturedStoneCard({
         </div>
 
         {/* Content */}
-        <div className="flex flex-col flex-1 px-5 pb-5 pt-4 gap-4">
+        <div className="flex flex-col flex-1 px-3 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 gap-3 sm:gap-4">
 
           {/* Shape + carat row */}
           <div className="flex items-start justify-between">
@@ -810,7 +840,7 @@ function FeaturedStoneCard({
                 className="flex flex-col items-center py-3"
                 style={{ borderRight: i < 3 ? "1px solid rgba(255,255,255,0.08)" : "none" }}
               >
-                <span className="text-[8px] uppercase tracking-[0.18em] mb-1.5" style={{ color: "rgba(255,255,255,0.3)" }}>{c.label}</span>
+                <span className="text-[7px] sm:text-[8px] uppercase tracking-tight sm:tracking-[0.2em] mb-1.5" style={{ color: "rgba(255,255,255,0.32)" }}></span>
                 <span
                   className="text-[13px] font-semibold"
                   style={{ color: (c.label === "Clarity" && isFLX) ? "#1CA9C9" : "rgba(255,255,255,0.85)" }}
@@ -821,28 +851,12 @@ function FeaturedStoneCard({
             ))}
           </div>
 
-          {/* Details row */}
-          <div className="space-y-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "12px" }}>
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] uppercase tracking-[0.22em]" style={{ color: "rgba(255,255,255,0.28)" }}>Measurements</span>
-              <span className="font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.55)" }}>{measurements}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] uppercase tracking-[0.22em]" style={{ color: "rgba(255,255,255,0.28)" }}>Polish / Sym.</span>
-              <span className="font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.55)" }}>
-                {polish.replace("Excellent","EX").replace("Very Good","VG")} · {symmetry.replace("Excellent","EX").replace("Very Good","VG")}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] uppercase tracking-[0.22em]" style={{ color: "rgba(255,255,255,0.28)" }}>Fluorescence</span>
-              <span className="font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.55)" }}>{fluorescence}</span>
-            </div>
-          </div>
+          
 
           {/* CTA */}
           <div className="mt-auto">
             <div
-              className="w-full py-3.5 text-[10px] uppercase tracking-[0.4em] font-semibold text-center transition-all"
+              className="w-full py-3 sm:py-3.5 text-[9px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] font-semibold text-center transition-all"
               style={{ background: "rgba(28,169,201,0.08)", border: "1px solid rgba(28,169,201,0.3)", color: "#1CA9C9" }}
             >
               Request Price
@@ -915,6 +929,7 @@ interface SanityHomePage {
 
 export default function Home() {
   const { data: sanityHome } = useSanityQuery<SanityHomePage>(["home-page"], HOME_PAGE_QUERY);
+  const { data: featuredDiamonds } = useSanityQuery<FeaturedStone[]>(["featured-diamonds"], FEATURED_DIAMONDS_QUERY);
 
   const activeFaqs = isSanityConfigured && sanityHome?.faqs?.length
     ? sanityHome.faqs
@@ -998,6 +1013,8 @@ export default function Home() {
 
   const hp = isSanityConfigured ? sanityHome : null;
   const seo = sanityHome?.seo;
+  const featuredStones: FeaturedStone[] =
+    featuredDiamonds && featuredDiamonds.length > 0 ? featuredDiamonds : FEATURED_FALLBACK;
 
   return (
     <>
@@ -1792,33 +1809,8 @@ export default function Home() {
           </div>
 
           {/* Stone cards — 1 col mobile, 2 col tablet, 3 col desktop */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {[
-              {
-                stockId: "FLX-2401-RB",  shape: "Round Brilliant", carat: 2.01, color: "D", clarity: "FL",   cut: "Excellent",
-                measurements: "8.10–8.14×4.99", polish: "Excellent", symmetry: "Excellent", fluorescence: "None", certification: "GIA" as const,
-              },
-              {
-                stockId: "FLX-2402-OV",  shape: "Oval Cut",        carat: 1.52, color: "E", clarity: "IF",   cut: "Excellent",
-                measurements: "9.07×6.08×3.74",  polish: "Excellent", symmetry: "Excellent", fluorescence: "None", certification: "GIA" as const,
-              },
-              {
-                stockId: "FLX-2403-EM",  shape: "Emerald Cut",     carat: 3.15, color: "F", clarity: "IF",   cut: "Excellent",
-                measurements: "9.62×7.23×5.01",  polish: "Excellent", symmetry: "Excellent", fluorescence: "None", certification: "GIA" as const,
-              },
-              {
-                stockId: "FLX-2404-PR",  shape: "Princess Cut",    carat: 1.75, color: "D", clarity: "VVS1", cut: "Excellent",
-                measurements: "6.64×6.61×4.62",  polish: "Excellent", symmetry: "Excellent", fluorescence: "None", certification: "GIA" as const,
-              },
-              {
-                stockId: "FLX-2405-CU",  shape: "Cushion Brilliant", carat: 2.40, color: "G", clarity: "VS1", cut: "Very Good",
-                measurements: "8.31×7.96×5.22",  polish: "Excellent", symmetry: "Very Good", fluorescence: "None", certification: "GIA" as const,
-              },
-              {
-                stockId: "FLX-2406-OV",  shape: "Oval Cut",        carat: 1.89, color: "E", clarity: "VVS2", cut: "Excellent",
-                measurements: "9.82×6.60×4.07",  polish: "Excellent", symmetry: "Excellent", fluorescence: "Faint", certification: "GIA" as const,
-              },
-            ].map((d, i) => (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
+            {featuredStones.map((d, i) => (
               <motion.div
                 key={d.stockId}
                 initial={{ opacity: 0, y: 32 }}
@@ -2110,7 +2102,7 @@ export default function Home() {
             {/* ══════════════════════════════════════════════════
           NO PITCH — Direct multi-CTA closing bar
       ══════════════════════════════════════════════════ */}
-      <section
+<section
         className="py-16 sm:py-20 px-4 sm:px-6 text-center"
         style={{ background: "white", borderTop: "1px solid rgba(2,39,74,0.07)", borderBottom: "1px solid rgba(2,39,74,0.07)" }}
       >
@@ -2125,41 +2117,42 @@ export default function Home() {
             <motion.p variants={up} className="text-sm sm:text-base leading-relaxed mx-auto max-w-xl" style={{ color: "rgba(2,39,74,0.5)" }}>
               {hp?.noPitchBody || "Buying, upgrading, investing, or sourcing for trade — we're straightforward people. Start here."}
             </motion.p>
-            <motion.div variants={up} className="flex flex-wrap justify-center gap-3 pt-2">
-              <Link href="/diamonds">
+            <motion.div variants={up} className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 max-w-md md:max-w-none mx-auto">
+              <Link href="/diamonds" className="w-full">
                 <Button
-                  className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90"
-                  style={{ background: "#02274A", height: "46px", padding: "0 1.75rem" }}
-                  data-testid="btn-nopitch-browse"
+                  variant="outline"
+                  className="w-full h-10 sm:h-12 rounded-none text-[11px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] hover:bg-[#02274A]/5"
+                  style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A" }}
+                  data-testid="btn-nopitch-talk"
                 >
                   Browse Stones
                 </Button>
               </Link>
-              <Link href="/contact">
+              <Link href="/contact" className="w-full">
                 <Button
                   variant="outline"
-                  className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5"
-                  style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A", height: "46px", padding: "0 1.75rem" }}
+                  className="w-full h-10 sm:h-12 rounded-none text-[11px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] hover:bg-[#02274A]/5"
+                  style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A" }}
                   data-testid="btn-nopitch-talk"
                 >
                   Talk to Us
                 </Button>
               </Link>
-              <Link href="/contact">
+              <Link href="/contact" className="w-full">
                 <Button
                   variant="outline"
-                  className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5"
-                  style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A", height: "46px", padding: "0 1.75rem" }}
+                  className="w-full h-10 sm:h-12 rounded-none text-[11px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] hover:bg-[#02274A]/5"
+                  style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A" }}
                   data-testid="btn-nopitch-call"
                 >
                   Book a Call
                 </Button>
               </Link>
-              <Link href="/trade">
+              <Link href="/trade" className="w-full">
                 <Button
                   variant="outline"
-                  className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5"
-                  style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A", height: "46px", padding: "0 1.75rem" }}
+                  className="w-full h-10 sm:h-12 rounded-none text-[11px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] hover:bg-[#02274A]/5"
+                  style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A" }}
                   data-testid="btn-nopitch-trade"
                 >
                   Trade Login

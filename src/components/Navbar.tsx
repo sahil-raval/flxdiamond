@@ -190,13 +190,13 @@ export function Navbar() {
   useEffect(() => { setMobileMenuOpen(false); }, [location]);
 
   const links = [
-    { href: "/diamonds",   label: "Diamonds" },
-    { href: "/services",   label: "Services" },
-    { href: "/investment", label: "Investment" },
+    { href: "/diamonds",   label: "Collection" },
+    { href: "/services",   label: "Expertise" },
+    { href: "/investment", label: "IF to FL" },
     { href: "/about",      label: "About" },
     { href: "/trade",        label: "Trade" },
     { href: "/journal",    label: "Journal" },
-    { href: "/contact",    label: "Contact" },
+    { href: "/contact",    label: "Talk to us" },
   ];
 
   const solid = !isHome || scrolled;

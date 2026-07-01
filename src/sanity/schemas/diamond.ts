@@ -176,6 +176,7 @@ export default defineType({
     }),
   ],
   orderings: [
+    { title: "Featured first", name: "featuredFirst", by: [{ field: "featured", direction: "desc" }, { field: "carat", direction: "desc" }] },
     { title: "Carat (highest first)", name: "caratDesc", by: [{ field: "carat", direction: "desc" }] },
     { title: "Carat (lowest first)", name: "caratAsc", by: [{ field: "carat", direction: "asc" }] },
     { title: "Stock ID", name: "stockId", by: [{ field: "stockId", direction: "asc" }] },
@@ -188,11 +189,12 @@ export default defineType({
       clarity: "clarity",
       color: "color",
       media: "image",
+      featured: "featured",
     },
-    prepare({ title, subtitle, carat, clarity, color, media }) {
+    prepare({ title, subtitle, carat, clarity, color, media, featured }) {
       return {
-        title: title,
-        subtitle: `${subtitle} · ${carat}ct · ${color} ${clarity}`,
+        title: `${featured ? "⭐ " : ""}${title}`,
+        subtitle: `${subtitle} · ${carat}ct · ${color} ${clarity}${featured ? " · Featured on Home" : ""}`,
         media,
       };
     },

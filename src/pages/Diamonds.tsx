@@ -16,7 +16,7 @@ import { useState, useMemo, useRef } from "react";
   const EMAILJS_OWNER_TMPL = import.meta.env.VITE_EMAILJS_OWNER_TMPL || "";
   const EMAILJS_BUYER_TMPL = import.meta.env.VITE_EMAILJS_BUYER_TMPL || "";
   const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY  || "";
-  const emailjsConfigured  = !!(EMAILJS_SERVICE_ID && EMAILJS_OWNER_TMPL && EMAILJS_BUYER_TMPL && EMAILJS_PUBLIC_KEY);
+  const emailjsConfigured  = !!(EMAILJS_SERVICE_ID && EMAILJS_OWNER_TMPL && EMAILJS_PUBLIC_KEY);
 
   function formatStonesList(stones: Diamond[]): string {
     return stones.map((d, i) =>
@@ -374,11 +374,12 @@ import { useState, useMemo, useRef } from "react";
   }
   
   /* ── Premium Stone Card ───────────────────────────────────── */
-  function StoneCard({ diamond, isShortlisted, onToggleShortlist, onQuickView }: {
+  function StoneCard({ diamond, isShortlisted, onToggleShortlist, onQuickView, onGetQuote }: {
   diamond: Diamond;
   isShortlisted: boolean;
   onToggleShortlist: () => void;
   onQuickView: () => void;
+  onGetQuote: () => void;
 }) {
     const isFLX  = FLX_GRADES.has(diamond.clarity);
     const isBGM  = diamond.fluorescence === "BGM";
@@ -418,7 +419,7 @@ import { useState, useMemo, useRef } from "react";
       >
         {/* Top bar: stock ID + certification badge */}
         <div
-          className="flex items-center justify-between px-4 py-2.5"
+          className="flex items-center justify-between px-3 sm:px-4 py-2.5"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         >
           <span className="font-mono text-[9px] tracking-widest" style={{ color: "rgba(28,169,201,0.7)" }}>
@@ -503,7 +504,7 @@ import { useState, useMemo, useRef } from "react";
         </div>
   
         {/* Content */}
-        <div className="flex flex-col flex-1 px-5 pb-5 pt-4 gap-4">
+        <div className="flex flex-col flex-1 px-3 sm:px-5 pb-4 sm:pb-5 pt-3 sm:pt-4 gap-3 sm:gap-4">
   
           {/* Shape heading + carat — most visible elements */}
           <div className="flex items-start justify-between">
@@ -554,7 +555,7 @@ import { useState, useMemo, useRef } from "react";
                 className="flex flex-col items-center py-3"
                 style={{ borderRight: i < 3 ? "1px solid rgba(255,255,255,0.08)" : "none" }}
               >
-                <span className="text-[8px] uppercase tracking-[0.2em] mb-1.5" style={{ color: "rgba(255,255,255,0.32)" }}>
+                <span className="text-[7px] sm:text-[8px] uppercase tracking-tight sm:tracking-[0.2em] mb-1.5" style={{ color: "rgba(255,255,255,0.32)" }}>
                   {c.label}
                 </span>
                 <span
@@ -567,35 +568,11 @@ import { useState, useMemo, useRef } from "react";
             ))}
           </div>
   
-          {/* Measurements + details */}
-          <div className="space-y-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "12px" }}>
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] uppercase tracking-[0.25em]" style={{ color: "rgba(255,255,255,0.28)" }}>Measurements</span>
-              <span className="font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.58)" }}>{diamond.measurements}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] uppercase tracking-[0.25em]" style={{ color: "rgba(255,255,255,0.28)" }}>Polish / Sym.</span>
-              <span className="font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.58)" }}>
-                {diamond.polish.replace("Excellent","EX").replace("Very Good","VG")} ·{" "}
-                {diamond.symmetry.replace("Excellent","EX").replace("Very Good","VG")}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] uppercase tracking-[0.25em]" style={{ color: "rgba(255,255,255,0.28)" }}>Fluorescence</span>
-              <span
-                className="font-mono text-[10px]"
-                style={{ color: isBGM ? "rgba(180,190,210,0.75)" : "rgba(255,255,255,0.58)" }}
-              >
-                {diamond.fluorescence}{isBGM ? " ◈" : ""}
-              </span>
-            </div>
-          </div>
-  
           {/* CTA */}
           <div className="mt-auto flex flex-col gap-2">
             <button
               onClick={onQuickView}
-              className="w-full py-2.5 text-[9px] uppercase tracking-[0.35em] font-medium transition-all"
+              className="w-full py-2 sm:py-2.5 text-[9px] uppercase tracking-[0.3em] sm:tracking-[0.35em] font-medium transition-all"
               style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(28,169,201,0.3)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(28,169,201,0.7)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.1)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.4)"; }}
@@ -604,7 +581,7 @@ import { useState, useMemo, useRef } from "react";
             </button>
             <button
               onClick={onToggleShortlist}
-              className="w-full py-3.5 text-[10px] uppercase tracking-[0.4em] font-semibold transition-all"
+              className="w-full py-2.5 sm:py-3.5 text-[9px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] font-semibold transition-all"
               style={isShortlisted ? {
                 background: "rgba(28,169,201,0.18)",
                 border: "1px solid rgba(28,169,201,0.6)",
@@ -639,6 +616,16 @@ import { useState, useMemo, useRef } from "react";
               data-testid="btn-shortlist"
             >
               {isShortlisted ? "✓ Shortlisted" : "Add to Shortlist"}
+            </button>
+            <button
+              onClick={onGetQuote}
+              className="w-full py-2.5 sm:py-3 text-[9px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] font-semibold transition-opacity"
+              style={{ background: "#1CA9C9", border: "1px solid #1CA9C9", color: "white" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.88"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+              data-testid="btn-get-quote"
+            >
+              Get a Quote
             </button>
           </div>
         </div>
@@ -694,11 +681,12 @@ import { useState, useMemo, useRef } from "react";
   ];
 
   /* ── Bloomberg-terminal DiamondTable ────────────────────── */
-  function DiamondTable({ diamonds, isShortlisted, onToggleShortlist, onQuickView }: {
+  function DiamondTable({ diamonds, isShortlisted, onToggleShortlist, onQuickView, onGetQuote }: {
     diamonds: Diamond[];
     isShortlisted: (stockId: string) => boolean;
     onToggleShortlist: (d: Diamond) => void;
     onQuickView: (d: Diamond) => void;
+    onGetQuote: (d: Diamond) => void;
   }) {
     return (
       <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
@@ -713,7 +701,7 @@ import { useState, useMemo, useRef } from "react";
                 </span>
               </div>
             ))}
-            <div style={{ width: "64px", flexShrink: 0 }} />
+            <div style={{ width: "132px", flexShrink: 0 }} />
           </div>
           {/* Rows */}
           {diamonds.map((d, i) => {
@@ -754,12 +742,12 @@ import { useState, useMemo, useRef } from "react";
                     {c.render(d)}
                   </div>
                 ))}
-                {/* Quick view */}
-                <div style={{ width: "64px", flexShrink: 0, padding: "0 8px 0 4px" }}>
+                {/* Actions */}
+                <div style={{ width: "132px", flexShrink: 0, padding: "0 8px 0 4px", display: "flex", gap: "6px" }}>
                   <button
                     onClick={() => onQuickView(d)}
                     style={{
-                      fontSize: "7.5px", textTransform: "uppercase", letterSpacing: "0.22em",
+                      fontSize: "7.5px", textTransform: "uppercase", letterSpacing: "0.18em",
                       padding: "4px 8px", border: "1px solid rgba(255,255,255,0.12)",
                       color: "rgba(255,255,255,0.4)", background: "transparent", cursor: "pointer",
                       whiteSpace: "nowrap", transition: "all 0.15s",
@@ -768,6 +756,20 @@ import { useState, useMemo, useRef } from "react";
                     onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.12)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.4)"; }}
                   >
                     View
+                  </button>
+                  <button
+                    onClick={() => onGetQuote(d)}
+                    data-testid="table-btn-get-quote"
+                    style={{
+                      fontSize: "7.5px", textTransform: "uppercase", letterSpacing: "0.18em",
+                      padding: "4px 8px", border: "1px solid #1CA9C9",
+                      color: "white", background: "#1CA9C9", cursor: "pointer",
+                      whiteSpace: "nowrap", transition: "opacity 0.15s",
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+                  >
+                    Quote
                   </button>
                 </div>
               </div>
@@ -982,7 +984,10 @@ import { useState, useMemo, useRef } from "react";
       try {
         if (emailjsConfigured) {
           await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_OWNER_TMPL, ownerParams, EMAILJS_PUBLIC_KEY);
-          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_BUYER_TMPL, { ...buyerParams, to_email: user.email }, EMAILJS_PUBLIC_KEY);
+          // Buyer confirmation email is optional — only send if a buyer template is configured.
+          if (EMAILJS_BUYER_TMPL) {
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_BUYER_TMPL, { ...buyerParams, to_email: user.email }, EMAILJS_PUBLIC_KEY);
+          }
         } else {
           await new Promise(r => setTimeout(r, 1100));
           console.info("[FLX] EmailJS not configured — enquiry data:", ownerParams);
@@ -1262,7 +1267,8 @@ import { useState, useMemo, useRef } from "react";
     const [caratMin,    setCaratMin]    = useState(0);
     const [caratMax,    setCaratMax]    = useState(999);
     const [sortKey,     setSortKey]     = useState<SortKey>("default");
-    const [gridCols, setGridCols] = useState<2 | 3>(3);
+    const [gridCols, setGridCols] = useState<3 | 4>(3);
+    const [filtersOpen, setFiltersOpen] = useState(false);
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [quickViewDiamond, setQuickViewDiamond] = useState<Diamond | null>(null);
     const [showEnquiryModal, setShowEnquiryModal] = useState(false);
@@ -1308,9 +1314,9 @@ import { useState, useMemo, useRef } from "react";
       setFluorFilter("All"); setCertFilter("All");
     };
   
-    const gridClass = gridCols === 2
-      ? "grid-cols-1 sm:grid-cols-2"
-      : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+    const gridClass = gridCols === 4
+      ? "grid-cols-2 lg:grid-cols-4"
+      : "grid-cols-2 lg:grid-cols-3";
   
     return (
       <div style={{ background: "#02274A", minHeight: "100vh" }}>
@@ -1360,7 +1366,20 @@ import { useState, useMemo, useRef } from "react";
         {category !== "custom" && (
           <div style={{ background: "#021C38", borderBottom: "1px solid rgba(28,169,201,0.08)" }}>
             <div className="max-w-7xl mx-auto px-8 md:px-14 lg:px-20 py-8">
-  
+
+              {/* Mobile filter toggle */}
+              <button
+                onClick={() => setFiltersOpen(o => !o)}
+                className="lg:hidden w-full flex items-center justify-between px-4 py-3 mb-5 text-[10px] uppercase tracking-[0.35em] font-semibold transition-all"
+                style={{ background: "rgba(28,169,201,0.06)", border: "1px solid rgba(28,169,201,0.25)", color: "#1CA9C9" }}
+                data-testid="btn-toggle-filters"
+              >
+                <span>Filters{hasFilters ? " · Active" : ""}</span>
+                <span style={{ fontSize: "14px", lineHeight: 1 }}>{filtersOpen ? "−" : "+"}</span>
+              </button>
+
+              <div className={`${filtersOpen ? "block" : "hidden"} lg:block`} data-testid="filter-panel-content">
+
               {/* ─ Two-column grid ─ */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 mb-8">
   
@@ -1536,6 +1555,7 @@ import { useState, useMemo, useRef } from "react";
                 </div>
               )}
   
+              </div>
             </div>
           </div>
         )}
@@ -1696,9 +1716,9 @@ import { useState, useMemo, useRef } from "react";
                       </select>
                     </div>
                     <div className="flex gap-1">
-                      {([2,3] as const).map(n => (
+                      {([3,4] as const).map(n => (
                         <button key={n} onClick={() => { setGridCols(n); setViewMode("grid"); }}
-                          className="w-8 h-8 transition-all text-[9px] font-mono"
+                          className="hidden sm:block w-8 h-8 transition-all text-[9px] font-mono"
                           style={{ border: `1px solid ${viewMode === "grid" && gridCols === n ? "#1CA9C9" : "rgba(255,255,255,0.12)"}`, color: viewMode === "grid" && gridCols === n ? "#1CA9C9" : "rgba(255,255,255,0.3)", background: viewMode === "grid" && gridCols === n ? "rgba(28,169,201,0.08)" : "transparent" }}
                         >{n}×</button>
                       ))}
@@ -1729,6 +1749,7 @@ import { useState, useMemo, useRef } from "react";
                       isShortlisted={isInShortlist}
                       onToggleShortlist={d => isInShortlist(d.stockId) ? removeFromShortlist(d.stockId) : addToShortlist(d)}
                       onQuickView={setQuickViewDiamond}
+                      onGetQuote={d => { addToShortlist(d); navigate("/quote-request"); }}
                     />
                   ) : (
                   <div className={`grid ${gridClass} gap-4`}>
@@ -1739,6 +1760,7 @@ import { useState, useMemo, useRef } from "react";
                           isShortlisted={isInShortlist(d.stockId)}
                           onToggleShortlist={() => isInShortlist(d.stockId) ? removeFromShortlist(d.stockId) : addToShortlist(d)}
                           onQuickView={() => setQuickViewDiamond(d)}
+                          onGetQuote={() => { addToShortlist(d); navigate("/quote-request"); }}
                         />
                       </motion.div>
                     ))}
@@ -1862,11 +1884,11 @@ import { useState, useMemo, useRef } from "react";
                     </div>
                     {/* Grid / List toggle */}
                     <div className="flex gap-1">
-                      {([2,3] as const).map(n => (
+                      {([3,4] as const).map(n => (
                         <button
                           key={n}
                           onClick={() => { setGridCols(n); setViewMode("grid"); }}
-                          className="w-8 h-8 transition-all text-[9px] font-mono"
+                          className="hidden sm:block w-8 h-8 transition-all text-[9px] font-mono"
                           style={{
                             border: `1px solid ${viewMode === "grid" && gridCols === n ? "#1CA9C9" : "rgba(255,255,255,0.12)"}`,
                             color: viewMode === "grid" && gridCols === n ? "#1CA9C9" : "rgba(255,255,255,0.3)",
@@ -1901,6 +1923,7 @@ import { useState, useMemo, useRef } from "react";
                       isShortlisted={isInShortlist}
                       onToggleShortlist={d => isInShortlist(d.stockId) ? removeFromShortlist(d.stockId) : addToShortlist(d)}
                       onQuickView={setQuickViewDiamond}
+                      onGetQuote={d => { addToShortlist(d); navigate("/quote-request"); }}
                     />
                   ) : (
                   <div className={`grid ${gridClass} gap-4`}>
@@ -1916,6 +1939,7 @@ import { useState, useMemo, useRef } from "react";
                           isShortlisted={isInShortlist(d.stockId)}
                           onToggleShortlist={() => isInShortlist(d.stockId) ? removeFromShortlist(d.stockId) : addToShortlist(d)}
                           onQuickView={() => setQuickViewDiamond(d)}
+                          onGetQuote={() => { addToShortlist(d); navigate("/quote-request"); }}
                         />
                       </motion.div>
                     ))}
@@ -1961,48 +1985,48 @@ import { useState, useMemo, useRef } from "react";
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 80, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed bottom-6 left-1/2 z-40 flex items-center gap-4 px-6 py-3.5 shadow-2xl"
+              className="fixed bottom-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-40 flex items-center justify-between sm:justify-start gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-3.5 shadow-2xl"
               style={{
-                transform: "translateX(-50%)",
                 background: "rgba(2,28,56,0.97)",
                 border: "1px solid rgba(28,169,201,0.35)",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
-                maxWidth: "calc(100vw - 2rem)",
               }}
             >
-              <div className="flex items-center gap-2.5">
-                <svg width="14" height="14" viewBox="0 0 22 22" fill="none">
+              <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                <svg width="14" height="14" viewBox="0 0 22 22" fill="none" className="shrink-0">
                   <path d="M11 2L19 8L11 20L3 8Z" stroke="#1CA9C9" strokeWidth="1.5" strokeLinejoin="round" />
                   <path d="M3 8H19" stroke="#1CA9C9" strokeWidth="1.5" />
                 </svg>
-                <span className="text-[10px] uppercase tracking-[0.3em] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
+                <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] sm:tracking-[0.3em] font-semibold whitespace-nowrap" style={{ color: "rgba(255,255,255,0.7)" }}>
                   <span style={{ color: "#1CA9C9" }}>{shortlistCount}</span>
                   {" "}{shortlistCount === 1 ? "stone" : "stones"} shortlisted
                 </span>
               </div>
-              <div className="w-px h-5" style={{ background: "rgba(255,255,255,0.12)" }} />
-              {/* Subtle "Edit" link */}
-              <button
-                onClick={() => navigate("/shortlist")}
-                className="text-[9px] uppercase tracking-[0.28em] transition-colors"
-                style={{ background: "none", border: "none", color: "rgba(255,255,255,0.38)", cursor: "pointer", padding: "0" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.65)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.38)"; }}
-              >
-                Edit
-              </button>
-              {/* Primary enquiry CTA */}
-              <button
-                onClick={() => setShowEnquiryModal(true)}
-                className="text-[10px] uppercase tracking-[0.35em] font-semibold text-white px-5 py-2 transition-opacity"
-                style={{ background: "#1CA9C9", border: "none", cursor: "pointer" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
-                data-testid="btn-submit-enquiry"
-              >
-                Submit Enquiry
-              </button>
+              <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+                <div className="hidden sm:block w-px h-5" style={{ background: "rgba(255,255,255,0.12)" }} />
+                {/* Subtle "Edit" link */}
+                <button
+                  onClick={() => navigate("/shortlist")}
+                  className="text-[9px] uppercase tracking-[0.2em] sm:tracking-[0.28em] transition-colors"
+                  style={{ background: "none", border: "none", color: "rgba(255,255,255,0.38)", cursor: "pointer", padding: "0" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.65)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.38)"; }}
+                >
+                  Edit
+                </button>
+                {/* Primary enquiry CTA */}
+                <button
+                  onClick={() => setShowEnquiryModal(true)}
+                  className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.35em] font-semibold text-white px-3 sm:px-5 py-2 transition-opacity whitespace-nowrap"
+                  style={{ background: "#1CA9C9", border: "none", cursor: "pointer" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+                  data-testid="btn-submit-enquiry"
+                >
+                  Submit Enquiry
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

@@ -130,6 +130,17 @@ export default defineConfig({
             S.documentTypeListItem("diamond")
               .title("💍  Diamonds"),
 
+            S.listItem()
+              .title("⭐  Featured on Home Page")
+              .id("featuredDiamonds")
+              .child(
+                S.documentList()
+                  .title("Featured Inventory (Home Page)")
+                  .schemaType("diamond")
+                  .filter('_type == "diamond" && featured == true')
+                  .defaultOrdering([{ field: "carat", direction: "desc" }])
+              ),
+
             S.documentTypeListItem("journalArticle")
               .title("📰  Journal Articles"),
 

@@ -16,16 +16,16 @@ interface SanitySiteSettings {
 }
 
 const NAV_LEFT = [
-  { href: "/diamonds",   label: "Diamonds" },
-  { href: "/services",   label: "Services" },
-  { href: "/investment", label: "Investment" },
+  { href: "/diamonds",   label: "Collection" },
+  { href: "/services",   label: "Expertise" },
+  { href: "/investment", label: "IF to FL" },
   { href: "/about",      label: "About" },
 ];
 
 const NAV_RIGHT = [
   { href: "/faq",     label: "FAQ" },
   { href: "/journal", label: "Journal" },
-  { href: "/contact", label: "Contact" },
+  { href: "/contact", label: "Talk to us" },
 ];
 
 const CONTACTS = [
@@ -155,10 +155,10 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Talk to us */}
           <div className="space-y-6">
             <p className="text-[9px] uppercase tracking-[0.45em] font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>
-              Contact
+              Talk to us
             </p>
             <ul className="space-y-4">
               {contacts.map(c => (

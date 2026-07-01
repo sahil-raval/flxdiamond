@@ -11,7 +11,7 @@ const EMAILJS_OWNER_TMPL  = import.meta.env.VITE_EMAILJS_OWNER_TMPL  || "";
 const EMAILJS_BUYER_TMPL  = import.meta.env.VITE_EMAILJS_BUYER_TMPL  || "";
 const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY  || "";
 
-const emailjsConfigured = !!(EMAILJS_SERVICE_ID && EMAILJS_OWNER_TMPL && EMAILJS_BUYER_TMPL && EMAILJS_PUBLIC_KEY);
+const emailjsConfigured = !!(EMAILJS_SERVICE_ID && EMAILJS_OWNER_TMPL && EMAILJS_PUBLIC_KEY);
 
 function formatStonesList(stones: Diamond[]): string {
   return stones.map((d, i) =>
@@ -102,7 +102,10 @@ export default function QuoteRequest() {
     try {
       if (emailjsConfigured) {
         await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_OWNER_TMPL, ownerParams, EMAILJS_PUBLIC_KEY);
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_BUYER_TMPL, { ...buyerParams, to_email: user.email }, EMAILJS_PUBLIC_KEY);
+        // Buyer confirmation email is optional — only send it if a buyer template is configured.
+        if (EMAILJS_BUYER_TMPL) {
+          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_BUYER_TMPL, { ...buyerParams, to_email: user.email }, EMAILJS_PUBLIC_KEY);
+        }
       } else {
         await new Promise(r => setTimeout(r, 1200));
         console.info("[FLX] EmailJS not configured — quote data:", ownerParams);
@@ -171,9 +174,9 @@ export default function QuoteRequest() {
               </p>
               <p className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>
                 Set <code style={{ color: "rgba(28,169,201,0.8)" }}>VITE_EMAILJS_SERVICE_ID</code>,{" "}
-                <code style={{ color: "rgba(28,169,201,0.8)" }}>VITE_EMAILJS_OWNER_TMPL</code>,{" "}
-                <code style={{ color: "rgba(28,169,201,0.8)" }}>VITE_EMAILJS_BUYER_TMPL</code>,{" "}
-                and <code style={{ color: "rgba(28,169,201,0.8)" }}>VITE_EMAILJS_PUBLIC_KEY</code> to enable real email sending.
+                <code style={{ color: "rgba(28,169,201,0.8)" }}>VITE_EMAILJS_OWNER_TMPL</code>, and{" "}
+                <code style={{ color: "rgba(28,169,201,0.8)" }}>VITE_EMAILJS_PUBLIC_KEY</code> to enable real email sending.{" "}
+                <code style={{ color: "rgba(28,169,201,0.8)" }}>VITE_EMAILJS_BUYER_TMPL</code> is optional (buyer confirmation email).
               </p>
             </div>
           )}
