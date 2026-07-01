@@ -889,36 +889,6 @@ export default function Investment() {
         </div>
       </section>
 
-      {/* ── IF→FL Process — GIA Clarity Scale + Horizontal Journey ── */}
-      <section className="py-20 md:py-28 px-6" style={{ background: "white" }}>
-        <div className="max-w-7xl mx-auto mb-12">
-          {/* Key insight stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-wrap gap-8 md:gap-12 pb-12 border-b"
-            style={{ borderColor: "rgba(28,169,201,0.2)" }}
-          >
-            {[
-              { label: "IF vs FL difference", value: "Surface blemish only" },
-              { label: "Material removed", value: "< 0.01mm" },
-              { label: "Qualification rate", value: "~15–20% of IF stones" },
-              { label: "GIA re-certification", value: "Independent · Verifiable" },
-            ].map((stat) => (
-              <div key={stat.label} className="flex flex-col gap-1">
-                <p className="text-[9px] uppercase tracking-widest" style={{ color: "rgba(28,169,201,0.7)" }}>{stat.label}</p>
-                <p className="font-serif text-base" style={{ color: "#02274A" }}>{stat.value}</p>
-              </div>
-            ))}
-          </motion.div>
-          <div className="mt-12">
-       
-          </div>
-        </div>
-      </section>
-
       {/* ── IF→FL Horizontal Scroll Journey — Full Width, Pinned ── */}
       <IFtoFLHorizontalScroll />
 
