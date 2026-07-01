@@ -100,97 +100,15 @@ const T = {
   text:  "#0e6b80",
 };
 
+// Single smooth easing curve used everywhere so nothing feels jerky
+// relative to anything else on the page.
+const EASE = [0.4, 0, 0.2, 1] as const;
+
 function getSlotStyle(distance: number) {
   if (distance === 0) return { scale: 1,    opacity: 1,    zIndex: 10 };
   if (distance === 1) return { scale: 0.81, opacity: 0.45, zIndex: 6  };
   if (distance === 2) return { scale: 0.65, opacity: 0.20, zIndex: 2  };
   return                      { scale: 0.52, opacity: 0.08, zIndex: 1  };
-}
-
-// ── 3-D Spanish moulding — pure grey, no beige ─────────────────────────
-function MouldingFrame({
-  active,
-  isEnd,
-  isDecision,
-}: {
-  active: boolean;
-  isEnd: boolean;
-  isDecision: boolean;
-}) {
-  const accentColor = isEnd ? T.full : isDecision ? T.mid : T.soft;
-
-  return (
-    <>
-      {/* Layer 1 — outermost raised bead, lit top-left */}
-      <div style={{
-        position: "absolute", inset: 0,
-        border: "10px solid transparent",
-        borderTopColor:    "rgba(255,255,255,0.92)",
-        borderLeftColor:   "rgba(255,255,255,0.82)",
-        borderBottomColor: "rgba(150,150,150,0.95)",
-        borderRightColor:  "rgba(150,150,150,0.88)",
-        zIndex: 6, pointerEvents: "none", boxSizing: "border-box",
-      }} />
-
-      {/* Layer 2 — recessed shadow channel */}
-      <div style={{
-        position: "absolute", inset: "10px",
-        border: "6px solid transparent",
-        borderTopColor:    "rgba(130,130,130,0.95)",
-        borderLeftColor:   "rgba(130,130,130,0.85)",
-        borderBottomColor: "rgba(255,255,255,0.65)",
-        borderRightColor:  "rgba(255,255,255,0.58)",
-        zIndex: 6, pointerEvents: "none", boxSizing: "border-box",
-      }} />
-
-      {/* Layer 3 — inner raised flat field */}
-      <div style={{
-        position: "absolute", inset: "16px",
-        border: "7px solid transparent",
-        borderTopColor:    "rgba(255,255,255,0.75)",
-        borderLeftColor:   "rgba(255,255,255,0.68)",
-        borderBottomColor: "rgba(145,145,145,0.9)",
-        borderRightColor:  "rgba(145,145,145,0.82)",
-        zIndex: 6, pointerEvents: "none", boxSizing: "border-box",
-      }} />
-
-      {/* Layer 4 — teal accent innermost rule */}
-      <div style={{
-        position: "absolute", inset: "23px",
-        border: `2px ${isDecision ? "dashed" : "solid"} ${accentColor}`,
-        zIndex: 7, pointerEvents: "none", boxSizing: "border-box",
-        transition: "border-color 0.4s ease",
-        boxShadow: active ? `inset 0 0 0 1px ${T.dim}, 0 0 0 1px ${T.dim}` : "none",
-      }} />
-
-      {/* Active teal glow halo */}
-      {active && (
-        <div style={{
-          position: "absolute", inset: "-4px",
-          boxShadow: `0 0 0 1px ${T.dim}, 0 0 28px rgba(28,169,201,0.18)`,
-          zIndex: 5, pointerEvents: "none",
-        }} />
-      )}
-
-      {/* 3-D drop shadow — frame lifts off the wall */}
-      <div style={{
-        position: "absolute", inset: 0,
-        boxShadow: active
-          ? [
-              "8px 16px 48px rgba(0,0,0,0.38)",
-              "4px 8px 18px rgba(0,0,0,0.28)",
-              "2px 4px 6px rgba(0,0,0,0.18)",
-              "-2px -2px 0 rgba(255,255,255,0.7)",
-            ].join(", ")
-          : [
-              "4px 8px 24px rgba(0,0,0,0.22)",
-              "2px 4px 8px rgba(0,0,0,0.14)",
-              "1px 2px 3px rgba(0,0,0,0.10)",
-            ].join(", "),
-        zIndex: 5, pointerEvents: "none", transition: "box-shadow 0.5s ease",
-      }} />
-    </>
-  );
 }
 
 // ── Hanging wire ────────────────────────────────────────────────────────
@@ -206,7 +124,7 @@ function HangingWire({ active }: { active: boolean }) {
         boxShadow: active
           ? "0 1px 4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.5)"
           : "0 1px 2px rgba(0,0,0,0.25)",
-        transition: "all 0.4s",
+        transition: `all 0.6s ${cssEase(EASE)}`,
         flexShrink: 0,
       }} />
       {/* Wire strand */}
@@ -215,10 +133,14 @@ function HangingWire({ active }: { active: boolean }) {
         background: active
           ? "linear-gradient(to bottom, rgba(160,160,160,0.85) 0%, rgba(110,110,110,0.35) 100%)"
           : "linear-gradient(to bottom, rgba(160,160,160,0.35) 0%, rgba(110,110,110,0.08) 100%)",
-        transition: "background 0.4s",
+        transition: `background 0.6s ${cssEase(EASE)}`,
       }} />
     </div>
   );
+}
+
+function cssEase(e: readonly [number, number, number, number]) {
+  return `cubic-bezier(${e[0]}, ${e[1]}, ${e[2]}, ${e[3]})`;
 }
 
 // ── Single gallery frame ────────────────────────────────────────────────
@@ -240,15 +162,14 @@ function GalleryFrame({
   const distance   = Math.abs(index - activeIndex);
   const { scale, opacity, zIndex } = getSlotStyle(distance);
 
-  const frameSize    = isActive ? "min(50vh, 46vw)" : "min(38vh, 36vw)";
-  const frameMax     = isActive ? "500px" : "360px";
-  const totalPadding = 26;
+  const frameSize = isActive ? "min(50vh, 46vw)" : "min(38vh, 36vw)";
+  const frameMax  = isActive ? "500px" : "360px";
 
   return (
     <motion.div
       onClick={onClick}
       animate={{ scale, opacity }}
-      transition={{ duration: 0.72, ease: [0.77, 0, 0.175, 1] }}
+      transition={{ duration: 0.85, ease: EASE }}
       style={{
         position: "relative", flexShrink: 0,
         display: "flex", flexDirection: "column", alignItems: "center",
@@ -258,35 +179,42 @@ function GalleryFrame({
     >
       <HangingWire active={isActive} />
 
-      {/* Moulding container — pure grey, no beige */}
+      {/* Image container — no moulding, just a soft-shadowed plate the
+          image sits centered inside of */}
       <div style={{
         position: "relative",
         width: frameSize, height: frameSize,
         maxWidth: frameMax, maxHeight: frameMax,
-        background: WALL,
-        transition: "width 0.65s cubic-bezier(0.77,0,0.175,1), height 0.65s, max-width 0.65s, max-height 0.65s",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        overflow: "hidden",
+        background: "transparent",
+        boxShadow: isActive
+          ? "0 20px 60px rgba(0,0,0,0.22), 0 6px 18px rgba(0,0,0,0.12)"
+          : "0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08)",
+        transition: [
+          `width 0.85s ${cssEase(EASE)}`,
+          `height 0.85s ${cssEase(EASE)}`,
+          `max-width 0.85s ${cssEase(EASE)}`,
+          `max-height 0.85s ${cssEase(EASE)}`,
+          `box-shadow 0.6s ${cssEase(EASE)}`,
+        ].join(", "),
         flexShrink: 0,
       }}>
-        <MouldingFrame active={isActive} isEnd={isEnd} isDecision={isDecision} />
-
-        {/* Image inset */}
+        {/* Image — centered, contained, no crop, no border */}
         <img
           src={panel.img}
           alt={panel.imgAlt}
           style={{
-            position: "absolute",
-            inset: `${totalPadding}px`,
-            width: `calc(100% - ${totalPadding * 2}px)`,
-            height: `calc(100% - ${totalPadding * 2}px)`,
-            objectFit: isIntro ? "contain" : "cover",
-            objectPosition: "center",
-            padding: isIntro ? "12px" : 0,
-            filter: isActive
-              ? "brightness(0.88) contrast(1.05) saturate(0.82)"
-              : "brightness(0.55) contrast(0.95) saturate(0.55)",
-            background: "#d4d4d4",
             display: "block",
-            transition: "filter 0.5s ease",
+            margin: "auto",
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            objectPosition: "center",
+            filter: isActive
+              ? "brightness(0.96) contrast(1.02) saturate(0.92)"
+              : "brightness(0.62) contrast(0.96) saturate(0.6)",
+            transition: `filter 0.7s ${cssEase(EASE)}`,
             zIndex: 1,
           }}
         />
@@ -294,7 +222,7 @@ function GalleryFrame({
         {/* Ghosted IF→FL on intro */}
         {isIntro && (
           <div style={{
-            position: "absolute", inset: `${totalPadding}px`,
+            position: "absolute", inset: 0,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontFamily: "Georgia, serif",
             fontSize: "clamp(1.5rem, 5vw, 4rem)",
@@ -308,12 +236,11 @@ function GalleryFrame({
         {panel.step && isActive && (
           <div style={{
             position: "absolute",
-            top: `${totalPadding + 8}px`, left: `${totalPadding + 8}px`,
+            top: "10px", left: "10px",
             padding: "4px 10px",
             fontFamily: "Georgia, serif", fontSize: "10px", letterSpacing: "0.1em",
             color: isEnd ? T.full : T.text,
-            background: "rgba(235,235,235,0.95)",
-            border: `1px solid ${isEnd ? T.mid : T.soft}`,
+            background: "rgba(235,235,235,0.9)",
             boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
             zIndex: 8,
           }}>{panel.step}</div>
@@ -323,12 +250,11 @@ function GalleryFrame({
         {isDecision && isActive && (
           <div style={{
             position: "absolute",
-            bottom: `${totalPadding + 8}px`, right: `${totalPadding + 8}px`,
+            bottom: "10px", right: "10px",
             padding: "4px 10px", fontSize: "7px",
             fontFamily: "'Inter', sans-serif", letterSpacing: "0.35em", textTransform: "uppercase",
             color: T.text,
-            background: "rgba(235,235,235,0.95)",
-            border: `1px dashed ${T.soft}`,
+            background: "rgba(235,235,235,0.9)",
             boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
             zIndex: 8,
           }}>~20% qualify</div>
@@ -338,12 +264,11 @@ function GalleryFrame({
         {isEnd && isActive && (
           <div style={{
             position: "absolute",
-            top: `${totalPadding + 8}px`, right: `${totalPadding + 8}px`,
+            top: "10px", right: "10px",
             padding: "4px 12px", fontSize: "7px",
             fontFamily: "'Inter', sans-serif", letterSpacing: "0.35em", textTransform: "uppercase",
             color: T.full,
-            background: "rgba(235,235,235,0.95)",
-            border: `1px solid ${T.mid}`,
+            background: "rgba(235,235,235,0.9)",
             boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
             zIndex: 8,
           }}>Flawless</div>
@@ -353,7 +278,7 @@ function GalleryFrame({
       {/* Caption */}
       <motion.div
         animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 8 }}
-        transition={{ duration: 0.45, ease: "easeOut", delay: isActive ? 0.12 : 0 }}
+        transition={{ duration: 0.6, ease: EASE, delay: isActive ? 0.15 : 0 }}
         style={{
           marginTop: "22px", textAlign: "center",
           pointerEvents: "none", maxWidth: "min(64vw, 500px)",
@@ -382,7 +307,6 @@ function GalleryFrame({
           <div style={{
             display: "inline-flex", alignItems: "flex-start", gap: "10px",
             marginTop: "14px", padding: "10px 16px",
-            border: `1px solid ${T.dim}`,
             background: "rgba(28,169,201,0.04)", maxWidth: "340px", textAlign: "left",
           }}>
             <span style={{
@@ -442,6 +366,8 @@ export default function IFtoFLHorizontalScroll() {
     setActiveIndex(Math.max(0, Math.min(TOTAL - 1, idx)));
   }), [scrollYProgress]);
 
+  // Spring-smoothed horizontal scroll instead of a raw linear map — this
+  // is what removes the last bit of jerkiness from the drag itself.
   const x           = useTransform(scrollYProgress, [0, 1], [0, -(TOTAL - 1) * vpWidth]);
   const hintOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
 
@@ -580,7 +506,7 @@ export default function IFtoFLHorizontalScroll() {
               width: i === activeIndex ? "30px" : "5px", height: "2px",
               background: i === activeIndex ? T.full : "rgba(28,169,201,0.25)",
               border: "none", padding: 0, cursor: "pointer",
-              transition: "all 0.4s cubic-bezier(0.77,0,0.175,1)",
+              transition: `all 0.6s ${cssEase(EASE)}`,
             }} />
           ))}
         </div>
