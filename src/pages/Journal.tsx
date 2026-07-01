@@ -733,8 +733,8 @@ export default function Journal() {
         </div>
       </section>
 
-      {/* ── Diamond Journey with Video ── */}
-      <DiamondTraceability videoSrc={jpc?.featureVideoUrl} />
+      {/* ── Diamond Journey with Video ──
+      <DiamondTraceability videoSrc={jpc?.featureVideoUrl} /> */}
 
       {/* ── Article List ── */}
       <section className="py-20 md:py-28 px-6" style={{ background: "white" }}>
