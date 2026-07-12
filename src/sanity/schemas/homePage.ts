@@ -1,139 +1,302 @@
 import { defineType, defineField } from "sanity";
 
+/**
+ * FLX Home Page — full editable schema.
+ *
+ * Every editable string, paragraph and array on the Home page is
+ * represented here. Fields are grouped for easier navigation in the
+ * Studio. Every field is optional at edit-time; the frontend supplies
+ * a safe fallback so nothing breaks if a value is missing.
+ */
+const stringItem = { name: "value", type: "string", title: "Text" };
+
 export default defineType({
   name: "homePage",
   title: "Home Page",
   type: "document",
+  groups: [
+    { name: "seo", title: "SEO" },
+    { name: "hero", title: "Hero" },
+    { name: "strip", title: "Signal Strip" },
+    { name: "clients", title: "Client Logos" },
+    { name: "qualifier", title: "Qualifier Cards" },
+    { name: "featured", title: "Featured Inventory" },
+    { name: "traceability", title: "Traceability" },
+    { name: "fourCs", title: "4 C's" },
+    { name: "iftfl", title: "IF→FL" },
+    { name: "services", title: "Services" },
+    { name: "process", title: "Process" },
+    { name: "why", title: "Why FLX" },
+    { name: "trade", title: "Trade Portal" },
+    { name: "investment", title: "Investment" },
+    { name: "testimonials", title: "Testimonials" },
+    { name: "faqs", title: "FAQs" },
+    { name: "closing", title: "Closing / CTA" },
+  ],
   fields: [
-    /* ── SEO ── */
-    defineField({ name: "seo", title: "SEO", type: "seoObject" }),
-
-    /* ── Hero ── */
-    defineField({ name: "heroOverline", title: "Hero Overline", type: "string",
-      initialValue: "Geelong, Victoria, Australia · Est. 1978" }),
-    defineField({ name: "heroHeading", title: "Hero Heading", type: "string",
-      initialValue: "The Stone Begins Here." }),
-    defineField({ name: "heroSubtext", title: "Hero Subtext", type: "text", rows: 2,
-      initialValue: "B2B diamond sourcing & IF→FL precision conversion. Natural, lab-grown, and custom — every stone GIA-certified." }),
-    defineField({ name: "heroCta", title: "Hero CTA Label", type: "string", initialValue: "Source Diamonds" }),
-    defineField({ name: "heroSecondaryCta", title: "Hero Secondary CTA Label", type: "string", initialValue: "IF→FL Conversion" }),
-    defineField({ name: "heroVideo", title: "Hero Video", type: "file",
-      description: "Upload hero video (MP4). Falls back to /hero-ocean.mp4 if blank.",
-      options: { accept: "video/mp4" } }),
-
-    /* ── Marquee ── */
+    /* ── SEO ─────────────────────────────────────── */
     defineField({
-      name: "marqueeItems", title: "Marquee Trust Items", type: "array", of: [{ type: "string" }],
-      initialValue: ["GIA Certified","IF → FL Conversion","Natural & Lab Grown","Trade Only","47 Years Mastery","Geelong, Australia","Discreet & Confidential","Precision Regrinding"],
-    }),
-
-    /* ── Qualifier section ── */
-    defineField({ name: "qualifierTagline", title: "Qualifier Tagline", type: "string", initialValue: "Find Your Answer" }),
-    defineField({ name: "qualifierHeading", title: "Qualifier Heading", type: "string", initialValue: "What brings you here today?" }),
-    defineField({ name: "qualifierSubtext", title: "Qualifier Subtext", type: "string",
-      initialValue: "Select the situation that matches yours. We'll give you the exact answer." }),
-
-    /* ── Manufacturing story ── */
-    defineField({ name: "manufacturingTagline", title: "Manufacturing Tagline", type: "string", initialValue: "Our Process" }),
-    defineField({ name: "manufacturingHeading", title: "Manufacturing Heading", type: "string",
-      initialValue: "We make them. We don't just sell them." }),
-    defineField({ name: "manufacturingBody", title: "Manufacturing Body", type: "text", rows: 3,
-      initialValue: "Most diamond businesses source from wholesalers. We cut and polish in our own manufacturing lab. That's why we can stand behind every stone we sell — and offer services no retailer can." }),
-    defineField({ name: "manufacturingCta", title: "Manufacturing CTA", type: "string", initialValue: "About Our Lab →" }),
-    defineField({ name: "manufacturingVideo", title: "Manufacturing Lab Video", type: "file",
-      description: "Optional video for the manufacturing story section.",
-      options: { accept: "video/mp4" } }),
-    defineField({ name: "manufacturingImage", title: "Manufacturing Lab Image", type: "image",
-      description: "Fallback image if no video.",
-      options: { hotspot: true } }),
-
-    /* ── IF→FL 50/50 callout ── */
-    defineField({ name: "profitSplitHeading", title: "50/50 Split Callout Heading", type: "string",
-      initialValue: "We only earn when you earn — 50/50 profit split." }),
-    defineField({ name: "profitSplitBody", title: "50/50 Split Callout Body", type: "text", rows: 3,
-      initialValue: "No upfront cost. No conversion fee. We calculate the IF value, the projected FL value, document it in writing, then share the profit we create together. If we can't do it, we'll tell you that before touching the stone." }),
-
-    /* ── Trade portal section ── */
-    defineField({ name: "tradePortalTagline", title: "Trade Portal Tagline", type: "string", initialValue: "Trade Portal" }),
-    defineField({ name: "tradePortalHeading", title: "Trade Portal Heading", type: "string", initialValue: "Built for the trade." }),
-    defineField({ name: "tradePortalJewellersHeading", title: "Trade Portal — Jewellers Heading", type: "string",
-      initialValue: "Jewellers and designers" }),
-    defineField({ name: "tradePortalJewellersBody", title: "Trade Portal — Jewellers Body", type: "text", rows: 3,
-      initialValue: "Melee sourcing, matched parcels, and memo requests. Register with your ABN — pricing always comes back to you personally by email. No retail pricing, no margins on top of margins." }),
-    defineField({ name: "tradePortalHowHeading", title: "Trade Portal — How We Work Heading", type: "string",
-      initialValue: "How we work with jewellers" }),
-    defineField({ name: "tradePortalHowBody", title: "Trade Portal — How We Work Body", type: "text", rows: 3,
-      initialValue: "If a retail customer mentions they're working with a jeweller, we loop that jeweller in rather than transact directly. Our customers without a jeweller stay ours to refer — once they have one, that relationship is theirs." }),
-
-    /* ── Investment section ── */
-    defineField({ name: "investmentTagline", title: "Investment Section Tagline", type: "string", initialValue: "Investment" }),
-    defineField({ name: "investmentHeading", title: "Investment Section Heading", type: "string",
-      initialValue: "Natural FL diamonds as a long-term asset." }),
-    defineField({ name: "investmentBody", title: "Investment Section Body", type: "text", rows: 3,
-      initialValue: "Natural diamonds — particularly FL clarity in desirable cuts — have held and appreciated in value over time. We work with buyers who want a portable, certifiable hard asset outside the share market. Same honest conversation, no hype." }),
-    defineField({ name: "investmentCta", title: "Investment CTA", type: "string", initialValue: "Book a Consultation →" }),
-    defineField({ name: "investmentPoints", title: "Investment Numbered Points", type: "array", of: [{ type: "string" }],
-      initialValue: [
-        "FL and IF in D–F colour represent the top 1% of all GIA-graded stones globally.",
-        "Tangible, portable, stateless — independent of any bank or financial system.",
-        "The IF→FL conversion creates a new GIA certificate with fully documented and verifiable uplift.",
-        "We advise on stone selection, market timing, and verified re-sale pathways. No salesmanship.",
+      name: "seo",
+      title: "SEO",
+      type: "object",
+      group: "seo",
+      fields: [
+        { name: "metaTitle", type: "string", title: "Meta Title" },
+        { name: "metaDescription", type: "text", rows: 3, title: "Meta Description" },
+        { name: "metaKeywords", type: "string", title: "Meta Keywords" },
+        { name: "ogTitle", type: "string", title: "OG Title" },
+        { name: "ogDescription", type: "text", rows: 2, title: "OG Description" },
+        { name: "ogImageUrl", type: "url", title: "OG Image URL" },
+        { name: "twitterCard", type: "string", title: "Twitter Card", options: { list: ["summary", "summary_large_image"] } },
+        { name: "noIndex", type: "boolean", title: "No-index this page" },
+        { name: "structuredDataType", type: "string", title: "JSON-LD Type", initialValue: "Organization" },
+        { name: "additionalJsonLd", type: "text", rows: 4, title: "Extra JSON-LD (raw JSON)" },
       ],
     }),
 
-    /* ── No pitch section ── */
-    defineField({ name: "noPitchHeading", title: '"No Pitch" Section Heading', type: "string",
-      initialValue: "No pitch. Just a conversation." }),
-    defineField({ name: "noPitchBody", title: '"No Pitch" Section Body', type: "text", rows: 2,
-      initialValue: "Buying, upgrading, investing, or sourcing for trade — we're straightforward people. Start here." }),
+    /* ── HERO ────────────────────────────────────── */
+    defineField({ name: "heroOverline", type: "string", title: "Hero Overline", group: "hero" }),
+    defineField({ name: "heroHeading", type: "string", title: "Hero Heading", group: "hero" }),
+    defineField({ name: "heroSubtext", type: "text", rows: 3, title: "Hero Subtext", group: "hero" }),
+    defineField({ name: "heroCta", type: "string", title: "Hero Primary CTA", group: "hero" }),
+    defineField({ name: "heroSecondaryCta", type: "string", title: "Hero Secondary CTA", group: "hero" }),
+    defineField({ name: "heroVideoUrl", type: "url", title: "Hero Video URL", group: "hero" }),
 
-    /* ── Featured inventory ── */
-    defineField({ name: "featuredInventoryTagline", title: "Featured Inventory Tagline", type: "string", initialValue: "By Application Only" }),
-    defineField({ name: "featuredInventoryHeading", title: "Featured Inventory Heading", type: "string", initialValue: "Featured Inventory" }),
-    defineField({ name: "featuredInventoryNote", title: "Featured Inventory Footer Note", type: "string",
-      initialValue: "Trade pricing disclosed by secure email · ABN verification required · All stones GIA-certified" }),
-
-    /* ── Why FLX section ── */
-    defineField({ name: "whyTagline", title: "Why FLX Tagline", type: "string", initialValue: "Our Difference" }),
-    defineField({ name: "whyHeading", title: "Why FLX Heading", type: "string", initialValue: "Why FLXDIAMONDS." }),
-
-    /* ── Testimonials ── */
-    defineField({ name: "testimonialsTagline", title: "Testimonials Tagline", type: "string", initialValue: "From Our Partners" }),
-    defineField({ name: "testimonialsHeading", title: "Testimonials Heading", type: "string", initialValue: "What the trade says." }),
+    /* ── SIGNAL STRIP (marquee) ──────────────────── */
     defineField({
-      name: "testimonials", title: "Testimonials", type: "array",
-      of: [{
-        type: "object",
-        fields: [
-          { name: "quote", type: "text", title: "Quote", rows: 3 },
-          { name: "author", type: "string", title: "Author (anonymised, e.g. Senior Buyer, Dubai)" },
-          { name: "region", type: "string", title: "Region" },
-        ],
-        preview: { select: { title: "author", subtitle: "region" } },
-      }],
+      name: "marqueeItems",
+      title: "Top Marquee Items",
+      type: "array",
+      of: [{ type: "string" }],
+      group: "strip",
+    }),
+    defineField({
+      name: "signalStripItems",
+      title: "Signal Strip Items",
+      type: "array",
+      group: "strip",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "text", type: "string", title: "Text" },
+            { name: "logoUrl", type: "url", title: "Logo URL (optional)" },
+          ],
+        },
+      ],
     }),
 
-    /* ── Closing CTA ── */
-    defineField({ name: "closingTagline", title: "Closing Tagline", type: "string", initialValue: "Precision. Trust. Excellence." }),
-    defineField({ name: "closingQuote", title: "Closing Quote", type: "text", rows: 2,
-      initialValue: '"The finest diamonds are not found. They are understood."' }),
-    defineField({ name: "closingCta", title: "Closing CTA Label", type: "string", initialValue: "Begin the Conversation →" }),
-    defineField({ name: "closingImage", title: "Closing Background Image", type: "image",
-      description: "Ocean/landscape image behind the closing quote.",
-      options: { hotspot: true } }),
-
-    /* ── FAQs ── */
+    /* ── CLIENT LOGOS ────────────────────────────── */
     defineField({
-      name: "faqs", title: "Home Page FAQs", type: "array",
-      of: [{
-        type: "object",
-        fields: [
-          { name: "q", type: "string", title: "Question" },
-          { name: "a", type: "text", title: "Answer", rows: 4 },
-        ],
-        preview: { select: { title: "q" } },
-      }],
+      name: "clientLogos",
+      title: "Client Logos",
+      type: "array",
+      group: "clients",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "name", type: "string", title: "Client Name" },
+            { name: "sub", type: "string", title: "Sub-line (locations)" },
+            { name: "logoUrl", type: "url", title: "Logo URL (optional)" },
+          ],
+        },
+      ],
     }),
+
+    /* ── QUALIFIER ───────────────────────────────── */
+    defineField({ name: "qualifierTagline", type: "string", title: "Qualifier Tagline", group: "qualifier" }),
+    defineField({ name: "qualifierHeading", type: "string", title: "Qualifier Heading", group: "qualifier" }),
+    defineField({ name: "qualifierSubtext", type: "text", rows: 2, title: "Qualifier Subtext", group: "qualifier" }),
+    defineField({
+      name: "qualifierCards",
+      title: "Qualifier Cards (buyer types)",
+      type: "array",
+      group: "qualifier",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "id", type: "string", title: "Slug ID", validation: (r) => r.required() },
+            { name: "num", type: "string", title: "Number (e.g. 01)" },
+            { name: "headline", type: "string", title: "Card Headline" },
+            { name: "subtext", type: "text", rows: 3, title: "Card Subtext" },
+            { name: "answerTitle", type: "string", title: "Answer Title" },
+            { name: "answerPoints", type: "array", of: [{ type: "string" }], title: "Answer Bullet Points" },
+            { name: "answerCta", type: "string", title: "Answer CTA Label" },
+            { name: "answerHref", type: "string", title: "Answer CTA Link (e.g. /contact)" },
+          ],
+        },
+      ],
+    }),
+
+    /* ── FEATURED INVENTORY ──────────────────────── */
+    defineField({ name: "featuredInventoryTagline", type: "string", title: "Tagline", group: "featured" }),
+    defineField({ name: "featuredInventoryHeading", type: "string", title: "Heading", group: "featured" }),
+    defineField({ name: "featuredInventoryNote", type: "string", title: "Bottom Note", group: "featured" }),
+
+    /* ── TRACEABILITY (feature video) ────────────── */
+    defineField({ name: "featureVideoUrl", type: "url", title: "Traceability Video URL", group: "traceability" }),
+
+    /* ── 4 C's ───────────────────────────────────── */
+    defineField({
+      name: "fourCs",
+      title: "The 4 C's",
+      type: "array",
+      group: "fourCs",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "n", type: "string", title: "Number" },
+            { name: "iconKey", type: "string", title: "Icon Key", options: { list: ["scale", "palette", "eye", "gem"] } },
+            { name: "title", type: "string", title: "Title" },
+            { name: "desc", type: "text", rows: 3, title: "Description" },
+          ],
+        },
+      ],
+    }),
+
+    /* ── IF→FL ───────────────────────────────────── */
+    defineField({ name: "iftflTagline", type: "string", title: "Tagline", group: "iftfl" }),
+    defineField({ name: "iftflHeading", type: "string", title: "Heading", group: "iftfl" }),
+    defineField({ name: "iftflBody", type: "text", rows: 4, title: "Body", group: "iftfl" }),
+    defineField({ name: "iftflCtaPrimary", type: "string", title: "Primary CTA Label", group: "iftfl" }),
+    defineField({ name: "iftflCtaSecondary", type: "string", title: "Secondary CTA Label", group: "iftfl" }),
+
+    /* ── SERVICES ────────────────────────────────── */
+    defineField({ name: "manufacturingTagline", type: "string", title: "Section Tagline", group: "services" }),
+    defineField({ name: "manufacturingHeading", type: "string", title: "Section Heading", group: "services" }),
+    defineField({ name: "manufacturingBody", type: "text", rows: 4, title: "Section Body", group: "services" }),
+    defineField({
+      name: "services",
+      title: "Services Cards",
+      type: "array",
+      group: "services",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "num", type: "string", title: "Number" },
+            { name: "title", type: "string", title: "Title" },
+            { name: "body", type: "text", rows: 3, title: "Body" },
+            { name: "tags", type: "array", of: [{ type: "string" }], title: "Tags" },
+            { name: "link", type: "string", title: "Link (e.g. /diamonds)" },
+            { name: "linkText", type: "string", title: "Link Text" },
+          ],
+        },
+      ],
+    }),
+
+    /* ── PROCESS BADGES ──────────────────────────── */
+    defineField({
+      name: "processBadges",
+      title: "Process Badges (3 tiles)",
+      type: "array",
+      group: "process",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "label", type: "string", title: "Label" },
+            { name: "sub", type: "string", title: "Sub-line" },
+          ],
+        },
+      ],
+    }),
+    defineField({ name: "processCta", type: "string", title: "Process CTA Label", group: "process" }),
+
+    /* ── WHY FLXDIAMONDS ─────────────────────────── */
+    defineField({ name: "whyTagline", type: "string", title: "Section Tagline", group: "why" }),
+    defineField({ name: "whyHeading", type: "string", title: "Section Heading", group: "why" }),
+    defineField({
+      name: "whyCards",
+      title: "Why Cards",
+      type: "array",
+      group: "why",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "iconKey", type: "string", title: "Icon Key", options: { list: ["award", "shield", "sliders", "cpu"] } },
+            { name: "title", type: "string", title: "Title" },
+            { name: "body", type: "text", rows: 3, title: "Body" },
+            { name: "tag", type: "string", title: "Tag Label" },
+          ],
+        },
+      ],
+    }),
+
+    /* ── TRADE PORTAL ────────────────────────────── */
+    defineField({ name: "tradePortalTagline", type: "string", title: "Tagline", group: "trade" }),
+    defineField({ name: "tradePortalHeading", type: "string", title: "Heading", group: "trade" }),
+    defineField({ name: "tradePortalJewellersHeading", type: "string", title: "Jewellers Heading", group: "trade" }),
+    defineField({ name: "tradePortalJewellersBody", type: "text", rows: 3, title: "Jewellers Body", group: "trade" }),
+    defineField({ name: "tradePortalHowHeading", type: "string", title: "How-we-work Heading", group: "trade" }),
+    defineField({ name: "tradePortalHowBody", type: "text", rows: 3, title: "How-we-work Body", group: "trade" }),
+
+    /* ── INVESTMENT ──────────────────────────────── */
+    defineField({ name: "investmentTagline", type: "string", title: "Tagline", group: "investment" }),
+    defineField({ name: "investmentHeading", type: "string", title: "Heading", group: "investment" }),
+    defineField({ name: "investmentBody", type: "text", rows: 4, title: "Body", group: "investment" }),
+    defineField({ name: "investmentCta", type: "string", title: "CTA Label", group: "investment" }),
+    defineField({
+      name: "investmentPoints",
+      title: "Investment Points",
+      type: "array",
+      of: [{ type: "string" }],
+      group: "investment",
+    }),
+
+    /* ── TESTIMONIALS ────────────────────────────── */
+    defineField({ name: "testimonialsTagline", type: "string", title: "Tagline", group: "testimonials" }),
+    defineField({ name: "testimonialsHeading", type: "string", title: "Heading", group: "testimonials" }),
+    defineField({
+      name: "testimonials",
+      title: "Testimonials",
+      type: "array",
+      group: "testimonials",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "quote", type: "text", rows: 3, title: "Quote" },
+            { name: "author", type: "string", title: "Role / Author" },
+            { name: "region", type: "string", title: "Region / Location" },
+          ],
+        },
+      ],
+    }),
+    defineField({ name: "testimonialsNote", type: "string", title: "Bottom Note", group: "testimonials" }),
+
+    /* ── FAQ ─────────────────────────────────────── */
+    defineField({
+      name: "faqs",
+      title: "FAQs",
+      type: "array",
+      group: "faqs",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "q", type: "string", title: "Question" },
+            { name: "a", type: "text", rows: 4, title: "Answer" },
+          ],
+        },
+      ],
+    }),
+
+    /* ── CLOSING / CTA ───────────────────────────── */
+    defineField({ name: "noPitchHeading", type: "string", title: "'No pitch' Heading", group: "closing" }),
+    defineField({ name: "noPitchBody", type: "text", rows: 3, title: "'No pitch' Body", group: "closing" }),
+    defineField({ name: "ctaSectionHeading", type: "string", title: "Closing Heading", group: "closing" }),
+    defineField({ name: "ctaSectionBody", type: "text", rows: 3, title: "Closing Body", group: "closing" }),
   ],
-  preview: { prepare: () => ({ title: "Home Page" }) },
+  preview: {
+    prepare() {
+      return { title: "Home Page" };
+    },
+  },
 });
+
+export const _placeholder = stringItem; // keep tsc happy (unused const)

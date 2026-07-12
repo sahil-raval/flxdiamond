@@ -213,10 +213,15 @@ export function Navbar() {
         solid ? "border-b" : "border-b border-transparent"
       )}
       style={{
-        background: solid ? "rgba(2,39,74,0.96)" : "transparent",
+        // Always carry a scrim — a fully transparent nav disappears against
+        // bright hero video frames (sky/cliffs). Before scroll it's a soft
+        // gradient so the glass look survives; after scroll it's solid.
+        background: solid
+          ? "rgba(2,39,74,0.96)"
+          : "linear-gradient(180deg, rgba(2,39,74,0.65) 0%, rgba(2,39,74,0.35) 60%, transparent 100%)",
         borderColor: solid ? "rgba(28,169,201,0.12)" : "transparent",
-        backdropFilter: solid ? "blur(14px)" : "none",
-        WebkitBackdropFilter: solid ? "blur(14px)" : "none",
+        backdropFilter: solid ? "blur(14px)" : "blur(2px)",
+        WebkitBackdropFilter: solid ? "blur(14px)" : "blur(2px)",
       }}
     >
       <div className="max-w-7xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
@@ -241,8 +246,9 @@ export function Navbar() {
                 "text-[10px] tracking-[0.18em] uppercase font-medium transition-all duration-200 relative py-2",
                 location === link.href
                   ? "text-white"
-                  : "text-white/55 hover:text-white"
+                  : "text-white/80 hover:text-white"
               )}
+              style={{ textShadow: solid ? "none" : "0 1px 6px rgba(0,0,0,0.45)" }}
             >
               {link.label}
               {location === link.href && (
@@ -263,14 +269,16 @@ export function Navbar() {
             <Link href="/login">
               <button style={{
                 fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase",
-                color: "#1CA9C9", background: "none",
-                border: "1px solid rgba(28,169,201,0.4)",
-                padding: "8px 16px", cursor: "pointer",
-                fontFamily: "'Inter', sans-serif", fontWeight: 500,
+                color: "#BEF0FA", background: "rgba(2,39,74,0.55)",
+                border: "1px solid rgba(28,169,201,0.6)",
+                padding: "9px 18px", cursor: "pointer",
+                fontFamily: "'Inter', sans-serif", fontWeight: 600,
+                backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
                 transition: "all 0.2s ease",
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(28,169,201,0.1)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "none"; }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(28,169,201,0.25)"; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "rgba(2,39,74,0.55)"; e.currentTarget.style.color = "#BEF0FA"; }}
               >
                 Trade Login
               </button>
