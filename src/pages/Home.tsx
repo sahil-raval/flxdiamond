@@ -546,20 +546,19 @@ export default function Home() {
               </>
             )}
           </video>
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(2,39,74,0.55) 0%, rgba(2,39,74,0.22) 30%, rgba(2,39,74,0.62) 68%, rgba(2,39,74,0.92) 100%)" }} />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(2,39,74,0.72) 0%, rgba(2,39,74,0.15) 55%, rgba(2,39,74,0.4) 100%)" }} />
-          <div className="absolute inset-0" style={{ background: "radial-gradient(80% 60% at 18% 88%, rgba(2,39,74,0.65) 0%, rgba(2,39,74,0) 60%)" }} />
-
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(2,39,74,0.35) 0%, rgba(2,39,74,0.12) 30%, rgba(2,39,74,0.45) 88%, rgba(2,39,74,0.75) 100%)" }} />
+<div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(2,39,74,0.45) 0%, rgba(2,39,74,0.08) 55%, rgba(2,39,74,0.25) 100%)" }} />
+<div className="absolute inset-0" style={{ background: "radial-gradient(80% 60% at 18% 88%, rgba(2,39,74,0.45) 0%, rgba(2,39,74,0) 60%)" }} />
           <ParallaxLayer speed={0.08} style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none" }}>
             {PARTICLES.map((p, i) => (
               <div key={i} className="particle" style={{ left: p.left, bottom: p.bottom, width: p.size, height: p.size, background: "rgba(28,169,201,0.7)", animationDelay: p.delay, animationDuration: p.dur }} />
             ))}
           </ParallaxLayer>
 
-          <button onClick={toggleMute} className="absolute z-20 flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider transition-all" style={{ top: "env(safe-area-inset-top, 96px)", right: "max(env(safe-area-inset-right, 0px), 24px)", marginTop: "24px", color: isMuted ? "rgba(255,255,255,0.4)" : "#1CA9C9", border: "1px solid", borderColor: isMuted ? "rgba(255,255,255,0.12)" : "rgba(28,169,201,0.4)" }} data-testid="btn-toggle-sound" aria-label={isMuted ? "Unmute ocean" : "Mute ocean"}>
+          {/* <button onClick={toggleMute} className="absolute z-20 flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider transition-all" style={{ top: "env(safe-area-inset-top, 96px)", right: "max(env(safe-area-inset-right, 0px), 24px)", marginTop: "24px", color: isMuted ? "rgba(255,255,255,0.4)" : "#1CA9C9", border: "1px solid", borderColor: isMuted ? "rgba(255,255,255,0.12)" : "rgba(28,169,201,0.4)" }} data-testid="btn-toggle-sound" aria-label={isMuted ? "Unmute ocean" : "Mute ocean"}>
             {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
             <span className="hidden sm:inline">{isMuted ? "Hear the Ocean" : "Ocean Sound On"}</span>
-          </button>
+          </button> */}
 
           <div className="relative z-10 w-full px-5 sm:px-8 md:px-16 lg:px-24 pt-24 pb-10 sm:pb-20 md:pb-24" style={{ paddingBottom: "max(40px, env(safe-area-inset-bottom, 40px))" }}>
             <div className="max-w-3xl">
@@ -704,57 +703,7 @@ export default function Home() {
 
         <DiamondTraceability videoSrc={hp?.featureVideoUrl} />
 
-        {/* ═════ IF→FL EXPERTISE + 4C's ═════ */}
-        <section className="py-16 sm:py-10 md:py-18 px-4 sm:px-6" style={{ background: "white" }}>
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: "rgba(2,39,74,0.09)", border: "1px solid rgba(2,39,74,0.09)" }}>
-              {fourCs.map((c, i) => {
-                const Icon = FOURC_ICONS[c.iconKey as keyof typeof FOURC_ICONS] || Gem;
-                return (
-                  <motion.div key={c.title} initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ delay: i * 0.1, duration: 0.7, ease: [0.76, 0, 0.24, 1] }} className="flex flex-col gap-5 sm:gap-6 py-8 sm:py-10 px-6 sm:px-7 transition-colors duration-300" style={{ background: "white" }}>
-                    <div className="flex items-start justify-between">
-                      <span className="font-serif text-3xl sm:text-4xl font-light leading-none tabular-nums" style={{ color: "rgba(2,39,74,0.14)" }}>{c.n}</span>
-                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0" style={{ border: "1.5px solid rgba(28,169,201,0.3)", color: "#1CA9C9" }}>
-                        <Icon size={17} strokeWidth={1.4} />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <h4 className="font-serif text-lg sm:text-xl leading-snug" style={{ color: "#02274A" }}>{c.title}</h4>
-                      <p className="text-xs sm:text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.5)" }}>{c.desc}</p>
-                    </div>
-                    <span className="mt-auto block h-px" style={{ width: "28px", background: "linear-gradient(90deg, #1CA9C9, rgba(28,169,201,0.1))" }} />
-                  </motion.div>
-                );
-              })}
-            </div>
 
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-end mb-12 sm:mb-16 md:mb-20 mt-16">
-              <div className="space-y-4 sm:space-y-5">
-                <motion.p variants={up} className="text-[10px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>{hp?.iftflTagline || "IF→FL Conversion"}</motion.p>
-                <motion.h2 variants={up} className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none" style={{ color: "#02274A" }}>
-                  {hp?.iftflHeading ? hp.iftflHeading : <>Unlock hidden value<br />in your IF stone.</>}
-                </motion.h2>
-              </div>
-              <motion.div variants={up} className="space-y-5 sm:space-y-6">
-                <p className="text-sm sm:text-base leading-relaxed font-light" style={{ color: "rgba(2,39,74,0.55)" }}>
-                  {hp?.iftflBody || "When a GIA certificate notes specific surface characteristics on an Internally Flawless stone, there is often a viable path to Flawless grade — without leaving the same carat weight bracket."}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                  <Link href="/investment" className="block w-full sm:w-auto">
-                    <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-learn">
-                      {hp?.iftflCtaPrimary || "How It Works"}
-                    </Button>
-                  </Link>
-                  <Link href="/contact" className="block w-full sm:w-auto">
-                    <Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-submit">
-                      {hp?.iftflCtaSecondary || "Submit a GIA Cert →"}
-                    </Button>
-                  </Link>
-                </div>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
 
         {/* ═════ 7. SERVICES + PROCESS ═════ */}
         <section className="pt-16 sm:pt-20 md:pt-28 pb-16 sm:pb-20 md:pb-28 px-4 sm:px-6" style={{ background: "#02274A" }}>
@@ -810,6 +759,58 @@ export default function Home() {
                 </motion.div>
               </motion.div>
             </div>
+          </div>
+        </section>
+
+                {/* ═════ IF→FL EXPERTISE + 4C's ═════ */}
+        <section className="py-16 sm:py-10 md:py-18 px-4 sm:px-6" style={{ background: "white" }}>
+          <div className="max-w-7xl mx-auto">
+            {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: "rgba(2,39,74,0.09)", border: "1px solid rgba(2,39,74,0.09)" }}>
+              {fourCs.map((c, i) => {
+                const Icon = FOURC_ICONS[c.iconKey as keyof typeof FOURC_ICONS] || Gem;
+                return (
+                  <motion.div key={c.title} initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ delay: i * 0.1, duration: 0.7, ease: [0.76, 0, 0.24, 1] }} className="flex flex-col gap-5 sm:gap-6 py-8 sm:py-10 px-6 sm:px-7 transition-colors duration-300" style={{ background: "white" }}>
+                    <div className="flex items-start justify-between">
+                      <span className="font-serif text-3xl sm:text-4xl font-light leading-none tabular-nums" style={{ color: "rgba(2,39,74,0.14)" }}>{c.n}</span>
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0" style={{ border: "1.5px solid rgba(28,169,201,0.3)", color: "#1CA9C9" }}>
+                        <Icon size={17} strokeWidth={1.4} />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <h4 className="font-serif text-lg sm:text-xl leading-snug" style={{ color: "#02274A" }}>{c.title}</h4>
+                      <p className="text-xs sm:text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.5)" }}>{c.desc}</p>
+                    </div>
+                    <span className="mt-auto block h-px" style={{ width: "28px", background: "linear-gradient(90deg, #1CA9C9, rgba(28,169,201,0.1))" }} />
+                  </motion.div>
+                );
+              })}
+            </div> */}
+
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-end mb-12 sm:mb-16 md:mb-20 mt-16">
+              <div className="space-y-4 sm:space-y-5">
+                <motion.p variants={up} className="text-[10px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>{hp?.iftflTagline || "IF→FL Conversion"}</motion.p>
+                <motion.h2 variants={up} className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none" style={{ color: "#02274A" }}>
+                  {hp?.iftflHeading ? hp.iftflHeading : <>Unlock hidden value<br />in your IF stone.</>}
+                </motion.h2>
+              </div>
+              <motion.div variants={up} className="space-y-5 sm:space-y-6">
+                <p className="text-sm sm:text-base leading-relaxed font-light" style={{ color: "rgba(2,39,74,0.55)" }}>
+                  {hp?.iftflBody || "When a GIA certificate notes specific surface characteristics on an Internally Flawless stone, there is often a viable path to Flawless grade — without leaving the same carat weight bracket."}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                  <Link href="/investment" className="block w-full sm:w-auto">
+                    <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-learn">
+                      {hp?.iftflCtaPrimary || "How It Works"}
+                    </Button>
+                  </Link>
+                  <Link href="/contact" className="block w-full sm:w-auto">
+                    <Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-submit">
+                      {hp?.iftflCtaSecondary || "Submit a GIA Cert →"}
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+            </motion.div>
           </div>
         </section>
 

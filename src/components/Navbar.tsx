@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 /* ── 3D Diamond profile icon ─────────────────────────────────── */
@@ -226,10 +227,10 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
 
-        {/* Logo */}
+        {/* Logo — white variant while the nav is transparent over the hero, original once solid */}
         <Link href="/" className="flex items-center shrink-0" data-testid="nav-logo">
           <img
-            src="/flx-logo.png"
+            src={solid ? "/flx-logo.png" : "/white-logo.png"}
             alt="FLX Diamond"
             style={{ height: "44px", width: "auto", mixBlendMode: "screen" }}
           />
@@ -267,21 +268,13 @@ export function Navbar() {
             <ProfileDropdown user={user} onLogout={handleLogout} />
           ) : (
             <Link href="/login">
-              <button style={{
-                fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase",
-                color: "#BEF0FA", background: "rgba(2,39,74,0.55)",
-                border: "1px solid rgba(28,169,201,0.6)",
-                padding: "9px 18px", cursor: "pointer",
-                fontFamily: "'Inter', sans-serif", fontWeight: 600,
-                backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(28,169,201,0.25)"; e.currentTarget.style.color = "#fff"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "rgba(2,39,74,0.55)"; e.currentTarget.style.color = "#BEF0FA"; }}
+              <Button
+                className="shimmer-btn rounded-none h-10 px-6 text-[9px] uppercase tracking-[0.3em] font-semibold text-white hover:opacity-90"
+                style={{ background: "#1CA9C9", boxShadow: "0 4px 24px rgba(28,169,201,0.35)" }}
+                data-testid="nav-trade-login"
               >
                 Trade Login
-              </button>
+              </Button>
             </Link>
           )}
         </div>
@@ -330,9 +323,13 @@ export function Navbar() {
                     </div>
                   ) : (
                     <Link href="/login">
-                      <span style={{ fontSize: "10px", letterSpacing: "0.25em", textTransform: "uppercase", color: "#1CA9C9" }}>
-                        Trade Login →
-                      </span>
+                      <Button
+                        className="shimmer-btn rounded-none h-11 w-full text-xs uppercase tracking-[0.22em] font-medium text-white hover:opacity-90"
+                        style={{ background: "#1CA9C9", boxShadow: "0 4px 24px rgba(28,169,201,0.35)" }}
+                        data-testid="mobile-trade-login"
+                      >
+                        Trade Login
+                      </Button>
                     </Link>
                   )}
                   <p className="text-[9px] tracking-widest text-white/30 uppercase">Geelong, VIC, Australia</p>

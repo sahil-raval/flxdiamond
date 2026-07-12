@@ -147,6 +147,10 @@ export function DiamondTraceability({ videoSrc }: { videoSrc?: string }) {
   const [videoProgress, setVideoProgress] = useState(0); // 0–100 across full video (drives progress bar)
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Refs for the mobile horizontal pill nav so we can auto-scroll it
+  const pillScrollRef = useRef<HTMLDivElement>(null);
+  const pillRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
   const step = STEPS[activeStep];
   const width = useWindowWidth();
 
@@ -168,6 +172,27 @@ export function DiamondTraceability({ videoSrc }: { videoSrc?: string }) {
     setStepProgress(pct);
     setVideoProgress(Math.min(100, (currentTime / dur) * 100));
   };
+
+  // Auto-scroll the mobile pill row so the active step pill is always
+  // brought into view — no manual dragging required as the video plays.
+  useEffect(() => {
+    const container = pillScrollRef.current;
+    const activePill = pillRefs.current[activeStep];
+    if (!container || !activePill) return;
+
+    const containerWidth = container.offsetWidth;
+    const pillLeft = activePill.offsetLeft;
+    const pillWidth = activePill.offsetWidth;
+
+    // Center the active pill within the visible scroll area
+    const targetScroll = pillLeft - containerWidth / 2 + pillWidth / 2;
+    const maxScroll = container.scrollWidth - containerWidth;
+
+    container.scrollTo({
+      left: Math.max(0, Math.min(targetScroll, maxScroll)),
+      behavior: "smooth",
+    });
+  }, [activeStep]);
 
   const R = 14;
   const circ = 2 * Math.PI * R;
@@ -238,21 +263,25 @@ export function DiamondTraceability({ videoSrc }: { videoSrc?: string }) {
         {/* ── MOBILE ── */}
         {isMobile && (
           <div>
-            {/* Horizontal scrolling step pills */}
-            <div style={{
-              display: "flex",
-              overflowX: "auto",
-              gap: "8px",
-              paddingBottom: "16px",
-              scrollbarWidth: "none",
-              WebkitOverflowScrolling: "touch",
-              msOverflowStyle: "none",
-            }}>
+            {/* Horizontal scrolling step pills — auto-scrolls to follow activeStep */}
+            <div
+              ref={pillScrollRef}
+              style={{
+                display: "flex",
+                overflowX: "auto",
+                gap: "8px",
+                paddingBottom: "16px",
+                scrollbarWidth: "none",
+                WebkitOverflowScrolling: "touch",
+                msOverflowStyle: "none",
+              }}
+            >
               {STEPS.map((s, i) => {
                 const isActive = i === activeStep;
                 return (
                   <button
                     key={s.id}
+                    ref={(el) => (pillRefs.current[i] = el)}
                     onClick={() => jumpTo(i)}
                     style={{
                       flexShrink: 0,
