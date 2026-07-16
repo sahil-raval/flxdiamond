@@ -733,32 +733,37 @@ export default function Home() {
                 </motion.div>
               ))}
             </div>
-            <div className="grid md:grid-cols-2 gap-10 sm:gap-16 items-start mt-20 sm:mt-24 md:mt-32">
-              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="space-y-5 sm:space-y-6">
-                <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em] font-medium" style={{ color: "#1CA9C9" }}>{hp?.manufacturingTagline || "Our Process"}</motion.p>
-                <motion.div variants={up}><div className="w-10 h-px" style={{ background: "#1CA9C9" }} /></motion.div>
-                <motion.p variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                  {hp?.manufacturingBody || "Most diamond businesses source from wholesalers. We cut and polish in our own manufacturing lab. That's why we can stand behind every stone we sell — and offer services no retailer can."}
-                </motion.p>
-              </motion.div>
-              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="flex flex-col gap-6 sm:gap-7">
-                <motion.div variants={up} className="grid grid-cols-3 gap-4">
-                  {processBadges.map(item => (
-                    <div key={item.label} className="flex flex-col gap-1 p-3 sm:p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      <span className="font-serif text-sm sm:text-base leading-snug text-white">{item.label}</span>
-                      <span className="text-[9px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.35)" }}>{item.sub}</span>
-                    </div>
-                  ))}
-                </motion.div>
-                <motion.div variants={up}>
-                  <Link href="/about">
-                    <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-about-lab">
-                      {hp?.processCta || "About Our Lab →"}
-                    </Button>
-                  </Link>
-                </motion.div>
-              </motion.div>
-            </div>
+            <div className="mt-10 sm:mt-14 md:mt-16">
+  <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="flex flex-col items-center text-center gap-4 mb-8 sm:mb-10">
+   
+  </motion.div>
+
+  <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
+    {[
+      { value: "47 Years+", label: "Collective craftsmanship" },
+      { value: "10,000+", label: "IF→FL conversions" },
+      ...processBadges.map(b => ({ value: b.label, label: b.sub })),
+    ].map((item) => (
+      <motion.div
+        key={item.value}
+        variants={up}
+        className="flex flex-col gap-1 sm:gap-1.5 p-3.5 sm:p-4 md:p-5"
+        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+      >
+        <span className="font-serif text-lg sm:text-xl md:text-2xl leading-snug text-white break-words">{item.value}</span>
+        <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.25em] sm:tracking-[0.3em] leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>{item.label}</span>
+      </motion.div>
+    ))}
+  </motion.div>
+
+  <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3, duration: 0.6 }} className="mt-7 sm:mt-8 flex justify-center">
+    <Link href="/about">
+      <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto max-w-xs" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-about-lab">
+        {hp?.processCta || "About Our Lab →"}
+      </Button>
+    </Link>
+  </motion.div>
+</div>
           </div>
         </section>
 
