@@ -344,8 +344,8 @@ interface SanityHomePage {
   whyTagline?: string; whyHeading?: string;
   whyCards?: WhyCardCms[];
   tradePortalTagline?: string; tradePortalHeading?: string;
-  tradePortalJewellersHeading?: string; tradePortalJewellersBody?: string;
-  tradePortalHowHeading?: string; tradePortalHowBody?: string;
+  tradePortalJewellersHeading?: string; tradePortalJewellersBody?: string; tradePortalJewellersCta?: string;
+  tradePortalHowHeading?: string; tradePortalHowBody?: string; tradePortalHowCta?: string;
   investmentTagline?: string; investmentHeading?: string; investmentBody?: string;
   investmentCta?: string; investmentPoints?: string[];
   testimonialsTagline?: string; testimonialsHeading?: string;
@@ -376,6 +376,9 @@ const PROCESS_BADGES_FALLBACK = [
   { label: "Factory direct", sub: "No middlemen" },
   { label: "GIA / IGI", sub: "Every stone certified" },
   { label: "Aus-wide", sub: "Insured & tracked" },
+  { label: "47 Years+", sub: "Collective craftsmanship" },
+  { label: "10,000+", sub: "IF→FL conversions" },
+  { label: "100%", sub: "Certified diamonds" },
 ];
 const WHY_CARDS_FALLBACK: WhyCardCms[] = [
   { iconKey: "award", title: "Expertise", body: "47 years of diamond craftsmanship, from Surat to Geelong. Babu Vekariya's precision regrinding technique is the result of a lifetime dedicated to a single discipline.", tag: "Est. 1978" },
@@ -689,20 +692,15 @@ const toggleMute = useCallback(() => {
    
   </motion.div>
 <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 md:gap-5">
-  {[
-    { value: "47 Years+", label: "Collective craftsmanship" },
-    { value: "10,000+", label: "IF→FL conversions" },
-    ...processBadges.map(b => ({ value: b.label, label: b.sub })),
-    { value: "100%", label: "Certified diamonds" },
-  ].map((item) => (
+  {processBadges.map((item) => (
     <motion.div
-      key={item.value}
+      key={item.label}
       variants={up}
       className="flex flex-col justify-center gap-1 sm:gap-1.5 p-2.5 sm:p-4 md:p-5"
       style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", minHeight: "56px" }}
     >
-      <span className="font-serif text-[15px] sm:text-xl md:text-2xl leading-tight text-white break-words">{item.value}</span>
-      <span className="text-[7px] sm:text-[9px] uppercase tracking-[0.06em] sm:tracking-[0.3em] leading-tight text-white/35">{item.label}</span>
+      <span className="font-serif text-[15px] sm:text-xl md:text-2xl leading-tight text-white break-words">{item.label}</span>
+      <span className="text-[7px] sm:text-[9px] uppercase tracking-[0.06em] sm:tracking-[0.3em] leading-tight text-white/35">{item.sub}</span>
     </motion.div>
   ))}
 </motion.div>
@@ -808,12 +806,12 @@ const toggleMute = useCallback(() => {
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="p-8 sm:p-10 flex flex-col gap-5" style={{ background: "white" }}>
                 <h3 className="font-serif text-xl sm:text-2xl" style={{ color: "#02274A" }}>{hp?.tradePortalJewellersHeading || "Jewellers and designers"}</h3>
                 <p className="text-sm leading-relaxed flex-1" style={{ color: "rgba(2,39,74,0.55)" }}>{hp?.tradePortalJewellersBody || "Melee sourcing, matched parcels, and memo requests. Register with your ABN — pricing always comes back to you personally by email. No retail pricing, no margins on top of margins."}</p>
-                <Link href="/trade"><Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-enquiry">Trade Enquiry →</Button></Link>
+                <Link href="/trade"><Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-enquiry">{hp?.tradePortalJewellersCta || "Trade Enquiry →"}</Button></Link>
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }} className="p-8 sm:p-10 flex flex-col gap-5" style={{ background: "white" }}>
                 <h3 className="font-serif text-xl sm:text-2xl" style={{ color: "#02274A" }}>{hp?.tradePortalHowHeading || "How we work with jewellers"}</h3>
                 <p className="text-sm leading-relaxed flex-1" style={{ color: "rgba(2,39,74,0.55)" }}>{hp?.tradePortalHowBody || "If a retail customer mentions they're working with a jeweller, we loop that jeweller in rather than transact directly. Our customers without a jeweller stay ours to refer — once they have one, that relationship is theirs."}</p>
-                <Link href="/trade"><Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-account">Create Trade Account →</Button></Link>
+                <Link href="/trade"><Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-account">{hp?.tradePortalHowCta || "Create Trade Account →"}</Button></Link>
               </motion.div>
             </div>
           </div>

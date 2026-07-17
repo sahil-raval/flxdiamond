@@ -228,12 +228,15 @@ export default defineType({
     }),
 
     /* ── TRADE PORTAL ────────────────────────────── */
-    defineField({ name: "tradePortalTagline", type: "string", title: "Tagline", group: "trade" }),
-    defineField({ name: "tradePortalHeading", type: "string", title: "Heading", group: "trade" }),
-    defineField({ name: "tradePortalJewellersHeading", type: "string", title: "Jewellers Heading", group: "trade" }),
-    defineField({ name: "tradePortalJewellersBody", type: "text", rows: 3, title: "Jewellers Body", group: "trade" }),
-    defineField({ name: "tradePortalHowHeading", type: "string", title: "How-we-work Heading", group: "trade" }),
-    defineField({ name: "tradePortalHowBody", type: "text", rows: 3, title: "How-we-work Body", group: "trade" }),
+    /* ── TRADE PORTAL ────────────────────────────── */
+defineField({ name: "tradePortalTagline", type: "string", title: "Tagline", group: "trade" }),
+defineField({ name: "tradePortalHeading", type: "string", title: "Heading", group: "trade" }),
+defineField({ name: "tradePortalJewellersHeading", type: "string", title: "Jewellers Heading", group: "trade" }),
+defineField({ name: "tradePortalJewellersBody", type: "text", rows: 3, title: "Jewellers Body", group: "trade" }),
+defineField({ name: "tradePortalJewellersCta", type: "string", title: "Jewellers CTA Label", group: "trade" }),
+defineField({ name: "tradePortalHowHeading", type: "string", title: "How-we-work Heading", group: "trade" }),
+defineField({ name: "tradePortalHowBody", type: "text", rows: 3, title: "How-we-work Body", group: "trade" }),
+defineField({ name: "tradePortalHowCta", type: "string", title: "How-we-work CTA Label", group: "trade" }),
 
     /* ── INVESTMENT ──────────────────────────────── */
     defineField({ name: "investmentTagline", type: "string", title: "Tagline", group: "investment" }),
