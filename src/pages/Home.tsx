@@ -138,49 +138,7 @@ const BUYER_TYPES: BuyerType[] = [
 ];
 
 /* ── Web Audio API ocean sound generator ────────────────── */
-function buildOceanSound(ctx: AudioContext): () => void {
-  const SR = ctx.sampleRate;
-  const makePinkNoise = (seconds = 9) => {
-    const len = seconds * SR;
-    const buf = ctx.createBuffer(1, len, SR);
-    const d = buf.getChannelData(0);
-    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-    for (let i = 0; i < len; i++) {
-      const w = Math.random() * 2 - 1;
-      b0 = 0.99886 * b0 + w * 0.0555179;
-      b1 = 0.99332 * b1 + w * 0.0750759;
-      b2 = 0.96900 * b2 + w * 0.1538520;
-      b3 = 0.86650 * b3 + w * 0.3104856;
-      b4 = 0.55000 * b4 + w * 0.5329522;
-      b5 = -0.7616 * b5 - w * 0.0168980;
-      d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
-      b6 = w * 0.115926;
-    }
-    const src = ctx.createBufferSource();
-    src.buffer = buf; src.loop = true;
-    return src;
-  };
-  const masterGain = ctx.createGain();
-  masterGain.gain.value = 0;
-  masterGain.connect(ctx.destination);
-  const n1 = makePinkNoise(10); const lp1 = ctx.createBiquadFilter(); lp1.type = "lowpass"; lp1.frequency.value = 160; lp1.Q.value = 0.5;
-  const g1 = ctx.createGain(); g1.gain.value = 0.80; n1.connect(lp1); lp1.connect(g1); g1.connect(masterGain);
-  const lfo1 = ctx.createOscillator(); lfo1.type = "sine"; lfo1.frequency.value = 0.045; const lfoG1 = ctx.createGain(); lfoG1.gain.value = 0.32; lfo1.connect(lfoG1); lfoG1.connect(g1.gain);
-  const n2 = makePinkNoise(7); const lp2 = ctx.createBiquadFilter(); lp2.type = "lowpass"; lp2.frequency.value = 400; lp2.Q.value = 0.6;
-  const g2 = ctx.createGain(); g2.gain.value = 0.20; n2.connect(lp2); lp2.connect(g2); g2.connect(masterGain);
-  const lfo2 = ctx.createOscillator(); lfo2.type = "sine"; lfo2.frequency.value = 0.072; const lfoG2 = ctx.createGain(); lfoG2.gain.value = 0.13; lfo2.connect(lfoG2); lfoG2.connect(g2.gain);
-  const n3 = makePinkNoise(5); const bp3 = ctx.createBiquadFilter(); bp3.type = "bandpass"; bp3.frequency.value = 600; bp3.Q.value = 1.4;
-  const g3 = ctx.createGain(); g3.gain.value = 0.055; n3.connect(bp3); bp3.connect(g3); g3.connect(masterGain);
-  const lfo3 = ctx.createOscillator(); lfo3.type = "sine"; lfo3.frequency.value = 0.10; const lfoG3 = ctx.createGain(); lfoG3.gain.value = 0.04; lfo3.connect(lfoG3); lfoG3.connect(g3.gain);
-  [n1, n2, n3, lfo1, lfo2, lfo3].forEach(n => n.start());
-  masterGain.gain.setValueAtTime(0, ctx.currentTime);
-  masterGain.gain.linearRampToValueAtTime(0.26, ctx.currentTime + 5);
-  return () => {
-    masterGain.gain.setValueAtTime(masterGain.gain.value, ctx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.5);
-    setTimeout(() => [n1, n2, n3, lfo1, lfo2, lfo3].forEach(n => { try { n.stop(); } catch {/* noop */ } }), 2700);
-  };
-}
+
 
 /* ── Testimonials fallback ──────────────────────── */
 const TESTIMONIALS = [
@@ -457,51 +415,44 @@ export default function Home() {
   const signalStrip = isSanityConfigured && sanityHome?.signalStripItems?.length ? sanityHome.signalStripItems : SIGNAL_STRIP_FALLBACK;
   const clientLogos = isSanityConfigured && sanityHome?.clientLogos?.length ? sanityHome.clientLogos : CLIENT_LOGOS_FALLBACK;
 
-  const [isMuted, setIsMuted] = useState(true);
-  const [selected, setSelected] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const answerRef = useRef<HTMLDivElement | null>(null);
-  const ctxRef = useRef<AudioContext | null>(null);
-  const stopRef = useRef<(() => void) | null>(null);
+const [isMuted, setIsMuted] = useState(true);
+const [selected, setSelected] = useState<string | null>(null);
+const videoRef = useRef<HTMLVideoElement | null>(null);
+const answerRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    let started = false;
-    const tryStart = () => {
-      if (started) return;
-      started = true;
-      try {
-        const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-        ctxRef.current = ctx;
-        stopRef.current = buildOceanSound(ctx);
-        setIsMuted(false);
-      } catch (e) { console.warn("Web Audio not available", e); }
-      document.removeEventListener("click", tryStart);
-      document.removeEventListener("scroll", tryStart);
-      document.removeEventListener("touchstart", tryStart);
-    };
-    document.addEventListener("click", tryStart);
-    document.addEventListener("scroll", tryStart);
-    document.addEventListener("touchstart", tryStart);
-    return () => {
-      document.removeEventListener("click", tryStart);
-      document.removeEventListener("scroll", tryStart);
-      document.removeEventListener("touchstart", tryStart);
-    };
-  }, []);
+// Unmute the hero video's own audio on first user interaction
+// (browsers block autoplay-with-sound until the user interacts with the page)
+useEffect(() => {
+  let started = false;
+  const tryUnmute = () => {
+    if (started) return;
+    started = true;
+    const video = videoRef.current;
+    if (video) {
+      video.muted = false;
+      video.volume = 1;
+      setIsMuted(false);
+    }
+    document.removeEventListener("click", tryUnmute);
+    document.removeEventListener("scroll", tryUnmute);
+    document.removeEventListener("touchstart", tryUnmute);
+  };
+  document.addEventListener("click", tryUnmute);
+  document.addEventListener("scroll", tryUnmute);
+  document.addEventListener("touchstart", tryUnmute);
+  return () => {
+    document.removeEventListener("click", tryUnmute);
+    document.removeEventListener("scroll", tryUnmute);
+    document.removeEventListener("touchstart", tryUnmute);
+  };
+}, []);
 
-  useEffect(() => {
-    return () => {
-      const ctx = ctxRef.current;
-      if (ctx && ctx.state === "running") ctx.suspend();
-    };
-  }, []);
-
-  const toggleMute = useCallback(() => {
-    const ctx = ctxRef.current;
-    if (!ctx) return;
-    if (ctx.state === "running") { ctx.suspend(); setIsMuted(true); }
-    else { ctx.resume(); setIsMuted(false); }
-  }, []);
+const toggleMute = useCallback(() => {
+  const video = videoRef.current;
+  if (!video) return;
+  video.muted = !video.muted;
+  setIsMuted(video.muted);
+}, []);
 
   const handleSelect = (id: string) => {
     setSelected(prev => {
@@ -737,24 +688,24 @@ export default function Home() {
   <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="flex flex-col items-center text-center gap-4 mb-8 sm:mb-10">
    
   </motion.div>
-
-  <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
-    {[
-      { value: "47 Years+", label: "Collective craftsmanship" },
-      { value: "10,000+", label: "IF→FL conversions" },
-      ...processBadges.map(b => ({ value: b.label, label: b.sub })),
-    ].map((item) => (
-      <motion.div
-        key={item.value}
-        variants={up}
-        className="flex flex-col gap-1 sm:gap-1.5 p-3.5 sm:p-4 md:p-5"
-        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-      >
-        <span className="font-serif text-lg sm:text-xl md:text-2xl leading-snug text-white break-words">{item.value}</span>
-        <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.25em] sm:tracking-[0.3em] leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>{item.label}</span>
-      </motion.div>
-    ))}
-  </motion.div>
+<motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 md:gap-5">
+  {[
+    { value: "47 Years+", label: "Collective craftsmanship" },
+    { value: "10,000+", label: "IF→FL conversions" },
+    ...processBadges.map(b => ({ value: b.label, label: b.sub })),
+    { value: "100%", label: "Certified diamonds" },
+  ].map((item) => (
+    <motion.div
+      key={item.value}
+      variants={up}
+      className="flex flex-col justify-center gap-1 sm:gap-1.5 p-2.5 sm:p-4 md:p-5"
+      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", minHeight: "56px" }}
+    >
+      <span className="font-serif text-[15px] sm:text-xl md:text-2xl leading-tight text-white break-words">{item.value}</span>
+      <span className="text-[7px] sm:text-[9px] uppercase tracking-[0.06em] sm:tracking-[0.3em] leading-tight text-white/35">{item.label}</span>
+    </motion.div>
+  ))}
+</motion.div>
 
   <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3, duration: 0.6 }} className="mt-7 sm:mt-8 flex justify-center">
     <Link href="/about">
