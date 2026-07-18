@@ -20,6 +20,7 @@ export default defineType({
     { name: "strip", title: "Signal Strip" },
     { name: "clients", title: "Client Logos" },
     { name: "qualifier", title: "Qualifier Cards" },
+
     { name: "featured", title: "Featured Inventory" },
     { name: "traceability", title: "Traceability" },
     { name: "fourCs", title: "4 C's" },
@@ -129,11 +130,14 @@ export default defineType({
         },
       ],
     }),
+    defineField({ name: "qualifierAnswerLabel", type: "string", title: "Answer Panel Label", group: "qualifier" }),
+defineField({ name: "qualifierAnswerQuote", type: "string", title: "Answer Panel Quote", group: "qualifier" }),
 
     /* ── FEATURED INVENTORY ──────────────────────── */
     defineField({ name: "featuredInventoryTagline", type: "string", title: "Tagline", group: "featured" }),
     defineField({ name: "featuredInventoryHeading", type: "string", title: "Heading", group: "featured" }),
     defineField({ name: "featuredInventoryNote", type: "string", title: "Bottom Note", group: "featured" }),
+    defineField({ name: "viewAllStonesText", type: "string", title: "'View All Stones' Link Text", group: "featured" }),
 
     /* ── TRACEABILITY (feature video) ────────────── */
     defineField({ name: "featureVideoUrl", type: "url", title: "Traceability Video URL", group: "traceability" }),
@@ -270,6 +274,9 @@ defineField({ name: "tradePortalHowCta", type: "string", title: "How-we-work CTA
       ],
     }),
     defineField({ name: "testimonialsNote", type: "string", title: "Bottom Note", group: "testimonials" }),
+    defineField({ name: "faqSectionTagline", type: "string", title: "Section Tagline", group: "faqs" }),
+defineField({ name: "faqSectionHeading", type: "string", title: "Section Heading", group: "faqs" }),
+defineField({ name: "faqClosingCta", type: "string", title: "Closing CTA Label", group: "faqs" }),
 
     /* ── FAQ ─────────────────────────────────────── */
     defineField({
@@ -293,6 +300,21 @@ defineField({ name: "tradePortalHowCta", type: "string", title: "How-we-work CTA
     defineField({ name: "noPitchBody", type: "text", rows: 3, title: "'No pitch' Body", group: "closing" }),
     defineField({ name: "ctaSectionHeading", type: "string", title: "Closing Heading", group: "closing" }),
     defineField({ name: "ctaSectionBody", type: "text", rows: 3, title: "Closing Body", group: "closing" }),
+    defineField({
+  name: "noPitchButtons",
+  title: "'No Pitch' Buttons (4)",
+  type: "array",
+  group: "closing",
+  of: [
+    {
+      type: "object",
+      fields: [
+        { name: "label", type: "string", title: "Label" },
+        { name: "href", type: "string", title: "Link (e.g. /diamonds)" },
+      ],
+    },
+  ],
+}),
   ],
   preview: {
     prepare() {

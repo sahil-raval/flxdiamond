@@ -80,14 +80,14 @@ const FAQS = [
   { q: "Do you work with retailers and jewellers directly?", a: "Yes, we operate as the quiet specialist behind serious businesses. We offer white-label sourcing and IF→FL conversion for retailers and jewellers who present our work under their own brand. Discretion is guaranteed." },
 ];
 
-function FaqSection({ faqs }: { faqs: { q: string; a: string }[] }) {
+function FaqSection({ faqs, tagline, heading, closingCta }: { faqs: { q: string; a: string }[]; tagline?: string; heading?: string; closingCta?: string }) {
   const [open, setOpen] = useState<number | null>(null);
   return (
     <section className="py-24 px-4 sm:px-6" style={{ background: "#02274A" }}>
       <div className="max-w-3xl mx-auto">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="mb-12">
-          <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em] mb-4 font-medium" style={{ color: "#1CA9C9" }}>Before You Reach Out</motion.p>
-          <motion.h2 variants={up} className="font-serif text-3xl sm:text-4xl md:text-5xl" style={{ color: "rgba(255,255,255,0.88)" }}>Common questions.</motion.h2>
+          <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em] mb-4 font-medium" style={{ color: "#1CA9C9" }}>{tagline || "Before You Reach Out"}</motion.p>
+          <motion.h2 variants={up} className="font-serif text-3xl sm:text-4xl md:text-5xl" style={{ color: "rgba(255,255,255,0.88)" }}>{heading || "Common questions."}</motion.h2>
         </motion.div>
         <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.07)", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
           {faqs.map((faq, i) => (
@@ -108,7 +108,7 @@ function FaqSection({ faqs }: { faqs: { q: string; a: string }[] }) {
         </div>
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.4, duration: 0.6 }} className="mt-10 text-center">
           <Link href="/contact" className="block w-full sm:inline-block sm:w-auto">
-            <Button className="rounded-none text-xs uppercase tracking-[0.12em] sm:tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="faq-cta">Still have questions? Get in touch →</Button>
+            <Button className="rounded-none text-xs uppercase tracking-[0.12em] sm:tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="faq-cta">{closingCta || "Still have questions? Get in touch →"}</Button>
           </Link>
         </motion.div>
       </div>
@@ -374,7 +374,9 @@ interface SanityHomePage {
   clientLogos?: ClientLogoCms[];
   qualifierTagline?: string; qualifierHeading?: string; qualifierSubtext?: string;
   qualifierCards?: QualifierCardCms[];
+  qualifierAnswerLabel?: string; qualifierAnswerQuote?: string;
   featuredInventoryTagline?: string; featuredInventoryHeading?: string; featuredInventoryNote?: string;
+  viewAllStonesText?: string;
   featureVideoUrl?: string;
   fourCs?: FourCCms[];
   iftflTagline?: string; iftflHeading?: string; iftflBody?: string;
@@ -386,8 +388,8 @@ interface SanityHomePage {
   whyTagline?: string; whyHeading?: string;
   whyCards?: WhyCardCms[];
   tradePortalTagline?: string; tradePortalHeading?: string;
-  tradePortalJewellersHeading?: string; tradePortalJewellersBody?: string; tradePortalJewellersCta?: string; tradePortalJewellersCta?: string;
-  tradePortalHowHeading?: string; tradePortalHowBody?: string; tradePortalHowCta?: string; tradePortalHowCta?: string;
+tradePortalJewellersHeading?: string; tradePortalJewellersBody?: string; tradePortalJewellersCta?: string;
+tradePortalHowHeading?: string; tradePortalHowBody?: string; tradePortalHowCta?: string;
   investmentTagline?: string; investmentHeading?: string; investmentBody?: string;
   investmentCta?: string; investmentPoints?: string[];
   testimonialsTagline?: string; testimonialsHeading?: string;
@@ -395,7 +397,8 @@ interface SanityHomePage {
   testimonialsNote?: string;
   faqs?: { q: string; a: string }[];
   noPitchHeading?: string; noPitchBody?: string;
-  ctaSectionHeading?: string; ctaSectionBody?: string;
+noPitchButtons?: { label: string; href: string }[];
+ctaSectionHeading?: string; ctaSectionBody?: string;
 }
 
 /* ── Icon look-ups (Sanity stores a key, frontend maps to component) ── */
@@ -651,7 +654,7 @@ export default function Home() {
                   <motion.div key={selectedBuyer.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.4 }} className="mt-4 sm:mt-6 p-6 sm:p-8 md:p-12 border border-[#1CA9C9]/30" style={{ background: "rgba(2,39,74,0.03)" }}>
                     <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-start">
                       <div>
-                        <p className="text-[10px] uppercase tracking-[0.3em] mb-4 font-medium" style={{ color: "#1CA9C9" }}>Our Answer</p>
+                        <p className="text-[10px] uppercase tracking-[0.3em] mb-4 font-medium" style={{ color: "#1CA9C9" }}>{hp?.qualifierAnswerLabel || "Our Answer"}</p>
                         <h3 className="font-serif text-xl sm:text-2xl md:text-3xl mb-5 sm:mb-6" style={{ color: "#02274A" }}>{selectedBuyer.answer.title}</h3>
                         <ul className="space-y-3">
                           {selectedBuyer.answer.points.map((p, i) => (
@@ -663,7 +666,7 @@ export default function Home() {
                         </ul>
                       </div>
                       <div className="flex flex-col gap-6 md:items-end">
-                        <p className="text-sm italic font-serif leading-relaxed text-right hidden md:block max-w-xs" style={{ color: "rgba(2,39,74,0.3)" }}>&quot;Every answer begins with understanding exactly what you need.&quot;</p>
+                        <p className="text-sm italic font-serif leading-relaxed text-right hidden md:block max-w-xs" style={{ color: "rgba(2,39,74,0.3)" }}>&quot;{hp?.qualifierAnswerQuote || "Every answer begins with understanding exactly what you need."}&quot;</p>
                         <Link href={selectedBuyer.answer.href} className="block w-full sm:w-auto">
                           <Button className="rounded-none text-xs uppercase tracking-[0.18em] text-white hover:opacity-90 font-medium w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid={`qualifier-cta-${selectedBuyer.id}`}>{selectedBuyer.answer.cta} →</Button>
                         </Link>
@@ -685,7 +688,7 @@ export default function Home() {
                 <motion.h2 variants={up} className="font-serif text-3xl sm:text-4xl" style={{ color: "rgba(255,255,255,0.88)" }}>{hp?.featuredInventoryHeading || "Featured Inventory"}</motion.h2>
               </motion.div>
               <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3, duration: 0.6 }}>
-                <Link href="/diamonds" className="flex items-center gap-2 text-[10px] uppercase tracking-wider font-medium transition-all hover:gap-3" style={{ color: "rgba(28,169,201,0.7)" }}>View All Stones <ArrowRight size={11} /></Link>
+                <Link href="/diamonds" className="flex items-center gap-2 text-[10px] uppercase tracking-wider font-medium transition-all hover:gap-3" style={{ color: "rgba(28,169,201,0.7)" }}>{hp?.viewAllStonesText || "View All Stones"} <ArrowRight size={11} /></Link>
               </motion.div>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
@@ -900,11 +903,26 @@ export default function Home() {
               <motion.h2 variants={up} className="font-serif text-3xl sm:text-4xl md:text-5xl" style={{ color: "#02274A" }}>{hp?.noPitchHeading || "No pitch. Just a conversation."}</motion.h2>
               <motion.p variants={up} className="text-sm sm:text-base leading-relaxed mx-auto max-w-xl" style={{ color: "rgba(2,39,74,0.5)" }}>{hp?.noPitchBody || "Buying, upgrading, investing, or sourcing for trade — we're straightforward people. Start here."}</motion.p>
               <motion.div variants={up} className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 max-w-md md:max-w-none mx-auto">
-                <Link href="/diamonds" className="w-full"><Button variant="outline" className="w-full h-10 sm:h-12 rounded-none text-[11px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] hover:bg-[#02274A]/5" style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A" }}>Browse Stones</Button></Link>
-                <Link href="/contact" className="w-full"><Button variant="outline" className="w-full h-10 sm:h-12 rounded-none text-[11px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] hover:bg-[#02274A]/5" style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A" }}>Talk to Us</Button></Link>
-                <Link href="/contact" className="w-full"><Button variant="outline" className="w-full h-10 sm:h-12 rounded-none text-[11px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] hover:bg-[#02274A]/5" style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A" }}>Book a Call</Button></Link>
-                <Link href="/trade" className="w-full"><Button variant="outline" className="w-full h-10 sm:h-12 rounded-none text-[11px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] hover:bg-[#02274A]/5" style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A" }}>Trade Login</Button></Link>
-              </motion.div>
+  {(hp?.noPitchButtons?.length
+    ? hp.noPitchButtons
+    : [
+        { label: "Browse Stones", href: "/diamonds" },
+        { label: "Talk to Us", href: "tel:+61474817548" },
+        { label: "Book a Call", href: "/contact" },
+        { label: "Trade Login", href: "/trade" },
+      ]
+  ).map((btn, i) => {
+    const isExternal = btn.href.startsWith("tel:") || btn.href.startsWith("mailto:") || btn.href.startsWith("http");
+    const buttonEl = (
+      <Button variant="outline" className="w-full h-10 sm:h-12 rounded-none text-[11px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.18em] hover:bg-[#02274A]/5" style={{ borderColor: "rgba(2,39,74,0.22)", color: "#02274A" }}>{btn.label}</Button>
+    );
+    return isExternal ? (
+      <a key={i} href={btn.href} className="w-full">{buttonEl}</a>
+    ) : (
+      <Link key={i} href={btn.href} className="w-full">{buttonEl}</Link>
+    );
+  })}
+</motion.div>
             </motion.div>
           </div>
         </section>
