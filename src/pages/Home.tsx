@@ -386,8 +386,8 @@ interface SanityHomePage {
   whyTagline?: string; whyHeading?: string;
   whyCards?: WhyCardCms[];
   tradePortalTagline?: string; tradePortalHeading?: string;
-  tradePortalJewellersHeading?: string; tradePortalJewellersBody?: string; tradePortalJewellersCta?: string;
-  tradePortalHowHeading?: string; tradePortalHowBody?: string; tradePortalHowCta?: string;
+  tradePortalJewellersHeading?: string; tradePortalJewellersBody?: string; tradePortalJewellersCta?: string; tradePortalJewellersCta?: string;
+  tradePortalHowHeading?: string; tradePortalHowBody?: string; tradePortalHowCta?: string; tradePortalHowCta?: string;
   investmentTagline?: string; investmentHeading?: string; investmentBody?: string;
   investmentCta?: string; investmentPoints?: string[];
   testimonialsTagline?: string; testimonialsHeading?: string;
