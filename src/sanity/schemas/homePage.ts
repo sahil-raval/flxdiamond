@@ -227,8 +227,7 @@ export default defineType({
       ],
     }),
 
-    /* ── TRADE PORTAL ────────────────────────────── */
-    /* ── TRADE PORTAL ────────────────────────────── */
+/* ── TRADE PORTAL ────────────────────────────── */
 defineField({ name: "tradePortalTagline", type: "string", title: "Tagline", group: "trade" }),
 defineField({ name: "tradePortalHeading", type: "string", title: "Heading", group: "trade" }),
 defineField({ name: "tradePortalJewellersHeading", type: "string", title: "Jewellers Heading", group: "trade" }),

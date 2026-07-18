@@ -386,8 +386,8 @@ interface SanityHomePage {
   whyTagline?: string; whyHeading?: string;
   whyCards?: WhyCardCms[];
   tradePortalTagline?: string; tradePortalHeading?: string;
-  tradePortalJewellersHeading?: string; tradePortalJewellersBody?: string;
-  tradePortalHowHeading?: string; tradePortalHowBody?: string;
+  tradePortalJewellersHeading?: string; tradePortalJewellersBody?: string; tradePortalJewellersCta?: string;
+  tradePortalHowHeading?: string; tradePortalHowBody?: string; tradePortalHowCta?: string;
   investmentTagline?: string; investmentHeading?: string; investmentBody?: string;
   investmentCta?: string; investmentPoints?: string[];
   testimonialsTagline?: string; testimonialsHeading?: string;
@@ -418,6 +418,9 @@ const PROCESS_BADGES_FALLBACK = [
   { label: "Factory direct", sub: "No middlemen" },
   { label: "GIA / IGI", sub: "Every stone certified" },
   { label: "Aus-wide", sub: "Insured & tracked" },
+  { label: "47 Years+", sub: "Collective craftsmanship" },
+  { label: "10,000+", sub: "IF→FL conversions" },
+  { label: "100%", sub: "Certified diamonds" },
   
 ];
 const WHY_CARDS_FALLBACK: WhyCardCms[] = [
@@ -556,11 +559,6 @@ export default function Home() {
               <div key={i} className="particle" style={{ left: p.left, bottom: p.bottom, width: p.size, height: p.size, background: "rgba(28,169,201,0.7)", animationDelay: p.delay, animationDuration: p.dur }} />
             ))}
           </ParallaxLayer>
-
-          <button onClick={toggleMute} className="absolute z-20 flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider transition-all" style={{ top: "env(safe-area-inset-top, 96px)", right: "max(env(safe-area-inset-right, 0px), 24px)", marginTop: "24px", color: isMuted ? "rgba(255,255,255,0.4)" : "#1CA9C9", border: "1px solid", borderColor: isMuted ? "rgba(255,255,255,0.12)" : "rgba(28,169,201,0.4)" }} data-testid="btn-toggle-sound" aria-label={isMuted ? "Unmute ocean" : "Mute ocean"}>
-            {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
-            <span className="hidden sm:inline">{isMuted ? "Hear the Ocean" : "Ocean Sound On"}</span>
-          </button>
 
           <div className="relative z-10 w-full px-5 sm:px-8 md:px-16 lg:px-24 pt-24 pb-10 sm:pb-20 md:pb-24" style={{ paddingBottom: "max(40px, env(safe-area-inset-bottom, 40px))" }}>
             <div className="max-w-3xl">
@@ -705,57 +703,6 @@ export default function Home() {
 
         <DiamondTraceability videoSrc={hp?.featureVideoUrl} />
 
-        {/* ═════ IF→FL EXPERTISE + 4C's ═════ */}
-        <section className="py-16 sm:py-10 md:py-18 px-4 sm:px-6" style={{ background: "white" }}>
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: "rgba(2,39,74,0.09)", border: "1px solid rgba(2,39,74,0.09)" }}>
-              {fourCs.map((c, i) => {
-                const Icon = FOURC_ICONS[c.iconKey as keyof typeof FOURC_ICONS] || Gem;
-                return (
-                  <motion.div key={c.title} initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ delay: i * 0.1, duration: 0.7, ease: [0.76, 0, 0.24, 1] }} className="flex flex-col gap-5 sm:gap-6 py-8 sm:py-10 px-6 sm:px-7 transition-colors duration-300" style={{ background: "white" }}>
-                    <div className="flex items-start justify-between">
-                      <span className="font-serif text-3xl sm:text-4xl font-light leading-none tabular-nums" style={{ color: "rgba(2,39,74,0.14)" }}>{c.n}</span>
-                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0" style={{ border: "1.5px solid rgba(28,169,201,0.3)", color: "#1CA9C9" }}>
-                        <Icon size={17} strokeWidth={1.4} />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <h4 className="font-serif text-lg sm:text-xl leading-snug" style={{ color: "#02274A" }}>{c.title}</h4>
-                      <p className="text-xs sm:text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.5)" }}>{c.desc}</p>
-                    </div>
-                    <span className="mt-auto block h-px" style={{ width: "28px", background: "linear-gradient(90deg, #1CA9C9, rgba(28,169,201,0.1))" }} />
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-end mb-12 sm:mb-16 md:mb-20 mt-16">
-              <div className="space-y-4 sm:space-y-5">
-                <motion.p variants={up} className="text-[10px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>{hp?.iftflTagline || "IF→FL Conversion"}</motion.p>
-                <motion.h2 variants={up} className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none" style={{ color: "#02274A" }}>
-                  {hp?.iftflHeading ? hp.iftflHeading : <>Unlock hidden value<br />in your IF stone.</>}
-                </motion.h2>
-              </div>
-              <motion.div variants={up} className="space-y-5 sm:space-y-6">
-                <p className="text-sm sm:text-base leading-relaxed font-light" style={{ color: "rgba(2,39,74,0.55)" }}>
-                  {hp?.iftflBody || "When a GIA certificate notes specific surface characteristics on an Internally Flawless stone, there is often a viable path to Flawless grade — without leaving the same carat weight bracket."}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                  <Link href="/investment" className="block w-full sm:w-auto">
-                    <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-learn">
-                      {hp?.iftflCtaPrimary || "How It Works"}
-                    </Button>
-                  </Link>
-                  <Link href="/contact" className="block w-full sm:w-auto">
-                    <Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-submit">
-                      {hp?.iftflCtaSecondary || "Submit a GIA Cert →"}
-                    </Button>
-                  </Link>
-                </div>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
 
         {/* ═════ 7. SERVICES + PROCESS ═════ */}
         <section className="pt-16 sm:pt-20 md:pt-28 pb-16 sm:pb-20 md:pb-28 px-4 sm:px-6" style={{ background: "#02274A" }}>
@@ -785,34 +732,66 @@ export default function Home() {
                 </motion.div>
               ))}
             </div>
-            <div className="grid md:grid-cols-2 gap-10 sm:gap-16 items-start mt-20 sm:mt-24 md:mt-32">
-              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="space-y-5 sm:space-y-6">
-                <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em] font-medium" style={{ color: "#1CA9C9" }}>{hp?.manufacturingTagline || "Our Process"}</motion.p>
-                <motion.div variants={up}><div className="w-10 h-px" style={{ background: "#1CA9C9" }} /></motion.div>
-                <motion.p variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                  {hp?.manufacturingBody || "Most diamond businesses source from wholesalers. We cut and polish in our own manufacturing lab. That's why we can stand behind every stone we sell — and offer services no retailer can."}
-                </motion.p>
-              </motion.div>
-              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="flex flex-col gap-6 sm:gap-7">
-                <motion.div variants={up} className="grid grid-cols-3 gap-4">
-                  {processBadges.map(item => (
-                    <div key={item.label} className="flex flex-col gap-1 p-3 sm:p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      <span className="font-serif text-sm sm:text-base leading-snug text-white">{item.label}</span>
-                      <span className="text-[9px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.35)" }}>{item.sub}</span>
-                    </div>
-                  ))}
-                </motion.div>
-                <motion.div variants={up}>
-                  <Link href="/about">
-                    <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-about-lab">
-                      {hp?.processCta || "About Our Lab →"}
-                    </Button>
-                  </Link>
-                </motion.div>
-              </motion.div>
-            </div>
+<div className="mt-10 sm:mt-14 md:mt-16">
+  <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="flex flex-col items-center gap-6 sm:gap-7">
+    <motion.div variants={up} className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-4 w-full">
+      {processBadges.map(item => (
+        <div
+          key={item.label}
+          className="flex flex-col justify-center gap-1 p-3 sm:p-4 min-h-[64px] sm:min-h-[92px]"
+          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          <span className="font-serif text-sm sm:text-base leading-snug text-white">{item.label}</span>
+          <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.15em] sm:tracking-[0.3em] leading-tight" style={{ color: "rgba(255,255,255,0.35)" }}>
+            {item.sub}
+          </span>
+        </div>
+      ))}
+    </motion.div>
+    <motion.div variants={up}>
+      <Link href="/about">
+        <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-about-lab">
+          {hp?.processCta || "About Our Lab →"}
+        </Button>
+      </Link>
+    </motion.div>
+  </motion.div>
+</div>
+
           </div>
         </section>
+                {/* ═════ IF→FL EXPERTISE + 4C's ═════ */}
+        <section className="py-16 sm:py-10 md:py-18 px-4 sm:px-6" style={{ background: "white" }}>
+          <div className="max-w-7xl mx-auto">
+
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-end mb-12 sm:mb-16 md:mb-20 mt-16">
+              <div className="space-y-4 sm:space-y-5">
+                <motion.p variants={up} className="text-[10px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>{hp?.iftflTagline || "IF→FL Conversion"}</motion.p>
+                <motion.h2 variants={up} className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none" style={{ color: "#02274A" }}>
+                  {hp?.iftflHeading ? hp.iftflHeading : <>Unlock hidden value<br />in your IF stone.</>}
+                </motion.h2>
+              </div>
+              <motion.div variants={up} className="space-y-5 sm:space-y-6">
+                <p className="text-sm sm:text-base leading-relaxed font-light" style={{ color: "rgba(2,39,74,0.55)" }}>
+                  {hp?.iftflBody || "When a GIA certificate notes specific surface characteristics on an Internally Flawless stone, there is often a viable path to Flawless grade — without leaving the same carat weight bracket."}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                  <Link href="/investment" className="block w-full sm:w-auto">
+                    <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-learn">
+                      {hp?.iftflCtaPrimary || "How It Works"}
+                    </Button>
+                  </Link>
+                  <Link href="/contact" className="block w-full sm:w-auto">
+                    <Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-submit">
+                      {hp?.iftflCtaSecondary || "Submit a GIA Cert →"}
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
 
         {/* ═════ 9. WHY FLXDIAMONDS ═════ */}
         <section className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 border-t border-[rgba(28,169,201,0.12)]" style={{ background: "#02274A" }}>
@@ -852,12 +831,12 @@ export default function Home() {
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="p-8 sm:p-10 flex flex-col gap-5" style={{ background: "white" }}>
                 <h3 className="font-serif text-xl sm:text-2xl" style={{ color: "#02274A" }}>{hp?.tradePortalJewellersHeading || "Jewellers and designers"}</h3>
                 <p className="text-sm leading-relaxed flex-1" style={{ color: "rgba(2,39,74,0.55)" }}>{hp?.tradePortalJewellersBody || "Melee sourcing, matched parcels, and memo requests. Register with your ABN — pricing always comes back to you personally by email. No retail pricing, no margins on top of margins."}</p>
-                <Link href="/trade"><Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-enquiry">Trade Enquiry →</Button></Link>
+                <Link href="/trade"><Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-enquiry">{hp?.tradePortalJewellersCta || "Trade Enquiry →"}</Button></Link>
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }} className="p-8 sm:p-10 flex flex-col gap-5" style={{ background: "white" }}>
                 <h3 className="font-serif text-xl sm:text-2xl" style={{ color: "#02274A" }}>{hp?.tradePortalHowHeading || "How we work with jewellers"}</h3>
                 <p className="text-sm leading-relaxed flex-1" style={{ color: "rgba(2,39,74,0.55)" }}>{hp?.tradePortalHowBody || "If a retail customer mentions they're working with a jeweller, we loop that jeweller in rather than transact directly. Our customers without a jeweller stay ours to refer — once they have one, that relationship is theirs."}</p>
-                <Link href="/trade"><Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-account">Create Trade Account →</Button></Link>
+                <Link href="/trade"><Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-account">{hp?.tradePortalHowCta || "Create Trade Account →"}</Button></Link>
               </motion.div>
             </div>
           </div>
