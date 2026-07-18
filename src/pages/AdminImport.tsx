@@ -312,7 +312,7 @@ export default function AdminImport() {
                 <ol style={{ fontSize: 12, color: C.muted, lineHeight: 2, paddingLeft: 18, marginBottom: 12 }}>
                   <li>Open <a href="https://www.sanity.io/manage/personal/project/dp1evbtf/api" target="_blank" rel="noopener noreferrer" style={{ color: C.accent }}>sanity.io/manage → project dp1evbtf → API → Tokens</a></li>
                   <li>Click <strong style={{ color: C.text }}>Add API token</strong>, choose <strong style={{ color: C.text }}>Editor</strong> permission, give it a name</li>
-                  <li>Copy the token, then open <strong style={{ color: C.text }}>Replit → Secrets</strong> and add it as <code style={{ fontFamily: "monospace", color: C.accent }}>SANITY_API_TOKEN</code></li>
+                  <li>Copy the token, then open <strong style={{ color: C.text }}>dri → Secrets</strong> and add it as <code style={{ fontFamily: "monospace", color: C.accent }}>SANITY_API_TOKEN</code></li>
                   <li>The API server will restart automatically and imports will work</li>
                 </ol>
                 <button onClick={checkToken} style={{ background: "transparent", border: "1px solid rgba(239,68,68,0.4)", color: "#ef4444", padding: "7px 16px", fontSize: 10, letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer" }}>

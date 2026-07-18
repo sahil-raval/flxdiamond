@@ -182,7 +182,7 @@ export default function AdminApiKeys() {
             Enter admin secret
           </h2>
           <p style={{ fontSize: 12, color: COLORS.muted, marginBottom: 20, lineHeight: 1.6 }}>
-            Set the <code style={{ fontFamily: "monospace", color: COLORS.accent }}>ADMIN_SECRET</code> environment variable in Replit Secrets, then enter it here.
+            Set the <code style={{ fontFamily: "monospace", color: COLORS.accent }}>ADMIN_SECRET</code> environment variable in dri Secrets, then enter it here.
           </p>
           <input
             type="password"
