@@ -118,11 +118,20 @@
   }
 }
 
-/* ── Word mask utility for heading reveals ── */
+/* Word mask technique for luxury headings */
 .word-mask {
   display: inline-block;
   overflow: hidden;
-  vertical-align: bottom;
+  vertical-align: top;
+  /* Playfair Display has deep descenders (~0.3em). Give generous room so
+     letters "g", "y", "p", "q", "j" are never clipped by overflow:hidden.
+     The negative margin cancels the extra visual space so line-height layout
+     stays identical to the original design. */
+  padding-bottom: 0.38em;
+  margin-bottom: -0.38em;
+  padding-top: 0.05em;
+  margin-top: -0.05em;
+  line-height: 1.2;
 }
 
 /* ── Shimmer line animation for footer ── */

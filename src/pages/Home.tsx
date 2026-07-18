@@ -138,7 +138,49 @@ const BUYER_TYPES: BuyerType[] = [
 ];
 
 /* ── Web Audio API ocean sound generator ────────────────── */
-
+function buildOceanSound(ctx: AudioContext): () => void {
+  const SR = ctx.sampleRate;
+  const makePinkNoise = (seconds = 9) => {
+    const len = seconds * SR;
+    const buf = ctx.createBuffer(1, len, SR);
+    const d = buf.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + w * 0.0555179;
+      b1 = 0.99332 * b1 + w * 0.0750759;
+      b2 = 0.96900 * b2 + w * 0.1538520;
+      b3 = 0.86650 * b3 + w * 0.3104856;
+      b4 = 0.55000 * b4 + w * 0.5329522;
+      b5 = -0.7616 * b5 - w * 0.0168980;
+      d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
+      b6 = w * 0.115926;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf; src.loop = true;
+    return src;
+  };
+  const masterGain = ctx.createGain();
+  masterGain.gain.value = 0;
+  masterGain.connect(ctx.destination);
+  const n1 = makePinkNoise(10); const lp1 = ctx.createBiquadFilter(); lp1.type = "lowpass"; lp1.frequency.value = 160; lp1.Q.value = 0.5;
+  const g1 = ctx.createGain(); g1.gain.value = 0.80; n1.connect(lp1); lp1.connect(g1); g1.connect(masterGain);
+  const lfo1 = ctx.createOscillator(); lfo1.type = "sine"; lfo1.frequency.value = 0.045; const lfoG1 = ctx.createGain(); lfoG1.gain.value = 0.32; lfo1.connect(lfoG1); lfoG1.connect(g1.gain);
+  const n2 = makePinkNoise(7); const lp2 = ctx.createBiquadFilter(); lp2.type = "lowpass"; lp2.frequency.value = 400; lp2.Q.value = 0.6;
+  const g2 = ctx.createGain(); g2.gain.value = 0.20; n2.connect(lp2); lp2.connect(g2); g2.connect(masterGain);
+  const lfo2 = ctx.createOscillator(); lfo2.type = "sine"; lfo2.frequency.value = 0.072; const lfoG2 = ctx.createGain(); lfoG2.gain.value = 0.13; lfo2.connect(lfoG2); lfoG2.connect(g2.gain);
+  const n3 = makePinkNoise(5); const bp3 = ctx.createBiquadFilter(); bp3.type = "bandpass"; bp3.frequency.value = 600; bp3.Q.value = 1.4;
+  const g3 = ctx.createGain(); g3.gain.value = 0.055; n3.connect(bp3); bp3.connect(g3); g3.connect(masterGain);
+  const lfo3 = ctx.createOscillator(); lfo3.type = "sine"; lfo3.frequency.value = 0.10; const lfoG3 = ctx.createGain(); lfoG3.gain.value = 0.04; lfo3.connect(lfoG3); lfoG3.connect(g3.gain);
+  [n1, n2, n3, lfo1, lfo2, lfo3].forEach(n => n.start());
+  masterGain.gain.setValueAtTime(0, ctx.currentTime);
+  masterGain.gain.linearRampToValueAtTime(0.26, ctx.currentTime + 5);
+  return () => {
+    masterGain.gain.setValueAtTime(masterGain.gain.value, ctx.currentTime);
+    masterGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.5);
+    setTimeout(() => [n1, n2, n3, lfo1, lfo2, lfo3].forEach(n => { try { n.stop(); } catch {/* noop */ } }), 2700);
+  };
+}
 
 /* ── Testimonials fallback ──────────────────────── */
 const TESTIMONIALS = [
@@ -344,8 +386,8 @@ interface SanityHomePage {
   whyTagline?: string; whyHeading?: string;
   whyCards?: WhyCardCms[];
   tradePortalTagline?: string; tradePortalHeading?: string;
-  tradePortalJewellersHeading?: string; tradePortalJewellersBody?: string; tradePortalJewellersCta?: string;
-  tradePortalHowHeading?: string; tradePortalHowBody?: string; tradePortalHowCta?: string;
+  tradePortalJewellersHeading?: string; tradePortalJewellersBody?: string;
+  tradePortalHowHeading?: string; tradePortalHowBody?: string;
   investmentTagline?: string; investmentHeading?: string; investmentBody?: string;
   investmentCta?: string; investmentPoints?: string[];
   testimonialsTagline?: string; testimonialsHeading?: string;
@@ -376,9 +418,7 @@ const PROCESS_BADGES_FALLBACK = [
   { label: "Factory direct", sub: "No middlemen" },
   { label: "GIA / IGI", sub: "Every stone certified" },
   { label: "Aus-wide", sub: "Insured & tracked" },
-  { label: "47 Years+", sub: "Collective craftsmanship" },
-  { label: "10,000+", sub: "IF→FL conversions" },
-  { label: "100%", sub: "Certified diamonds" },
+  
 ];
 const WHY_CARDS_FALLBACK: WhyCardCms[] = [
   { iconKey: "award", title: "Expertise", body: "47 years of diamond craftsmanship, from Surat to Geelong. Babu Vekariya's precision regrinding technique is the result of a lifetime dedicated to a single discipline.", tag: "Est. 1978" },
@@ -418,44 +458,51 @@ export default function Home() {
   const signalStrip = isSanityConfigured && sanityHome?.signalStripItems?.length ? sanityHome.signalStripItems : SIGNAL_STRIP_FALLBACK;
   const clientLogos = isSanityConfigured && sanityHome?.clientLogos?.length ? sanityHome.clientLogos : CLIENT_LOGOS_FALLBACK;
 
-const [isMuted, setIsMuted] = useState(true);
-const [selected, setSelected] = useState<string | null>(null);
-const videoRef = useRef<HTMLVideoElement | null>(null);
-const answerRef = useRef<HTMLDivElement | null>(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const [selected, setSelected] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const answerRef = useRef<HTMLDivElement | null>(null);
+  const ctxRef = useRef<AudioContext | null>(null);
+  const stopRef = useRef<(() => void) | null>(null);
 
-// Unmute the hero video's own audio on first user interaction
-// (browsers block autoplay-with-sound until the user interacts with the page)
-useEffect(() => {
-  let started = false;
-  const tryUnmute = () => {
-    if (started) return;
-    started = true;
-    const video = videoRef.current;
-    if (video) {
-      video.muted = false;
-      video.volume = 1;
-      setIsMuted(false);
-    }
-    document.removeEventListener("click", tryUnmute);
-    document.removeEventListener("scroll", tryUnmute);
-    document.removeEventListener("touchstart", tryUnmute);
-  };
-  document.addEventListener("click", tryUnmute);
-  document.addEventListener("scroll", tryUnmute);
-  document.addEventListener("touchstart", tryUnmute);
-  return () => {
-    document.removeEventListener("click", tryUnmute);
-    document.removeEventListener("scroll", tryUnmute);
-    document.removeEventListener("touchstart", tryUnmute);
-  };
-}, []);
+  useEffect(() => {
+    let started = false;
+    const tryStart = () => {
+      if (started) return;
+      started = true;
+      try {
+        const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+        ctxRef.current = ctx;
+        stopRef.current = buildOceanSound(ctx);
+        setIsMuted(false);
+      } catch (e) { console.warn("Web Audio not available", e); }
+      document.removeEventListener("click", tryStart);
+      document.removeEventListener("scroll", tryStart);
+      document.removeEventListener("touchstart", tryStart);
+    };
+    document.addEventListener("click", tryStart);
+    document.addEventListener("scroll", tryStart);
+    document.addEventListener("touchstart", tryStart);
+    return () => {
+      document.removeEventListener("click", tryStart);
+      document.removeEventListener("scroll", tryStart);
+      document.removeEventListener("touchstart", tryStart);
+    };
+  }, []);
 
-const toggleMute = useCallback(() => {
-  const video = videoRef.current;
-  if (!video) return;
-  video.muted = !video.muted;
-  setIsMuted(video.muted);
-}, []);
+  useEffect(() => {
+    return () => {
+      const ctx = ctxRef.current;
+      if (ctx && ctx.state === "running") ctx.suspend();
+    };
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    const ctx = ctxRef.current;
+    if (!ctx) return;
+    if (ctx.state === "running") { ctx.suspend(); setIsMuted(true); }
+    else { ctx.resume(); setIsMuted(false); }
+  }, []);
 
   const handleSelect = (id: string) => {
     setSelected(prev => {
@@ -500,19 +547,20 @@ const toggleMute = useCallback(() => {
               </>
             )}
           </video>
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(2,39,74,0.35) 0%, rgba(2,39,74,0.12) 30%, rgba(2,39,74,0.45) 88%, rgba(2,39,74,0.75) 100%)" }} />
-<div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(2,39,74,0.45) 0%, rgba(2,39,74,0.08) 55%, rgba(2,39,74,0.25) 100%)" }} />
-<div className="absolute inset-0" style={{ background: "radial-gradient(80% 60% at 18% 88%, rgba(2,39,74,0.45) 0%, rgba(2,39,74,0) 60%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(2,39,74,0.55) 0%, rgba(2,39,74,0.22) 30%, rgba(2,39,74,0.62) 68%, rgba(2,39,74,0.92) 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(2,39,74,0.72) 0%, rgba(2,39,74,0.15) 55%, rgba(2,39,74,0.4) 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(80% 60% at 18% 88%, rgba(2,39,74,0.65) 0%, rgba(2,39,74,0) 60%)" }} />
+
           <ParallaxLayer speed={0.08} style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none" }}>
             {PARTICLES.map((p, i) => (
               <div key={i} className="particle" style={{ left: p.left, bottom: p.bottom, width: p.size, height: p.size, background: "rgba(28,169,201,0.7)", animationDelay: p.delay, animationDuration: p.dur }} />
             ))}
           </ParallaxLayer>
 
-          {/* <button onClick={toggleMute} className="absolute z-20 flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider transition-all" style={{ top: "env(safe-area-inset-top, 96px)", right: "max(env(safe-area-inset-right, 0px), 24px)", marginTop: "24px", color: isMuted ? "rgba(255,255,255,0.4)" : "#1CA9C9", border: "1px solid", borderColor: isMuted ? "rgba(255,255,255,0.12)" : "rgba(28,169,201,0.4)" }} data-testid="btn-toggle-sound" aria-label={isMuted ? "Unmute ocean" : "Mute ocean"}>
+          <button onClick={toggleMute} className="absolute z-20 flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider transition-all" style={{ top: "env(safe-area-inset-top, 96px)", right: "max(env(safe-area-inset-right, 0px), 24px)", marginTop: "24px", color: isMuted ? "rgba(255,255,255,0.4)" : "#1CA9C9", border: "1px solid", borderColor: isMuted ? "rgba(255,255,255,0.12)" : "rgba(28,169,201,0.4)" }} data-testid="btn-toggle-sound" aria-label={isMuted ? "Unmute ocean" : "Mute ocean"}>
             {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
             <span className="hidden sm:inline">{isMuted ? "Hear the Ocean" : "Ocean Sound On"}</span>
-          </button> */}
+          </button>
 
           <div className="relative z-10 w-full px-5 sm:px-8 md:px-16 lg:px-24 pt-24 pb-10 sm:pb-20 md:pb-24" style={{ paddingBottom: "max(40px, env(safe-area-inset-bottom, 40px))" }}>
             <div className="max-w-3xl">
@@ -657,7 +705,57 @@ const toggleMute = useCallback(() => {
 
         <DiamondTraceability videoSrc={hp?.featureVideoUrl} />
 
+        {/* ═════ IF→FL EXPERTISE + 4C's ═════ */}
+        <section className="py-16 sm:py-10 md:py-18 px-4 sm:px-6" style={{ background: "white" }}>
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: "rgba(2,39,74,0.09)", border: "1px solid rgba(2,39,74,0.09)" }}>
+              {fourCs.map((c, i) => {
+                const Icon = FOURC_ICONS[c.iconKey as keyof typeof FOURC_ICONS] || Gem;
+                return (
+                  <motion.div key={c.title} initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ delay: i * 0.1, duration: 0.7, ease: [0.76, 0, 0.24, 1] }} className="flex flex-col gap-5 sm:gap-6 py-8 sm:py-10 px-6 sm:px-7 transition-colors duration-300" style={{ background: "white" }}>
+                    <div className="flex items-start justify-between">
+                      <span className="font-serif text-3xl sm:text-4xl font-light leading-none tabular-nums" style={{ color: "rgba(2,39,74,0.14)" }}>{c.n}</span>
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0" style={{ border: "1.5px solid rgba(28,169,201,0.3)", color: "#1CA9C9" }}>
+                        <Icon size={17} strokeWidth={1.4} />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <h4 className="font-serif text-lg sm:text-xl leading-snug" style={{ color: "#02274A" }}>{c.title}</h4>
+                      <p className="text-xs sm:text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.5)" }}>{c.desc}</p>
+                    </div>
+                    <span className="mt-auto block h-px" style={{ width: "28px", background: "linear-gradient(90deg, #1CA9C9, rgba(28,169,201,0.1))" }} />
+                  </motion.div>
+                );
+              })}
+            </div>
 
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-end mb-12 sm:mb-16 md:mb-20 mt-16">
+              <div className="space-y-4 sm:space-y-5">
+                <motion.p variants={up} className="text-[10px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>{hp?.iftflTagline || "IF→FL Conversion"}</motion.p>
+                <motion.h2 variants={up} className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none" style={{ color: "#02274A" }}>
+                  {hp?.iftflHeading ? hp.iftflHeading : <>Unlock hidden value<br />in your IF stone.</>}
+                </motion.h2>
+              </div>
+              <motion.div variants={up} className="space-y-5 sm:space-y-6">
+                <p className="text-sm sm:text-base leading-relaxed font-light" style={{ color: "rgba(2,39,74,0.55)" }}>
+                  {hp?.iftflBody || "When a GIA certificate notes specific surface characteristics on an Internally Flawless stone, there is often a viable path to Flawless grade — without leaving the same carat weight bracket."}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                  <Link href="/investment" className="block w-full sm:w-auto">
+                    <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-learn">
+                      {hp?.iftflCtaPrimary || "How It Works"}
+                    </Button>
+                  </Link>
+                  <Link href="/contact" className="block w-full sm:w-auto">
+                    <Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-submit">
+                      {hp?.iftflCtaSecondary || "Submit a GIA Cert →"}
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
 
         {/* ═════ 7. SERVICES + PROCESS ═════ */}
         <section className="pt-16 sm:pt-20 md:pt-28 pb-16 sm:pb-20 md:pb-28 px-4 sm:px-6" style={{ background: "#02274A" }}>
@@ -687,84 +785,32 @@ const toggleMute = useCallback(() => {
                 </motion.div>
               ))}
             </div>
-            <div className="mt-10 sm:mt-14 md:mt-16">
-  <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="flex flex-col items-center text-center gap-4 mb-8 sm:mb-10">
-   
-  </motion.div>
-<motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 md:gap-5">
-  {processBadges.map((item) => (
-    <motion.div
-      key={item.label}
-      variants={up}
-      className="flex flex-col justify-center gap-1 sm:gap-1.5 p-2.5 sm:p-4 md:p-5"
-      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", minHeight: "56px" }}
-    >
-      <span className="font-serif text-[15px] sm:text-xl md:text-2xl leading-tight text-white break-words">{item.label}</span>
-      <span className="text-[7px] sm:text-[9px] uppercase tracking-[0.06em] sm:tracking-[0.3em] leading-tight text-white/35">{item.sub}</span>
-    </motion.div>
-  ))}
-</motion.div>
-
-  <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3, duration: 0.6 }} className="mt-7 sm:mt-8 flex justify-center">
-    <Link href="/about">
-      <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto max-w-xs" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-about-lab">
-        {hp?.processCta || "About Our Lab →"}
-      </Button>
-    </Link>
-  </motion.div>
-</div>
-          </div>
-        </section>
-
-                {/* ═════ IF→FL EXPERTISE + 4C's ═════ */}
-        <section className="py-16 sm:py-10 md:py-18 px-4 sm:px-6" style={{ background: "white" }}>
-          <div className="max-w-7xl mx-auto">
-            {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: "rgba(2,39,74,0.09)", border: "1px solid rgba(2,39,74,0.09)" }}>
-              {fourCs.map((c, i) => {
-                const Icon = FOURC_ICONS[c.iconKey as keyof typeof FOURC_ICONS] || Gem;
-                return (
-                  <motion.div key={c.title} initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ delay: i * 0.1, duration: 0.7, ease: [0.76, 0, 0.24, 1] }} className="flex flex-col gap-5 sm:gap-6 py-8 sm:py-10 px-6 sm:px-7 transition-colors duration-300" style={{ background: "white" }}>
-                    <div className="flex items-start justify-between">
-                      <span className="font-serif text-3xl sm:text-4xl font-light leading-none tabular-nums" style={{ color: "rgba(2,39,74,0.14)" }}>{c.n}</span>
-                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0" style={{ border: "1.5px solid rgba(28,169,201,0.3)", color: "#1CA9C9" }}>
-                        <Icon size={17} strokeWidth={1.4} />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <h4 className="font-serif text-lg sm:text-xl leading-snug" style={{ color: "#02274A" }}>{c.title}</h4>
-                      <p className="text-xs sm:text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.5)" }}>{c.desc}</p>
-                    </div>
-                    <span className="mt-auto block h-px" style={{ width: "28px", background: "linear-gradient(90deg, #1CA9C9, rgba(28,169,201,0.1))" }} />
-                  </motion.div>
-                );
-              })}
-            </div> */}
-
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid lg:grid-cols-2 gap-10 sm:gap-16 items-end mb-12 sm:mb-16 md:mb-20 mt-16">
-              <div className="space-y-4 sm:space-y-5">
-                <motion.p variants={up} className="text-[10px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>{hp?.iftflTagline || "IF→FL Conversion"}</motion.p>
-                <motion.h2 variants={up} className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-none" style={{ color: "#02274A" }}>
-                  {hp?.iftflHeading ? hp.iftflHeading : <>Unlock hidden value<br />in your IF stone.</>}
-                </motion.h2>
-              </div>
-              <motion.div variants={up} className="space-y-5 sm:space-y-6">
-                <p className="text-sm sm:text-base leading-relaxed font-light" style={{ color: "rgba(2,39,74,0.55)" }}>
-                  {hp?.iftflBody || "When a GIA certificate notes specific surface characteristics on an Internally Flawless stone, there is often a viable path to Flawless grade — without leaving the same carat weight bracket."}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                  <Link href="/investment" className="block w-full sm:w-auto">
-                    <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-learn">
-                      {hp?.iftflCtaPrimary || "How It Works"}
-                    </Button>
-                  </Link>
-                  <Link href="/contact" className="block w-full sm:w-auto">
-                    <Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-submit">
-                      {hp?.iftflCtaSecondary || "Submit a GIA Cert →"}
-                    </Button>
-                  </Link>
-                </div>
+            <div className="grid md:grid-cols-2 gap-10 sm:gap-16 items-start mt-20 sm:mt-24 md:mt-32">
+              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="space-y-5 sm:space-y-6">
+                <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em] font-medium" style={{ color: "#1CA9C9" }}>{hp?.manufacturingTagline || "Our Process"}</motion.p>
+                <motion.div variants={up}><div className="w-10 h-px" style={{ background: "#1CA9C9" }} /></motion.div>
+                <motion.p variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+                  {hp?.manufacturingBody || "Most diamond businesses source from wholesalers. We cut and polish in our own manufacturing lab. That's why we can stand behind every stone we sell — and offer services no retailer can."}
+                </motion.p>
               </motion.div>
-            </motion.div>
+              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="flex flex-col gap-6 sm:gap-7">
+                <motion.div variants={up} className="grid grid-cols-3 gap-4">
+                  {processBadges.map(item => (
+                    <div key={item.label} className="flex flex-col gap-1 p-3 sm:p-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      <span className="font-serif text-sm sm:text-base leading-snug text-white">{item.label}</span>
+                      <span className="text-[9px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.35)" }}>{item.sub}</span>
+                    </div>
+                  ))}
+                </motion.div>
+                <motion.div variants={up}>
+                  <Link href="/about">
+                    <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-about-lab">
+                      {hp?.processCta || "About Our Lab →"}
+                    </Button>
+                  </Link>
+                </motion.div>
+              </motion.div>
+            </div>
           </div>
         </section>
 
@@ -806,12 +852,12 @@ const toggleMute = useCallback(() => {
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="p-8 sm:p-10 flex flex-col gap-5" style={{ background: "white" }}>
                 <h3 className="font-serif text-xl sm:text-2xl" style={{ color: "#02274A" }}>{hp?.tradePortalJewellersHeading || "Jewellers and designers"}</h3>
                 <p className="text-sm leading-relaxed flex-1" style={{ color: "rgba(2,39,74,0.55)" }}>{hp?.tradePortalJewellersBody || "Melee sourcing, matched parcels, and memo requests. Register with your ABN — pricing always comes back to you personally by email. No retail pricing, no margins on top of margins."}</p>
-                <Link href="/trade"><Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-enquiry">{hp?.tradePortalJewellersCta || "Trade Enquiry →"}</Button></Link>
+                <Link href="/trade"><Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-enquiry">Trade Enquiry →</Button></Link>
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }} className="p-8 sm:p-10 flex flex-col gap-5" style={{ background: "white" }}>
                 <h3 className="font-serif text-xl sm:text-2xl" style={{ color: "#02274A" }}>{hp?.tradePortalHowHeading || "How we work with jewellers"}</h3>
                 <p className="text-sm leading-relaxed flex-1" style={{ color: "rgba(2,39,74,0.55)" }}>{hp?.tradePortalHowBody || "If a retail customer mentions they're working with a jeweller, we loop that jeweller in rather than transact directly. Our customers without a jeweller stay ours to refer — once they have one, that relationship is theirs."}</p>
-                <Link href="/trade"><Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-account">{hp?.tradePortalHowCta || "Create Trade Account →"}</Button></Link>
+                <Link href="/trade"><Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "46px", padding: "0 1.75rem" }} data-testid="btn-trade-account">Create Trade Account →</Button></Link>
               </motion.div>
             </div>
           </div>
