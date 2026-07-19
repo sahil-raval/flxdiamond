@@ -596,6 +596,18 @@ export default function Home() {
             <ChevronDown size={14} className="animate-bounce" style={{ color: "rgba(28,169,201,0.45)" }} />
           </motion.div>
         </section>
+        {((hp?.marqueeItems?.length ?? 0) > 0) && (
+  <section className="py-3 border-b border-white/5 overflow-hidden" style={{ background: "#011A33" }}>
+    <Marquee duration={22} gap={40} pauseOnHover>
+      {hp!.marqueeItems!.map((item, i) => (
+        <span key={i} className="flex items-center gap-3 shrink-0 text-[8px] uppercase tracking-[0.3em] font-medium" style={{ color: "rgba(28,169,201,0.55)" }}>
+          {item}
+          <span style={{ color: "rgba(255,255,255,0.2)", marginLeft: "8px" }}>•</span>
+        </span>
+      ))}
+    </Marquee>
+  </section>
+)}
 
         {/* ═════ 2. SIGNAL STRIP ═════ */}
         <section className="py-5 border-b border-white/5 overflow-hidden" style={{ background: "#02274A" }}>
@@ -735,6 +747,11 @@ export default function Home() {
                 </motion.div>
               ))}
             </div>
+            {hp?.manufacturingBody && (
+  <motion.p initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="max-w-2xl mt-10 sm:mt-14 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+    {hp.manufacturingBody}
+  </motion.p>
+)}
 <div className="mt-10 sm:mt-14 md:mt-16">
   <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="flex flex-col items-center gap-6 sm:gap-7">
     <motion.div variants={up} className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-4 w-full">
@@ -926,6 +943,18 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
+        {(hp?.ctaSectionHeading || hp?.ctaSectionBody) && (
+  <section className="py-16 sm:py-20 px-4 sm:px-6 text-center" style={{ background: "#02274A" }}>
+    <div className="max-w-3xl mx-auto">
+      <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="font-serif text-3xl sm:text-4xl md:text-5xl mb-5" style={{ color: "rgba(255,255,255,0.9)" }}>
+        {hp?.ctaSectionHeading || "Enquiries handled with discretion."}
+      </motion.h2>
+      <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.1 }} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+        {hp?.ctaSectionBody || "We work exclusively with established trade partners — jewellers, retailers, and serious investors. All enquiries are treated as commercially confidential."}
+      </motion.p>
+    </div>
+  </section>
+)}
       </div>
     </>
   );
