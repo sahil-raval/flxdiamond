@@ -754,7 +754,7 @@ export default function Home() {
 )}
 <div className="mt-10 sm:mt-14 md:mt-16">
   <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="flex flex-col items-center gap-6 sm:gap-7">
-    <motion.div variants={up} className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-4 w-full">
+    <motion.div variants={up} className="grid grid-cols-3 text-center sm:grid-cols-6 gap-2 sm:gap-4 w-full">
       {processBadges.map(item => (
         <div
           key={item.label}
