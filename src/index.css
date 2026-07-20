@@ -145,3 +145,15 @@
   all: initial;
   font-family: system-ui, sans-serif;
 }
+@keyframes flx-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-pause-hover:hover {
+  animation-play-state: paused;
+}
