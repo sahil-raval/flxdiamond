@@ -141,8 +141,8 @@ function FloatTextarea({ label, testId, value, onChange, required }: {
   );
 }
 
-/* ─── Data ───────────────────────────────────────────────────────── */
-const WHO_QUALIFIES = [
+/* ─── Fallback data (used only when Sanity has nothing yet) ──────── */
+const WHO_QUALIFIES_FALLBACK = [
   {
     icon: "◈",
     title: "Diamond Traders",
@@ -164,8 +164,9 @@ const WHO_QUALIFIES = [
     body: "Portfolio buyers and family offices acquiring GIA-certified stones as a hard asset, with full provenance documentation and IF→FL conversion advisory.",
   },
 ];
+const WHO_QUALIFIES_ICONS = ["◈", "◇", "◆", "◉"];
 
-const WHAT_WE_OFFER = [
+const WHAT_WE_OFFER_FALLBACK = [
   {
     number: "01",
     title: "Standing Supply Briefs",
@@ -192,7 +193,7 @@ const WHAT_WE_OFFER = [
   },
 ];
 
-const PROCESS_STEPS = [
+const PROCESS_STEPS_FALLBACK = [
   { step: "01", title: "Submit Application", body: "Complete the trade account form below with your business details and primary sourcing requirements." },
   { step: "02", title: "Qualification Review", body: "We review every application personally. Established trade credentials are verified before access is granted — typically within 2 business days." },
   { step: "03", title: "Account Activation", body: "Approved partners receive access to our full inventory, trade pricing, and a dedicated point of contact." },
@@ -229,6 +230,8 @@ interface SanityTradePage {
   partnerTypes?: { title: string; body: string; tags: string[] }[];
   accessTagline?: string; accessHeading?: string;
   accessFeatures?: { title: string; body: string }[];
+  processTagline?: string; processHeading?: string;
+  processSteps?: { step: string; title: string; body: string }[];
   jewellersHeading?: string; jewellersBody?: string;
   ctaHeading?: string; ctaBody?: string;
 }
@@ -237,6 +240,19 @@ export default function Trade() {
   const { data: sanityTrade } = useSanityQuery<SanityTradePage>(["trade-page"], TRADE_PAGE_QUERY);
   const seo = sanityTrade?.seo;
   const trd = isSanityConfigured ? sanityTrade : null;
+
+  /* ── Sanity-first, hardcoded-fallback data (mirrors Home.tsx pattern) ── */
+  const partnerTypes = isSanityConfigured && trd?.partnerTypes?.length
+    ? trd.partnerTypes.map((p, i) => ({ ...p, icon: WHO_QUALIFIES_ICONS[i % WHO_QUALIFIES_ICONS.length] }))
+    : WHO_QUALIFIES_FALLBACK;
+
+  const accessFeatures = isSanityConfigured && trd?.accessFeatures?.length
+    ? trd.accessFeatures
+    : WHAT_WE_OFFER_FALLBACK;
+
+  const processSteps = isSanityConfigured && trd?.processSteps?.length
+    ? trd.processSteps
+    : PROCESS_STEPS_FALLBACK;
 
   const formRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState({
@@ -366,7 +382,7 @@ export default function Trade() {
                 onMouseEnter={e => (e.currentTarget.style.background = "#1594b0")}
                 onMouseLeave={e => (e.currentTarget.style.background = "#1CA9C9")}
               >
-                Apply for Trade Account
+                {sanityTrade?.heroCta || "Apply for Trade Account"}
               </button>
               <Link href="/diamonds">
                 <button
@@ -388,7 +404,7 @@ export default function Trade() {
                     e.currentTarget.style.color = "#fff";
                   }}
                 >
-                  Browse Inventory
+                  {sanityTrade?.heroSecondaryCta || "Browse Inventory"}
                 </button>
               </Link>
             </motion.div>
@@ -437,7 +453,7 @@ export default function Trade() {
               fontSize: "9px", letterSpacing: "0.55em", textTransform: "uppercase",
               color: "#1CA9C9", marginBottom: "20px", fontWeight: 500,
             }}>
-              Qualification
+              {trd?.partnerTypesTagline || "Qualification"}
             </motion.p>
             <motion.h2 variants={up} style={{
               fontFamily: "'Playfair Display', serif",
@@ -451,7 +467,7 @@ export default function Trade() {
               display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
               gap: "2px", background: "rgba(2,39,74,0.06)",
             }}>
-              {WHO_QUALIFIES.map((q, i) => (
+              {partnerTypes.map((q, i) => (
                 <motion.div key={i} variants={up} style={{
                   background: "#fff", padding: "44px 36px",
                   borderTop: "3px solid transparent",
@@ -460,12 +476,25 @@ export default function Trade() {
                   onMouseEnter={e => (e.currentTarget.style.borderTopColor = "#1CA9C9")}
                   onMouseLeave={e => (e.currentTarget.style.borderTopColor = "transparent")}
                 >
-                  <div style={{ fontSize: "22px", color: "#1CA9C9", marginBottom: "20px" }}>{q.icon}</div>
+                  <div style={{ fontSize: "22px", color: "#1CA9C9", marginBottom: "20px" }}>
+                    {(q as { icon?: string }).icon || WHO_QUALIFIES_ICONS[i % WHO_QUALIFIES_ICONS.length]}
+                  </div>
                   <div style={{
                     fontFamily: "'Playfair Display', serif",
                     fontSize: "20px", color: "#02274A", marginBottom: "14px", fontWeight: 400,
                   }}>{q.title}</div>
                   <p style={{ fontSize: "13px", color: "rgba(2,39,74,0.6)", lineHeight: 1.75 }}>{q.body}</p>
+                  {!!q.tags?.length && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "16px" }}>
+                      {q.tags.map((tag, j) => (
+                        <span key={j} style={{
+                          fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase",
+                          color: "#1CA9C9", border: "1px solid rgba(28,169,201,0.3)",
+                          padding: "4px 10px", fontWeight: 500,
+                        }}>{tag}</span>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -494,7 +523,7 @@ export default function Trade() {
               fontSize: "9px", letterSpacing: "0.55em", textTransform: "uppercase",
               color: "#1CA9C9", marginBottom: "20px", fontWeight: 500,
             }}>
-              Services
+              {trd?.accessTagline || "Services"}
             </motion.p>
             <motion.h2 variants={up} style={{
               fontFamily: "'Playfair Display', serif",
@@ -505,23 +534,25 @@ export default function Trade() {
             </motion.h2>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.06)" }}>
-              {WHAT_WE_OFFER.map((s, i) => (
+              {accessFeatures.map((s, i) => (
                 <motion.div key={i} variants={up} style={{
                   background: "#02274A", padding: "44px 36px",
                   borderBottom: "1px solid rgba(255,255,255,0.06)",
                 }}>
                   <div style={{ fontSize: "10px", letterSpacing: "0.4em", color: "#1CA9C9", marginBottom: "20px", fontWeight: 500 }}>
-                    {s.number}
+                    {(s as { number?: string }).number || String(i + 1).padStart(2, "0")}
                   </div>
                   <div style={{
                     fontFamily: "'Playfair Display', serif",
                     fontSize: "21px", color: "#fff", marginBottom: "16px", fontWeight: 400, lineHeight: 1.2,
                   }}>{s.title}</div>
-                  <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.58)", lineHeight: 1.78, marginBottom: "20px" }}>{s.body}</p>
-                  <p style={{
-                    fontSize: "11px", color: "#1CA9C9", lineHeight: 1.6,
-                    borderLeft: "2px solid rgba(28,169,201,0.3)", paddingLeft: "12px",
-                  }}>{s.detail}</p>
+                  <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.58)", lineHeight: 1.78, marginBottom: (s as { detail?: string }).detail ? "20px" : 0 }}>{s.body}</p>
+                  {!!(s as { detail?: string }).detail && (
+                    <p style={{
+                      fontSize: "11px", color: "#1CA9C9", lineHeight: 1.6,
+                      borderLeft: "2px solid rgba(28,169,201,0.3)", paddingLeft: "12px",
+                    }}>{(s as { detail?: string }).detail}</p>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -563,21 +594,21 @@ export default function Trade() {
               fontSize: "9px", letterSpacing: "0.55em", textTransform: "uppercase",
               color: "#1CA9C9", marginBottom: "20px", fontWeight: 500,
             }}>
-              How It Works
+              {trd?.processTagline || "How It Works"}
             </motion.p>
             <motion.h2 variants={up} style={{
               fontFamily: "'Playfair Display', serif",
               fontSize: "clamp(30px,4vw,52px)", fontWeight: 400,
               color: "#02274A", marginBottom: "64px", lineHeight: 1.1,
             }}>
-              The Path to Trade Access
+              {trd?.processHeading || "The Path to Trade Access"}
             </motion.h2>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "32px" }}>
-              {PROCESS_STEPS.map((p, i) => (
+              {processSteps.map((p, i) => (
                 <motion.div key={i} variants={up} style={{ position: "relative" }}>
                   {/* Connector line */}
-                  {i < PROCESS_STEPS.length - 1 && (
+                  {i < processSteps.length - 1 && (
                     <div style={{
                       position: "absolute", top: "22px", left: "calc(100% + 8px)",
                       width: "calc(100% - 16px)", height: "1px",
