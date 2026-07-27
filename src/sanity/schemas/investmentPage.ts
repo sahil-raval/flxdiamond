@@ -146,6 +146,58 @@ export default defineType({
       initialValue: "Whether you hold an IF stone or are looking to acquire an FL-grade asset, start with a conversation. No obligation, no salesmanship.",
     }),
     defineField({
+  name: "opportunityTagline",
+  title: "Opportunity Section Tagline",
+  type: "string",
+  initialValue: "The Arbitrage",
+}),
+defineField({
+  name: "opportunityHeading",
+  title: "Opportunity Section Heading",
+  type: "string",
+  initialValue: "The IF → FL Opportunity.",
+}),
+defineField({
+  name: "opportunityBody1",
+  title: "Opportunity Paragraph 1",
+  type: "text",
+  rows: 3,
+  initialValue: "GIA-certified FL diamonds command a material premium over IF at commercial scale. The cost of conversion (regrind, GIA re-submission, and handling) is predictable and substantially below that premium in the majority of viable cases.",
+}),
+defineField({
+  name: "opportunityBody2",
+  title: "Opportunity Paragraph 2",
+  type: "text",
+  rows: 3,
+  initialValue: "For a buyer who acquires IF at a market rate, commissions conversion, and receives back a FL-certified stone, the capital gain is structurally embedded in the process. GIA certification makes the outcome verifiable and the exit path straightforward.",
+}),
+defineField({
+  name: "opportunityStats",
+  title: "Opportunity Stats Table",
+  type: "array",
+  of: [{
+    type: "object",
+    fields: [
+      { name: "label", type: "string", title: "Row Label" },
+      { name: "value", type: "string", title: "Row Value" },
+    ],
+    preview: { select: { title: "label", subtitle: "value" } },
+  }],
+  initialValue: [
+    { label: "Premium of FL over IF (1ct, D–F colour)", value: "15–35%" },
+    { label: "Typical conversion cost as % of FL premium", value: "< 30%" },
+    { label: "GIA certification: objective exit benchmark", value: "Yes" },
+    { label: "Minimum engagement (AUD)", value: "$50,000" },
+    { label: "Typical hold period", value: "12–36 months" },
+  ],
+}),
+defineField({
+  name: "opportunityDisclaimer",
+  title: "Opportunity Stats Disclaimer",
+  type: "string",
+  initialValue: "All figures are indicative and vary by stone parameters. Past performance does not guarantee future returns.",
+}),
+    defineField({
       name: "pillars",
       title: "Pillars (Why FL diamonds hold value)",
       type: "array",

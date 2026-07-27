@@ -685,6 +685,13 @@ interface SanityInvestmentPage {
   ctaHeading?: string; ctaBody?: string;
   galleryImageUrls?: string[];
   conversionPanels?: SanityConversionPanel[];
+  casestudiesTagline?: string;
+  casestudiesHeading?: string;
+  casestudiesSubtext?: string;
+  opportunityTagline?: string; opportunityHeading?: string;
+  opportunityBody1?: string; opportunityBody2?: string;
+  opportunityStats?: { label: string; value: string }[];
+  opportunityDisclaimer?: string;
 }
 
 export default function Investment() {
@@ -805,27 +812,16 @@ export default function Investment() {
           >
             <div className="space-y-4">
               <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em]" style={{ color: "#1CA9C9" }}>
-                Documented Results
-              </motion.p>
-              <motion.h2
-                variants={up}
-                className="font-serif leading-tight"
-                style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", color: "rgba(255,255,255,0.88)" }}
-              >
-                Before & after.<br />
-                <span style={{ color: "rgba(255,255,255,0.25)" }}>Three stones, three outcomes.</span>
-              </motion.h2>
+  {inv?.casestudiesTagline || "Documented Results"}
+</motion.p>
+<motion.h2 variants={up} className="font-serif leading-tight" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", color: "rgba(255,255,255,0.88)" }}>
+  {inv?.casestudiesHeading ? inv.casestudiesHeading : (<>Before & after.<br /><span style={{ color: "rgba(255,255,255,0.25)" }}>Three stones, three outcomes.</span></>)}
+</motion.h2>
               <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
             </div>
-            <motion.p
-              variants={up}
-              className="text-sm leading-relaxed"
-              style={{ color: "rgba(255,255,255,0.38)" }}
-            >
-              Each card shows the exact GIA Comments language from the IF certificate, the specific surface
-              characteristic removed, and the verified FL outcome with its indicative value uplift.
-              All stones were independently recertified by GIA with no pre-disclosure of the conversion.
-            </motion.p>
+            <motion.p variants={up} className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
+  {inv?.casestudiesSubtext || "Each card shows the exact GIA Comments language from the IF certificate, the specific surface characteristic removed, and the verified FL outcome with its indicative value uplift. All stones were independently recertified by GIA with no pre-disclosure of the conversion."}
+</motion.p>
           </motion.div>
 
           {/* Stone cards */}
@@ -854,63 +850,37 @@ export default function Investment() {
       <section className="py-20 md:py-28 px-6" style={{ background: "white" }}>
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-start">
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="space-y-5 md:space-y-6"
-          >
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="space-y-5 md:space-y-6">
             <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em]" style={{ color: "#1CA9C9" }}>
-              The Arbitrage
+              {inv?.opportunityTagline || "The Arbitrage"}
             </motion.p>
-            <motion.h2
-              variants={up}
-              className="font-serif leading-tight"
-              style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", color: "#02274A" }}
-            >
-              The IF → FL<br />
-              <span style={{ color: "rgba(2,39,74,0.28)" }}>Opportunity.</span>
+            <motion.h2 variants={up} className="font-serif leading-tight" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", color: "#02274A" }}>
+              {inv?.opportunityHeading ? inv.opportunityHeading : (<>The IF → FL<br /><span style={{ color: "rgba(2,39,74,0.28)" }}>Opportunity.</span></>)}
             </motion.h2>
             <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
             <motion.p variants={up} className="text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.55)" }}>
-              GIA-certified FL diamonds command a material premium over IF at commercial scale.
-              The cost of conversion (regrind, GIA re-submission, and handling) is predictable
-              and substantially below that premium in the majority of viable cases.
+              {inv?.opportunityBody1 || "GIA-certified FL diamonds command a material premium over IF at commercial scale. The cost of conversion (regrind, GIA re-submission, and handling) is predictable and substantially below that premium in the majority of viable cases."}
             </motion.p>
             <motion.p variants={up} className="text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.55)" }}>
-              For a buyer who acquires IF at a market rate, commissions conversion, and receives back
-              a FL-certified stone, the capital gain is structurally embedded in the process.
-              GIA certification makes the outcome verifiable and the exit path straightforward.
+              {inv?.opportunityBody2 || "For a buyer who acquires IF at a market rate, commissions conversion, and receives back a FL-certified stone, the capital gain is structurally embedded in the process. GIA certification makes the outcome verifiable and the exit path straightforward."}
             </motion.p>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="space-y-4"
-          >
-            {[
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="space-y-4">
+            {(inv?.opportunityStats?.length ? inv.opportunityStats : [
               { label: "Premium of FL over IF (1ct, D–F colour)", value: "15–35%" },
               { label: "Typical conversion cost as % of FL premium", value: "< 30%" },
               { label: "GIA certification: objective exit benchmark", value: "Yes" },
               { label: "Minimum engagement (AUD)", value: "$50,000" },
               { label: "Typical hold period", value: "12–36 months" },
-            ].map((row) => (
-              <motion.div
-                key={row.label}
-                variants={up}
-                className="flex items-baseline justify-between gap-6 py-4 border-b"
-                style={{ borderColor: "rgba(2,39,74,0.08)" }}
-              >
+            ]).map((row) => (
+              <motion.div key={row.label} variants={up} className="flex items-baseline justify-between gap-6 py-4 border-b" style={{ borderColor: "rgba(2,39,74,0.08)" }}>
                 <span className="text-[11px] leading-snug" style={{ color: "rgba(2,39,74,0.4)" }}>{row.label}</span>
                 <span className="text-sm shrink-0 tabular-nums" style={{ color: "#02274A" }}>{row.value}</span>
               </motion.div>
             ))}
             <p className="text-[9px] mt-3" style={{ color: "rgba(2,39,74,0.3)" }}>
-              All figures are indicative and vary by stone parameters. Past performance does not guarantee future returns.
+              {inv?.opportunityDisclaimer || "All figures are indicative and vary by stone parameters. Past performance does not guarantee future returns."}
             </p>
           </motion.div>
         </div>
@@ -945,17 +915,22 @@ export default function Investment() {
             variants={stagger}
             className="grid md:grid-cols-3 gap-8"
           >
-            {PILLARS.map((p) => (
-              <motion.div
-                key={p.title}
-                variants={up}
-                className="p-7 md:p-8 space-y-4 border-t-2"
-                style={{ background: "rgba(255,255,255,0.03)", borderTopColor: "#1CA9C9" }}
-              >
-                <h3 className="font-serif text-xl" style={{ color: "rgba(255,255,255,0.88)" }}>{p.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{p.body}</p>
-              </motion.div>
-            ))}
+            {(inv?.assetClassPoints?.length ? inv.assetClassPoints : PILLARS).map((p) => (
+  <motion.div
+    key={p.title}
+    variants={up}
+    className="p-7 md:p-8 space-y-4 border-t-2"
+    style={{ background: "rgba(255,255,255,0.03)", borderTopColor: "#1CA9C9" }}
+  >
+    <h3 className="font-serif text-xl" style={{ color: "rgba(255,255,255,0.88)" }}>{p.title}</h3>
+    <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{p.body}</p>
+    {!!(p as { tag?: string }).tag && (
+      <p className="text-[9px] uppercase tracking-widest pt-3" style={{ color: "rgba(28,169,201,0.7)", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        {(p as { tag?: string }).tag}
+      </p>
+    )}
+  </motion.div>
+))}
           </motion.div>
         </div>
       </section>
