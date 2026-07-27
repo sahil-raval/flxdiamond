@@ -275,6 +275,8 @@ defineField({
         { type: "end", step: "FL", tag: "Value uplift: 15–35%", title: "Your Stone.\nReborn Flawless.", body: "The stone is independently resubmitted to GIA. A new Flawless certificate is issued — same carat bracket, verifiable, permanent, globally recognised.", imgAlt: "FL diamond — result" },
       ],
     }),
+    defineField({ name: "ctaButtonPrimary", title: "CTA Primary Button Label", type: "string", initialValue: "Begin a Conversation" }),
+defineField({ name: "ctaButtonSecondary", title: "CTA Secondary Button Label", type: "string", initialValue: "Common Questions" }),
   ],
   preview: { prepare: () => ({ title: "Investment Page" }) },
 });

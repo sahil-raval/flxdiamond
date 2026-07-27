@@ -692,6 +692,8 @@ interface SanityInvestmentPage {
   opportunityBody1?: string; opportunityBody2?: string;
   opportunityStats?: { label: string; value: string }[];
   opportunityDisclaimer?: string;
+  ctaButtonPrimary?: string;
+  ctaButtonSecondary?: string;
 }
 
 export default function Investment() {
@@ -964,7 +966,7 @@ export default function Investment() {
                 className="w-full sm:w-auto text-[10px] uppercase tracking-[0.3em] text-white transition-opacity hover:opacity-80"
                 style={{ background: "#1CA9C9", height: "50px", padding: "0 2.25rem", border: "none" }}
               >
-                Begin a Conversation
+                {inv?.ctaButtonPrimary || "Begin a Conversation"}
               </button>
             </Link>
             <Link href="/faq" data-testid="btn-investment-faq">
@@ -978,7 +980,7 @@ export default function Investment() {
                   background: "transparent",
                 }}
               >
-                Common Questions
+                {inv?.ctaButtonSecondary || "Common Questions"}
               </button>
             </Link>
           </motion.div>

@@ -183,7 +183,6 @@ export const INVESTMENT_PAGE_QUERY = `*[_type == "investmentPage"][0]{
   profitSplitBody,
   ctaHeading,
   ctaBody,
-  ctaBody,
   opportunityTagline,
   opportunityHeading,
   opportunityBody1,
@@ -191,7 +190,8 @@ export const INVESTMENT_PAGE_QUERY = `*[_type == "investmentPage"][0]{
   opportunityStats,
   opportunityDisclaimer,
   pillars, 
-  pillars,
+  ctaButtonPrimary
+  ctaButtonSecondary
   processTagline,
   processHeading,
   processSteps,
