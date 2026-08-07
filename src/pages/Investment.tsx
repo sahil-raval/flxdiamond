@@ -699,9 +699,8 @@ interface SanityInvestmentPage {
 export default function Investment() {
   const { data: sanityInvestment } = useSanityQuery<SanityInvestmentPage>(["investment-page"], INVESTMENT_PAGE_QUERY);
   const { data: sanityStones } = useSanityQuery<SanityStone[]>(["conversion-stones"], CONVERSION_STONES_QUERY);
-
-  const seo = sanityInvestment?.seo;
   const inv = isSanityConfigured ? sanityInvestment : null;
+  const seo = inv?.seo;
 
   const stones = isSanityConfigured && sanityStones && sanityStones.length > 0
     ? sanityStones.map((s) => ({
@@ -738,10 +737,10 @@ export default function Investment() {
       {/* ── Hero ── */}
       <section className="relative overflow-hidden pt-28 md:pt-40 pb-20 md:pb-28 px-8 md:px-14 lg:px-20" style={{ background: "#02274A" }}>
         {/* Sanity CMS hero image — optional background */}
-        {sanityInvestment?.heroImageUrl && (
+        {inv?.heroImageUrl && (
           <>
             <img
-              src={sanityInvestment.heroImageUrl}
+              src={inv.heroImageUrl}
               alt=""
               aria-hidden="true"
               className="absolute inset-0 w-full h-full object-cover"
@@ -769,21 +768,47 @@ export default function Investment() {
         >
           <div className="space-y-5 md:space-y-6">
             <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em] font-medium" style={{ color: "#1CA9C9" }}>
-              {sanityInvestment?.heroTagline || "Investment Advisory"}
+              {inv?.heroTagline || "Investment Advisory"}
             </motion.p>
             <motion.h1
               variants={up}
               className="font-serif leading-tight"
               style={{ fontSize: "clamp(2.4rem, 6vw, 5rem)", color: "rgba(255,255,255,0.9)" }}
             >
-              {sanityInvestment?.heroHeading || "Diamonds as a Store of Value."}
+              {inv?.heroHeading || "Diamonds as a Store of Value."}
             </motion.h1>
             <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
           </div>
           <motion.div variants={up} className="space-y-4">
             <p className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.42)" }}>
-              {sanityInvestment?.heroSubtext || "FL-grade diamonds at meaningful carat weights have historically functioned as a portable, non-correlated store of value. The IF→FL conversion represents a specific, documentable arbitrage: buy IF, convert to FL, hold or sell at FL pricing."}
+              {inv?.heroSubtext || "FL-grade diamonds at meaningful carat weights have historically functioned as a portable, non-correlated store of value. The IF→FL conversion represents a specific, documentable arbitrage: buy IF, convert to FL, hold or sell at FL pricing."}
             </p>
+            {(inv?.heroCta || inv?.heroSecondaryCta) && (
+              <div className="flex flex-wrap gap-4 pt-2">
+                <Link href="/contact">
+                  <button
+                    className="text-[10px] uppercase tracking-[0.3em] text-white transition-opacity hover:opacity-80"
+                    style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem", border: "none" }}
+                  >
+                    {inv?.heroCta || "Book a Consultation"}
+                  </button>
+                </Link>
+                <Link href="/inventory">
+                  <button
+                    className="text-[10px] uppercase tracking-[0.3em] transition-all hover:border-white/30"
+                    style={{
+                      height: "48px",
+                      padding: "0 2rem",
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      color: "rgba(255,255,255,0.7)",
+                      background: "transparent",
+                    }}
+                  >
+                    {inv?.heroSecondaryCta || "Browse IF→FL Inventory"}
+                  </button>
+                </Link>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       </section>

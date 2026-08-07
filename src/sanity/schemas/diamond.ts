@@ -4,6 +4,9 @@ export default defineType({
   name: "diamond",
   title: "Diamond",
   type: "document",
+  groups: [
+    { name: "trade", title: "Trade Data" },
+  ],
   fields: [
     defineField({
       name: "stockId",
@@ -100,6 +103,58 @@ export default defineType({
       title: "Certificate Number",
       type: "string",
     }),
+
+    /* ── Trade Data ── */
+    defineField({ name: "rapPrice", title: "Rap List Price ($/ct)", type: "number", group: "trade" }),
+    defineField({
+      name: "discountPercent",
+      title: "Discount off Rap (%)",
+      type: "number",
+      description: "Negative = discount, positive = premium over Rap",
+      group: "trade",
+    }),
+    defineField({ name: "pricePerCarat", title: "Price per Carat (AUD)", type: "number", group: "trade" }),
+    defineField({
+      name: "totalPrice",
+      title: "Total Price (AUD)",
+      type: "number",
+      description: "Leave blank to show POA on the site",
+      group: "trade",
+    }),
+    defineField({ name: "tablePercent", title: "Table %", type: "number", group: "trade" }),
+    defineField({ name: "depthPercent", title: "Depth %", type: "number", group: "trade" }),
+    defineField({ name: "crownAngle", title: "Crown Angle (°)", type: "number", group: "trade" }),
+    defineField({ name: "pavilionAngle", title: "Pavilion Angle (°)", type: "number", group: "trade" }),
+    defineField({ name: "lengthWidthRatio", title: "Length/Width Ratio", type: "number", group: "trade" }),
+    defineField({
+      name: "origin",
+      title: "Origin",
+      type: "string",
+      description: "e.g. Botswana, India, Lab (IGI)",
+      group: "trade",
+    }),
+    defineField({
+      name: "heartsAndArrows",
+      title: "Hearts & Arrows",
+      type: "string",
+      options: { list: [{ title: "Yes", value: "Y" }, { title: "No", value: "N" }], layout: "radio" },
+      group: "trade",
+    }),
+    defineField({
+      name: "shade",
+      title: "Shade",
+      type: "string",
+      description: "e.g. Brownish, Greenish — leave blank if none",
+      group: "trade",
+    }),
+    defineField({
+      name: "location",
+      title: "Stone Location",
+      type: "string",
+      description: "Physical location, e.g. Mumbai, Antwerp",
+      group: "trade",
+    }),
+
     defineField({
       name: "image",
       title: "Diamond Image",

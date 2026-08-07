@@ -3,7 +3,7 @@ import { useState, useMemo, useRef } from "react";
   import emailjs from "@emailjs/browser";
   import { useSanityQuery } from "@/lib/useSanityData";
   import { isSanityConfigured } from "@/lib/sanity";
-  import { DIAMONDS_QUERY } from "@/lib/sanity-queries";
+  import { DIAMONDS_PAGE_QUERY, DIAMONDS_QUERY } from "@/lib/sanity-queries";
   import { Link, useLocation } from "wouter";
   import { Button } from "@/components/ui/button";
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -1207,32 +1207,66 @@ import { useState, useMemo, useRef } from "react";
     if (key === "color")      return out.sort((a, b) => COLOR_ORDER.indexOf(a.color) - COLOR_ORDER.indexOf(b.color));
     return out;
   }
-  
   interface SanityDiamond {
-    _id: string;
-    stockId: string;
-    type: "natural" | "lab" | "loose";
-    shape: string;
-    carat: number;
-    color: string;
-    clarity: string;
-    cut: string;
-    polish: string;
-    symmetry: string;
-    fluorescence: string;
-    measurements: string;
-    certification: "GIA" | "IGI" | "None";
-    certificateNumber?: string;
-    imageUrl?: string;
-    images?: string[];
-    videoUrl?: string;
-    giaReportUrl?: string;
-    giaReportPdfUrl?: string;
-  }
+  _id: string;
+  stockId: string;
+  type: "natural" | "lab" | "loose";
+  shape: string;
+  carat: number;
+  color: string;
+  clarity: string;
+  cut: string;
+  polish: string;
+  symmetry: string;
+  fluorescence: string;
+  measurements: string;
+  certification: "GIA" | "IGI" | "None";
+  certificateNumber?: string;
+  imageUrl?: string;
+  images?: string[];
+  videoUrl?: string;
+  giaReportUrl?: string;
+  giaReportPdfUrl?: string;
+  /* ── Trade Data ── */
+  rap?: number;
+  listedDisc?: number;
+  listedPrCt?: number;
+  listedAmt?: number;
+  tableP?: number;
+  depth?: number;
+  ca?: number;
+  pa?: number;
+  ratio?: number;
+  origin?: string;
+  ha?: string;
+  shade?: string;
+  loc?: string;
+}
+  interface SanityDiamondsPage {
+  seo?: { metaTitle?: string; metaDescription?: string; [k: string]: any };
+  heroTagline?: string;
+  heroHeading?: string;
+  heroSubtext?: string;
+  tabLabelNatural?: string;
+  tabLabelLab?: string;
+  tabLabelLoose?: string;
+  tabLabelCustom?: string;
+  trustStripItems?: { icon?: string; label: string; sub: string }[];
+  looseTrustStripItems?: { icon?: string; label: string; sub: string }[];
+  looseBannerHeading?: string;
+  looseBannerBody?: string;
+  customTagline?: string;
+  customHeading?: string;
+  customBody?: string;
+  customCtaPrimary?: string;
+  customCtaSecondary?: string;
+}
 
   /* ── Main Page ──────────────────────────────────────────── */
   export default function Diamonds() {
     const { data: sanityDiamonds } = useSanityQuery<SanityDiamond[]>(["diamonds"], DIAMONDS_QUERY);
+    const { data: sanityDiamondsPage } = useSanityQuery<SanityDiamondsPage>(["diamonds-page"], DIAMONDS_PAGE_QUERY);
+    const inv = isSanityConfigured ? sanityDiamondsPage : null;
 
     const activeDiamonds: Diamond[] = isSanityConfigured && sanityDiamonds && sanityDiamonds.length > 0
       ? sanityDiamonds.map((d, i) => ({
@@ -1256,6 +1290,19 @@ import { useState, useMemo, useRef } from "react";
           giaReportPdfUrl: d.giaReportPdfUrl || undefined,
           certification: d.certification || "GIA",
           certificateNumber: d.certificateNumber || undefined,
+          rap: d.rap ?? undefined,
+          listedDisc: d.listedDisc ?? undefined,
+          listedPrCt: d.listedPrCt ?? undefined,
+          listedAmt: d.listedAmt ?? undefined,
+          tableP: d.tableP ?? undefined,
+          depth: d.depth ?? undefined,
+          ca: d.ca ?? undefined,
+          pa: d.pa ?? undefined,
+          ratio: d.ratio ?? undefined,
+          origin: d.origin || undefined,
+          ha: d.ha || undefined,
+          shade: d.shade || undefined,
+          loc: d.loc || undefined,
         }))
       : DIAMONDS;
 
@@ -1325,16 +1372,15 @@ import { useState, useMemo, useRef } from "react";
         <div className="pt-28 md:pt-40 pb-10 px-8 md:px-14 lg:px-20" style={{ background: "#02274A" }}>
           <div className="max-w-7xl mx-auto">
             <p className="text-[10px] uppercase tracking-[0.45em] mb-4 font-medium" style={{ color: "#1CA9C9" }}>
-              GIA-Certified Trade Inventory
+              {inv?.heroTagline || "GIA-Certified Trade Inventory"}
             </p>
             <h1 className="font-serif text-4xl md:text-5xl text-white mb-3 leading-tight">
-              Diamond Collection
+              {inv?.heroHeading || "Diamond Collection"}
             </h1>
             <div className="w-10 h-px my-4" style={{ background: "#1CA9C9" }} />
             <p className="text-white/45 text-sm max-w-xl leading-relaxed font-light">
-              Natural and lab-grown diamonds at verified trade pricing. Every stone GIA-certified.
-              IF→FL conversion assessments available at no cost.
-            </p>
+              {inv?.heroSubtext || "Natural and lab-grown diamonds at verified trade pricing. Every stone GIA-certified. IF→FL conversion assessments available at no cost."}
+            </p>  
           </div>
         </div>
   
@@ -1342,7 +1388,12 @@ import { useState, useMemo, useRef } from "react";
         <div style={{ background: "#02274A", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="max-w-7xl mx-auto px-8 md:px-14 lg:px-20 flex overflow-x-auto">
             {(["natural","lab","loose","custom"] as Category[]).map(cat => {
-              const labels = { natural:"Natural Diamonds", lab:"Lab-Grown Diamonds", loose:"Loose Diamonds", custom:"Customised" };
+              const labels = {
+                natural: inv?.tabLabelNatural || "Natural Diamonds",
+                lab: inv?.tabLabelLab || "Lab-Grown Diamonds",
+                loose: inv?.tabLabelLoose || "Loose Diamonds",
+                custom: inv?.tabLabelCustom || "Customised",
+              };
               const active = category === cat;
               return (
                 <button
@@ -1579,25 +1630,28 @@ import { useState, useMemo, useRef } from "react";
                   </svg>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.45em] mb-3 font-medium" style={{ color: "#1CA9C9" }}>Bespoke Sourcing</p>
-                  <h2 className="font-serif text-3xl text-white mb-4">Describe exactly what you need.</h2>
-                  <p className="text-white/40 text-sm leading-relaxed">
-                    We source to specification — carat, shape, colour, clarity, origin.
-                    Natural and lab-grown. Every brief is handled personally and confidentially.
-                  </p>
+                  <p className="text-[10px] uppercase tracking-[0.45em] mb-3 font-medium" style={{ color: "#1CA9C9" }}>
+  {inv?.customTagline || "Bespoke Sourcing"}
+</p>
+<h2 className="font-serif text-3xl text-white mb-4">
+  {inv?.customHeading || "Describe exactly what you need."}
+</h2>
+<p className="text-white/40 text-sm leading-relaxed">
+  {inv?.customBody || "We source to specification — carat, shape, colour, clarity, origin. Natural and lab-grown. Every brief is handled personally and confidentially."}
+</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
                   <Link href="/contact">
                     <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90"
-                      style={{ background:"#1CA9C9", height:"48px", padding:"0 2rem" }} data-testid="btn-custom-enquiry">
-                      Submit a Brief
-                    </Button>
+  style={{ background:"#1CA9C9", height:"48px", padding:"0 2rem" }} data-testid="btn-custom-enquiry">
+  {inv?.customCtaPrimary || "Submit a Brief"}
+</Button>
                   </Link>
                   <Link href="/services">
                     <Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-white/10"
-                      style={{ borderColor:"rgba(255,255,255,0.2)", color:"rgba(255,255,255,0.7)", height:"48px", padding:"0 2rem" }}>
-                      View Our Services
-                    </Button>
+  style={{ borderColor:"rgba(255,255,255,0.2)", color:"rgba(255,255,255,0.7)", height:"48px", padding:"0 2rem" }}>
+  {inv?.customCtaSecondary || "View Our Services"}
+</Button>
                   </Link>
                 </div>
               </motion.div>
@@ -1619,13 +1673,11 @@ import { useState, useMemo, useRef } from "react";
                   </div>
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.35em] font-semibold mb-1.5" style={{ color: "rgba(255,255,255,0.7)" }}>
-                      Loose Diamonds — Sold Without Grading Reports
-                    </p>
-                    <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
-                      These stones are available to the trade as uncertified inventory. Weights and grades are assessed in-house.
-                      Independent GIA or IGI certification can be arranged prior to purchase on request.
-                      Stones range from sub-carat melee to exceptional large specimens up to 20ct.
-                    </p>
+  {inv?.looseBannerHeading || "Loose Diamonds — Sold Without Grading Reports"}
+</p>
+<p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>
+  {inv?.looseBannerBody || "These stones are available to the trade as uncertified inventory. Weights and grades are assessed in-house. Independent GIA or IGI certification can be arranged prior to purchase on request. Stones range from sub-carat melee to exceptional large specimens up to 20ct."}
+</p>
                   </div>
                 </div>
 
@@ -1634,20 +1686,20 @@ import { useState, useMemo, useRef } from "react";
                   className="grid grid-cols-2 md:grid-cols-4 gap-px mb-8"
                   style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}
                 >
-                  {[
-                    { icon: "◈", label: "Trade Pricing",        sub: "No retail margin, direct to trade" },
-                    { icon: "⬡", label: "In-House Assessment",  sub: "All grades verified by our gemologists" },
-                    { icon: "◎", label: "Cert on Request",      sub: "GIA/IGI grading available pre-purchase" },
-                    { icon: "✦", label: "Up to 20ct",           sub: "Large & parcel lots available" },
-                  ].map(t => (
-                    <div key={t.label} className="flex items-start gap-3 p-4" style={{ background:"#010D1C" }}>
-                      <span className="text-base mt-0.5 shrink-0" style={{ color: "rgba(255,255,255,0.4)" }}>{t.icon}</span>
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.25em] font-semibold text-white">{t.label}</p>
-                        <p className="text-[9px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>{t.sub}</p>
-                      </div>
-                    </div>
-                  ))}
+                  {(inv?.looseTrustStripItems?.length ? inv.looseTrustStripItems : [
+  { icon: "◈", label: "Trade Pricing", sub: "No retail margin, direct to trade" },
+  { icon: "⬡", label: "In-House Assessment", sub: "All grades verified by our gemologists" },
+  { icon: "◎", label: "Cert on Request", sub: "GIA/IGI grading available pre-purchase" },
+  { icon: "✦", label: "Up to 20ct", sub: "Large & parcel lots available" },
+]).map((t: any) => (
+  <div key={t.label} className="flex items-start gap-3 p-4" style={{ background:"#010D1C" }}>
+    <span className="text-base mt-0.5 shrink-0" style={{ color: "rgba(255,255,255,0.4)" }}>{t.icon}</span>
+    <div>
+      <p className="text-[10px] uppercase tracking-[0.25em] font-semibold text-white">{t.label}</p>
+      <p className="text-[9px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>{t.sub}</p>
+    </div>
+  </div>
+))}
                 </div>
 
                 {/* Active filter chips */}
@@ -1785,24 +1837,24 @@ import { useState, useMemo, useRef } from "react";
                   className="grid grid-cols-2 md:grid-cols-4 gap-px mb-8"
                   style={{ border: "1px solid rgba(28,169,201,0.12)", background: "rgba(28,169,201,0.06)" }}
                 >
-                  {[
-                    { img: "/gia-logo.png", icon: null,  label: "GIA Certified",    sub: "Every stone independently graded" },
-                    { img: null, icon: "◈",               label: "Trade Pricing",    sub: "No retail margin, direct to trade" },
-                    { img: null, icon: "⬡",               label: "IF→FL Conversion", sub: "Free viability assessment" },
-                    { img: null, icon: "◎",               label: "Discretion",       sub: "White-label sourcing available" },
-                  ].map(t => (
-                    <div key={t.label} className="flex items-start gap-3 p-4" style={{ background:"#010D1C" }}>
-                      {t.img ? (
-                        <img src={t.img} alt="GIA" className="shrink-0 mt-0.5" style={{ width:"24px", height:"24px", objectFit:"contain", opacity:1, mixBlendMode:"screen" }} />
-                      ) : (
-                        <span className="text-base mt-0.5 shrink-0" style={{ color: "#1CA9C9" }}>{t.icon}</span>
-                      )}
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.25em] font-semibold text-white">{t.label}</p>
-                        <p className="text-[9px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>{t.sub}</p>
-                      </div>
-                    </div>
-                  ))}
+                  {(inv?.trustStripItems?.length ? inv.trustStripItems : [
+  { img: "/gia-logo.png", icon: null, label: "GIA Certified", sub: "Every stone independently graded" },
+  { img: null, icon: "◈", label: "Trade Pricing", sub: "No retail margin, direct to trade" },
+  { img: null, icon: "⬡", label: "IF→FL Conversion", sub: "Free viability assessment" },
+  { img: null, icon: "◎", label: "Discretion", sub: "White-label sourcing available" },
+]).map((t: any) => (
+  <div key={t.label} className="flex items-start gap-3 p-4" style={{ background:"#010D1C" }}>
+    {t.img || !t.icon ? (
+      <img src={t.img || "/gia-logo.png"} alt="GIA" className="shrink-0 mt-0.5" style={{ width:"24px", height:"24px", objectFit:"contain", opacity:1, mixBlendMode:"screen" }} />
+    ) : (
+      <span className="text-base mt-0.5 shrink-0" style={{ color: "#1CA9C9" }}>{t.icon}</span>
+    )}
+    <div>
+      <p className="text-[10px] uppercase tracking-[0.25em] font-semibold text-white">{t.label}</p>
+      <p className="text-[9px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>{t.sub}</p>
+    </div>
+  </div>
+))}
                 </div>
   
                 {/* Active filter chips */}

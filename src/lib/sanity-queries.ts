@@ -190,8 +190,8 @@ export const INVESTMENT_PAGE_QUERY = `*[_type == "investmentPage"][0]{
   opportunityStats,
   opportunityDisclaimer,
   pillars, 
-  ctaButtonPrimary
-  ctaButtonSecondary
+  ctaButtonPrimary,
+  ctaButtonSecondary,
   processTagline,
   processHeading,
   processSteps,
@@ -293,7 +293,39 @@ export const DIAMONDS_QUERY = `*[_type == "diamond" && available != false] | ord
   "videoUrl": video.asset->url,
   giaReportUrl,
   "giaReportPdfUrl": giaReportPdf.asset->url,
-  featured
+  featured,
+  "rap": rapPrice,
+  "listedDisc": discountPercent,
+  "listedPrCt": pricePerCarat,
+  "listedAmt": totalPrice,
+  "tableP": tablePercent,
+  "depth": depthPercent,
+  "ca": crownAngle,
+  "pa": pavilionAngle,
+  "ratio": lengthWidthRatio,
+  origin,
+  "ha": heartsAndArrows,
+  shade,
+  "loc": location
+}`;
+export const DIAMONDS_PAGE_QUERY = `*[_type == "diamondsPage"][0]{
+  ${SEO_PROJECTION},
+  heroTagline,
+  heroHeading,
+  heroSubtext,
+  tabLabelNatural,
+  tabLabelLab,
+  tabLabelLoose,
+  tabLabelCustom,
+  trustStripItems,
+  looseTrustStripItems,
+  looseBannerHeading,
+  looseBannerBody,
+  customTagline,
+  customHeading,
+  customBody,
+  customCtaPrimary,
+  customCtaSecondary
 }`;
 
 export const FEATURED_DIAMONDS_QUERY = `*[_type == "diamond" && featured == true && available != false][0...6] | order(carat desc){
