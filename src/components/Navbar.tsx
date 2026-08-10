@@ -192,12 +192,12 @@ export function Navbar() {
 
   const links = [
     { href: "/diamonds",   label: "Collection" },
-    { href: "/services",   label: "Expertise" },
-    { href: "/investment", label: "IF to FL" },
+    { href: "/expertise",   label: "Expertise" },
+    { href: "/if-to-fl", label: "IF to FL" },
     { href: "/about",      label: "About" },
     { href: "/trade",        label: "Trade" },
     { href: "/journal",    label: "Journal" },
-    { href: "/contact",    label: "Talk to us" },
+    { href: "/talk-to-us",    label: "Talk to us" },
   ];
 
   const solid = !isHome || scrolled;

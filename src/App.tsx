@@ -1,15 +1,15 @@
 import { lazy, Suspense } from "react";
 import { Layout } from "@/components/Layout";
 import Home from "@/pages/Home";
-import Diamonds from "@/pages/Diamonds";
+import Diamonds from "@/pages/Collection";
 import Jewellery from "@/pages/Jewellery";
 import Trade from "@/pages/Trade";
-import Investment from "@/pages/Investment";
+import Investment from "@/pages/if-to-fl";
 import Journal from "@/pages/Journal";
 import ArticleDetail from "@/pages/ArticleDetail";
-import Contact from "@/pages/Contact";
+import Contact from "@/pages/talk-to-us";
 import About from "@/pages/About";
-import Services from "@/pages/Services";
+import Services from "@/pages/Expertise";
 import FAQ from "@/pages/FAQ";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
@@ -55,13 +55,13 @@ function Router() {
             <Route path="/diamonds" component={Diamonds} />
             <Route path="/jewellery" component={Jewellery} />
             <Route path="/trade" component={Trade} />
-            <Route path="/investment" component={Investment} />
-            <Route path="/services" component={Services} />
+            <Route path="/if-to-fl" component={Investment} />
+            <Route path="/expertise" component={Services} />
             <Route path="/faq" component={FAQ} />
             <Route path="/about" component={About} />
             <Route path="/journal" component={Journal} />
             <Route path="/journal/:slug" component={ArticleDetail} />
-            <Route path="/contact" component={Contact} />
+            <Route path="/talk-to-us" component={Contact} />
             <Route path="/privacy" component={Privacy} />
             <Route path="/terms" component={Terms} />
             <Route path="/shortlist" component={Shortlist} />

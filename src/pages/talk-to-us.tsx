@@ -377,7 +377,7 @@ export default function Contact() {
                       </span>
                     </div>
                     <div>
-                      <Link href="/services">
+                      <Link href="/expertise">
                         <button style={{
                           fontSize: "9px", letterSpacing: "0.3em", textTransform: "uppercase",
                           color: "rgba(2,39,74,0.35)", background: "none", border: "none",

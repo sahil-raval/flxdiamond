@@ -234,7 +234,7 @@ function ServiceBlock({ s, index }: { s: typeof SERVICES[number]; index: number 
 
             {/* Mobile CTA */}
             <motion.div variants={fade} className="pt-2 md:hidden">
-              <Link href="/contact" data-testid={`btn-services-${s.id}-enquire`}>
+              <Link href="/talk-to-us" data-testid={`btn-services-${s.id}-enquire`}>
                 <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em]" style={{ color: "#1CA9C9" }}>
                   Enquire → 
                 </span>
@@ -255,7 +255,7 @@ function ServiceBlock({ s, index }: { s: typeof SERVICES[number]; index: number 
 
             {/* Desktop CTA */}
             <motion.div variants={fade} className="pt-6 hidden md:block">
-              <Link href="/contact" data-testid={`btn-services-${s.id}-enquire`} className="inline-flex items-center gap-3 group">
+              <Link href="/talk-to-us" data-testid={`btn-services-${s.id}-enquire`} className="inline-flex items-center gap-3 group">
                 <span
                   className="text-[10px] uppercase tracking-[0.3em] border-b pb-0.5 transition-all duration-300 group-hover:border-[#1CA9C9]"
                   style={{ color: "#1CA9C9", borderColor: "rgba(28,169,201,0.35)" }}
@@ -484,7 +484,7 @@ export default function Services() {
           </motion.p>
 
           <motion.div variants={fade} className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-            <Link href="/contact" data-testid="btn-services-contact">
+            <Link href="/talk-to-us" data-testid="btn-services-contact">
               <button
                 className="w-full sm:w-auto text-[10px] uppercase tracking-[0.3em] text-white transition-all duration-200 hover:opacity-80"
                 style={{ background: "#1CA9C9", height: "50px", padding: "0 2.25rem", border: "none" }}

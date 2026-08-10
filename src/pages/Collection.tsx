@@ -1641,13 +1641,13 @@ import { useState, useMemo, useRef } from "react";
 </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                  <Link href="/contact">
+                  <Link href="/talk-to-us">
                     <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90"
   style={{ background:"#1CA9C9", height:"48px", padding:"0 2rem" }} data-testid="btn-custom-enquiry">
   {inv?.customCtaPrimary || "Submit a Brief"}
 </Button>
                   </Link>
-                  <Link href="/services">
+                  <Link href="/expertise">
                     <Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-white/10"
   style={{ borderColor:"rgba(255,255,255,0.2)", color:"rgba(255,255,255,0.7)", height:"48px", padding:"0 2rem" }}>
   {inv?.customCtaSecondary || "View Our Services"}

@@ -292,7 +292,7 @@ export default function FAQ() {
 
             <div className="pt-10 space-y-3 border-t" style={{ borderColor: "rgba(2,39,74,0.08)" }}>
               <p className="text-[9px] uppercase tracking-widest" style={{ color: "rgba(2,39,74,0.3)" }}>Still have questions?</p>
-              <Link href="/contact">
+              <Link href="/talk-to-us">
                 <Button
                   className="w-full rounded-none text-[10px] uppercase tracking-[0.2em] text-white hover:opacity-90"
                   style={{ background: "#1CA9C9", height: "42px" }}
@@ -332,7 +332,7 @@ export default function FAQ() {
 
                   {/* Mobile CTA — shown below FAQ list on small screens */}
                   <div className="pt-10 lg:hidden">
-                    <Link href="/contact" className="block">
+                    <Link href="/talk-to-us" className="block">
                       <Button
                         className="w-full rounded-none text-[10px] uppercase tracking-[0.2em] text-white hover:opacity-90"
                         style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }}
@@ -370,7 +370,7 @@ export default function FAQ() {
             </motion.p>
           </div>
           <motion.div variants={up} className="flex flex-col sm:flex-row gap-4">
-            <Link href="/contact">
+            <Link href="/talk-to-us">
               <Button
                 className="w-full sm:w-auto rounded-none text-[10px] uppercase tracking-[0.25em] text-white hover:opacity-90"
                 style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }}
@@ -379,7 +379,7 @@ export default function FAQ() {
                 Contact Us
               </Button>
             </Link>
-            <Link href="/services">
+            <Link href="/expertise">
               <Button
                 variant="outline"
                 className="w-full sm:w-auto rounded-none text-[10px] uppercase tracking-[0.25em] hover:text-[#02274A] transition-colors"

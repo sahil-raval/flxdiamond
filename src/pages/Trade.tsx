@@ -558,7 +558,7 @@ export default function Trade() {
             </div>
 
             <motion.div variants={up} style={{ marginTop: "52px", textAlign: "center" }}>
-              <Link href="/services">
+              <Link href="/expertise">
                 <button
                   data-testid="btn-services-detail"
                   style={{
@@ -687,7 +687,7 @@ export default function Trade() {
             <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.82)", lineHeight: 1.78, marginBottom: "28px" }}>
               {trd?.jewellersBody || "The FL grade carries a material premium over IF that justifies conversion cost many times over at commercial scale. We assess stones, execute precision micro-regrind, and manage the GIA re-submission — delivering a certified Flawless diamond."}
             </p>
-            <Link href="/services#conversion">
+            <Link href="/expertise#conversion">
               <button
                 data-testid="btn-conversion-learn"
                 style={{
@@ -864,7 +864,7 @@ export default function Trade() {
             </h3>
           </div>
           <div style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
-            <Link href="/contact">
+            <Link href="/talk-to-us">
               <button
                 data-testid="btn-contact-bottom"
                 style={{

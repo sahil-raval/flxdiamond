@@ -125,7 +125,7 @@ export default defineType({
             { name: "answerTitle", type: "string", title: "Answer Title" },
             { name: "answerPoints", type: "array", of: [{ type: "string" }], title: "Answer Bullet Points" },
             { name: "answerCta", type: "string", title: "Answer CTA Label" },
-            { name: "answerHref", type: "string", title: "Answer CTA Link (e.g. /contact)" },
+            { name: "answerHref", type: "string", title: "Answer CTA Link (e.g. /talk-to-us)" },
           ],
         },
       ],

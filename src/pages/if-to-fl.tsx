@@ -785,7 +785,7 @@ export default function Investment() {
             </p>
             {(inv?.heroCta || inv?.heroSecondaryCta) && (
               <div className="flex flex-wrap gap-4 pt-2">
-                <Link href="/contact">
+                <Link href="/talk-to-us">
                   <button
                     className="text-[10px] uppercase tracking-[0.3em] text-white transition-opacity hover:opacity-80"
                     style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem", border: "none" }}
@@ -986,7 +986,7 @@ export default function Investment() {
             {inv?.ctaBody || "We work with a limited number of private buyers and family offices. All enquiries are handled directly and under strict commercial confidence."}
           </motion.p>
           <motion.div variants={up} className="flex flex-col sm:flex-row justify-center gap-4 pt-2">
-            <Link href="/contact" data-testid="btn-investment-consultation">
+            <Link href="/talk-to-us" data-testid="btn-investment-consultation">
               <button
                 className="w-full sm:w-auto text-[10px] uppercase tracking-[0.3em] text-white transition-opacity hover:opacity-80"
                 style={{ background: "#1CA9C9", height: "50px", padding: "0 2.25rem", border: "none" }}

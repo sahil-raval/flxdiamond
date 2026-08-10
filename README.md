@@ -201,13 +201,13 @@ Plus non-filter fields: `stockId`, `polish`, `symmetry`, `measurements`,
 |------|-------------|
 | `/` | Home — hero, featured diamonds, brand story |
 | `/diamonds` | Full inventory with filters |
-| `/services` | IF→FL conversion & sourcing services |
-| `/investment` | Investment-grade stone information |
+| `/expertise` | IF→FL conversion & sourcing services |
+| `/if-to-fl` | Investment-grade stone information |
 | `/about` | About the team |
 | `/journal` | Articles & educational content |
 | `/jewellery` | Jewellery collections |
 | `/faq` | Frequently asked questions |
-| `/contact` | Contact form |
+| `/talk-to-us` | Contact form |
 | `/trade` | Trade partnership info |
 | `/studio` | Sanity CMS editor |
 | `/sitemap.xml` | Dynamic sitemap |

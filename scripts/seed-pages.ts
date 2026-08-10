@@ -69,7 +69,7 @@ const homePage = {
           "50/50 profit split on the value created — no upfront cost.",
         ],
         answerCta: "Submit a GIA Certificate",
-        answerHref: "/investment",
+        answerHref: "/if-to-fl",
       },
       {
         id: "buy",
@@ -99,7 +99,7 @@ const homePage = {
           "No salesmanship — an honest conversation about the asset case.",
         ],
         answerCta: "Book a Consultation",
-        answerHref: "/investment",
+        answerHref: "/if-to-fl",
       },
       {
         id: "partner",
@@ -114,7 +114,7 @@ const homePage = {
           "All agreements under NDA by default. Discretion is not negotiable.",
         ],
         answerCta: "Discuss a Partnership",
-        answerHref: "/contact",
+        answerHref: "/talk-to-us",
       },
     ],
     "qc"
@@ -153,7 +153,7 @@ const homePage = {
   services: withKeys(
     [
       { num: "01", title: "Diamond Sourcing", body: "GIA-certified natural and lab-grown stones at trade pricing. Any shape, any size, any spec. No retail. Minimum order requirements apply.", tags: ["Natural", "Lab-Grown", "Melee"], link: "/diamonds", linkText: "View Diamond Inventory" },
-      { num: "02", title: "IF→FL Conversion", body: "Send any IF stone's GIA cert number. We analyse the comments, assess viability at no cost, and if the stone qualifies, execute the precision regrind. New GIA FL certificate issued.", tags: ["Assessment", "Regrinding", "New Certificate"], link: "/investment", linkText: "Learn About Conversion" },
+      { num: "02", title: "IF→FL Conversion", body: "Send any IF stone's GIA cert number. We analyse the comments, assess viability at no cost, and if the stone qualifies, execute the precision regrind. New GIA FL certificate issued.", tags: ["Assessment", "Regrinding", "New Certificate"], link: "/if-to-fl", linkText: "Learn About Conversion" },
       { num: "03", title: "B2B Advisory", body: "White-label sourcing. Investment stone advisory. Custom specification briefs. Partnership structures for retailers, jewellers, private clients, and institutional buyers.", tags: ["White-Label", "Investment", "Bespoke"], link: "/trade", linkText: "Explore Partnership" },
     ],
     "svc"

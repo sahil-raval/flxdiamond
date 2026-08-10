@@ -353,7 +353,7 @@ export default function About() {
             {(isSanityConfigured && sanityAbout?.ctaBody) || "All enquiries are handled directly and under strict commercial confidence."}
           </motion.p>
           <motion.div variants={up} className="flex justify-center gap-4 flex-wrap">
-            <Link href="/contact">
+            <Link href="/talk-to-us">
               <Button
                 className="rounded-none text-[10px] uppercase tracking-[0.25em] text-white hover:opacity-90"
                 style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }}

@@ -778,7 +778,7 @@ export default function Journal() {
             <p className="text-[9px] uppercase tracking-[0.45em] mb-2" style={{ color: "#1CA9C9" }}>Trade Enquiries</p>
             <p className="font-serif text-2xl text-white">Ready to discuss your stones?</p>
           </div>
-          <Link href="/contact">
+          <Link href="/talk-to-us">
             <button className="text-[10px] uppercase tracking-[0.3em] text-white transition-all hover:opacity-80" style={{ background: "#1CA9C9", height: "50px", padding: "0 2.5rem", border: "none" }}>
               Begin the Conversation →
             </button>

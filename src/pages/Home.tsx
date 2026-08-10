@@ -107,7 +107,7 @@ function FaqSection({ faqs, tagline, heading, closingCta }: { faqs: { q: string;
           ))}
         </div>
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.4, duration: 0.6 }} className="mt-10 text-center">
-          <Link href="/contact" className="block w-full sm:inline-block sm:w-auto">
+          <Link href="/talk-to-us" className="block w-full sm:inline-block sm:w-auto">
             <Button className="rounded-none text-xs uppercase tracking-[0.12em] sm:tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="faq-cta">{closingCta || "Still have questions? Get in touch →"}</Button>
           </Link>
         </motion.div>
@@ -131,10 +131,10 @@ const PARTICLES = [
 /* ── Buyer qualifier fallback data ────────────────── */
 type BuyerType = { id: string; num: string; headline: string; subtext: string; answer: { title: string; points: string[]; cta: string; href: string } };
 const BUYER_TYPES: BuyerType[] = [
-  { id: "upgrade", num: "01", headline: "I hold IF diamonds I want to upgrade", subtext: "Your GIA certificate may reveal a path to Flawless grade, same carat weight, measurable value uplift.", answer: { title: "Yes, this is precisely what we do.", points: ["Send us your GIA certificate number. We read the comments for surface-characteristic indicators.", "If the stone qualifies, our master craftsman precision-regrounds in micro-millimeters.", "The stone is resubmitted to GIA. FL grade achieved. Same carat weight bracket documented.", "Most partners see measurable value uplift without changing their inventory volume."], cta: "Discuss Your Stones", href: "/contact" } },
+  { id: "upgrade", num: "01", headline: "I hold IF diamonds I want to upgrade", subtext: "Your GIA certificate may reveal a path to Flawless grade, same carat weight, measurable value uplift.", answer: { title: "Yes, this is precisely what we do.", points: ["Send us your GIA certificate number. We read the comments for surface-characteristic indicators.", "If the stone qualifies, our master craftsman precision-regrounds in micro-millimeters.", "The stone is resubmitted to GIA. FL grade achieved. Same carat weight bracket documented.", "Most partners see measurable value uplift without changing their inventory volume."], cta: "Discuss Your Stones", href: "/talk-to-us" } },
   { id: "supply", num: "02", headline: "I need a reliable diamond supplier", subtext: "Natural and lab-grown, GIA certified, trade pricing. No retail. Sourced through 47 years of trusted relationships.", answer: { title: "We supply serious trade buyers, not retail.", points: ["Natural diamonds: D–K colour, VVS1–SI2 clarity, 0.30ct to 10ct+.", "Lab-grown: high-precision CVD and HPHT at competitive trade pricing.", "Pricing on application. No public catalogue, by design.", "47 years of relationships with cutters in Antwerp, Mumbai, and Surat."], cta: "Request Trade Access", href: "/trade" } },
-  { id: "invest", num: "03", headline: "I want investment-grade diamonds", subtext: "FL and IF clarity with complete GIA documentation. The IF→FL conversion creates a documented, verifiable uplift.", answer: { title: "Diamonds are tangible, portable, stateless assets.", points: ["FL and IF in D–F colour represent the top 1% of all GIA-graded stones globally.", "The IF→FL conversion creates a new GIA certificate with documented uplift.", "We advise on stone selection, market timing, and re-sale pathways.", "All stones carry full GIA certification, the global standard."], cta: "Explore Investment Stones", href: "/investment" } },
-  { id: "partner", num: "04", headline: "I want a B2B partnership", subtext: "We operate as the quiet expert behind serious businesses, offering white-label sourcing with guaranteed discretion.", answer: { title: "We are the specialist behind your sourcing.", points: ["White-label sourcing: we find and verify, you present to your clients.", "IF→FL conversion offered on your client's existing stones.", "Trusted by KGK Diamond, Venus Jewellery, and Excell Overseas.", "All agreements under NDA by default. Discretion is not negotiable."], cta: "Discuss a Partnership", href: "/contact" } },
+  { id: "invest", num: "03", headline: "I want investment-grade diamonds", subtext: "FL and IF clarity with complete GIA documentation. The IF→FL conversion creates a documented, verifiable uplift.", answer: { title: "Diamonds are tangible, portable, stateless assets.", points: ["FL and IF in D–F colour represent the top 1% of all GIA-graded stones globally.", "The IF→FL conversion creates a new GIA certificate with documented uplift.", "We advise on stone selection, market timing, and re-sale pathways.", "All stones carry full GIA certification, the global standard."], cta: "Explore Investment Stones", href: "/if-to-fl" } },
+  { id: "partner", num: "04", headline: "I want a B2B partnership", subtext: "We operate as the quiet expert behind serious businesses, offering white-label sourcing with guaranteed discretion.", answer: { title: "We are the specialist behind your sourcing.", points: ["White-label sourcing: we find and verify, you present to your clients.", "IF→FL conversion offered on your client's existing stones.", "Trusted by KGK Diamond, Venus Jewellery, and Excell Overseas.", "All agreements under NDA by default. Discretion is not negotiable."], cta: "Discuss a Partnership", href: "/talk-to-us" } },
 ];
 
 /* ── Web Audio API ocean sound generator ────────────────── */
@@ -414,7 +414,7 @@ const FOURCS_FALLBACK: FourCCms[] = [
 ];
 const SERVICES_FALLBACK: ServiceCms[] = [
   { num: "01", title: "Diamond Sourcing", body: "GIA-certified natural and lab-grown stones at trade pricing. Any shape, any size, any spec. No retail. Minimum order requirements apply.", tags: ["Natural", "Lab-Grown", "Melee"], link: "/diamonds", linkText: "View Diamond Inventory" },
-  { num: "02", title: "IF→FL Conversion", body: "Send any IF stone's GIA cert number. We analyse the comments, assess viability at no cost, and if the stone qualifies, execute the precision regrind. New GIA FL certificate issued.", tags: ["Assessment", "Regrinding", "New Certificate"], link: "/investment", linkText: "Learn About Conversion" },
+  { num: "02", title: "IF→FL Conversion", body: "Send any IF stone's GIA cert number. We analyse the comments, assess viability at no cost, and if the stone qualifies, execute the precision regrind. New GIA FL certificate issued.", tags: ["Assessment", "Regrinding", "New Certificate"], link: "/if-to-fl", linkText: "Learn About Conversion" },
   { num: "03", title: "B2B Advisory", body: "White-label sourcing. Investment stone advisory. Custom specification briefs. Partnership structures for retailers, jewellers, private clients, and institutional buyers.", tags: ["White-Label", "Investment", "Bespoke"], link: "/trade", linkText: "Explore Partnership" },
 ];
 const PROCESS_BADGES_FALLBACK = [
@@ -582,7 +582,7 @@ export default function Home() {
                   </Link>
                 </MagneticBtn>
                 <MagneticBtn>
-                  <Link href="/contact">
+                  <Link href="/talk-to-us">
                     <Button variant="outline" className="rounded-none h-[52px] px-8 sm:px-10 text-xs uppercase tracking-[0.18em] sm:tracking-[0.22em] text-white hover:bg-white/15 w-full sm:w-auto" style={{ borderColor: "rgba(255,255,255,0.75)", background: "rgba(2,39,74,0.4)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }} data-testid="hero-cta-if-stone">
                       {hp?.heroSecondaryCta || "IF→FL Conversion"}
                     </Button>
@@ -796,12 +796,12 @@ export default function Home() {
                   {hp?.iftflBody || "When a GIA certificate notes specific surface characteristics on an Internally Flawless stone, there is often a viable path to Flawless grade — without leaving the same carat weight bracket."}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                  <Link href="/investment" className="block w-full sm:w-auto">
+                  <Link href="/if-to-fl" className="block w-full sm:w-auto">
                     <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90 w-full sm:w-auto" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-learn">
                       {hp?.iftflCtaPrimary || "How It Works"}
                     </Button>
                   </Link>
-                  <Link href="/contact" className="block w-full sm:w-auto">
+                  <Link href="/talk-to-us" className="block w-full sm:w-auto">
                     <Button variant="outline" className="rounded-none text-xs uppercase tracking-[0.18em] hover:bg-[#02274A]/5 w-full sm:w-auto" style={{ borderColor: "rgba(2,39,74,0.2)", color: "#02274A", height: "48px", padding: "0 2rem" }} data-testid="btn-iftfl-submit">
                       {hp?.iftflCtaSecondary || "Submit a GIA Cert →"}
                     </Button>
@@ -871,7 +871,7 @@ export default function Home() {
                 <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl mb-5 leading-tight" style={{ color: "rgba(255,255,255,0.88)" }}>{hp?.investmentHeading || "Natural FL diamonds as a long-term asset."}</h2>
                 <div className="w-10 h-px mb-5" style={{ background: "#1CA9C9" }} />
                 <p className="text-sm sm:text-base leading-relaxed mb-8" style={{ color: "rgba(255,255,255,0.45)" }}>{hp?.investmentBody || "Natural diamonds — particularly FL clarity in desirable cuts — have held and appreciated in value over time. We work with buyers who want a portable, certifiable hard asset outside the share market. Same honest conversation, no hype."}</p>
-                <Link href="/investment">
+                <Link href="/if-to-fl">
                   <Button className="rounded-none text-xs uppercase tracking-[0.18em] font-medium text-white hover:opacity-90" style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }} data-testid="btn-investment-consult">{hp?.investmentCta || "Book a Consultation →"}</Button>
                 </Link>
               </motion.div>
@@ -925,7 +925,7 @@ export default function Home() {
     : [
         { label: "Browse Stones", href: "/diamonds" },
         { label: "Talk to Us", href: "tel:+61474817548" },
-        { label: "Book a Call", href: "/contact" },
+        { label: "Book a Call", href: "/talk-to-us" },
         { label: "Trade Login", href: "/trade" },
       ]
   ).map((btn, i) => {
