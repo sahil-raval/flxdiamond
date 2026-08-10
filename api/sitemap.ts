@@ -17,10 +17,14 @@ const STATIC_ROUTES: Array<[string, number, string]> = [
 ];
 
 function siteBase(req: VercelRequest): string {
-  const fromEnv =
-    process.env.SITE_URL || process.env.VITE_SITE_URL || process.env.VERCEL_URL;
+  const fromEnv = process.env.SITE_URL || process.env.VITE_SITE_URL;
   if (fromEnv) {
     return fromEnv.startsWith("http") ? fromEnv : `https://${fromEnv}`;
+  }
+  // Never fall back to VERCEL_URL — it's always the deployment host,
+  // not the canonical domain. Default to production.
+  if (process.env.VERCEL_ENV === "production") {
+    return "https://www.flxdiamond.com";
   }
   const host = req.headers.host || "localhost:3000";
   const proto = (req.headers["x-forwarded-proto"] as string) || "https";
