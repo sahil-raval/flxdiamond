@@ -317,9 +317,39 @@ interface SanityService {
   signature: boolean;
 }
 
+interface ServicesPageSeo {
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImageUrl?: string;
+  twitterCard?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImageUrl?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+  structuredDataType?: string;
+  additionalJsonLd?: string;
+}
+
+interface SanityServicesPage {
+  seo?: ServicesPageSeo;
+  heroTagline?: string;
+  heroHeading?: string;
+  heroSubtext?: string;
+  closingTagline?: string;
+  closingHeading?: string;
+  closingBody?: string;
+  ctaButtonPrimary?: string;
+  ctaButtonSecondary?: string;
+  trustTags?: string[];
+}
+
 export default function Services() {
   const { data: sanityServices } = useSanityQuery<SanityService[]>(["services"], SERVICES_QUERY);
-  const { data: sp } = useSanityQuery<{ heroTagline?: string; heroHeading?: string; heroSubtext?: string; closingTagline?: string; closingHeading?: string; closingBody?: string }>(["services-page"], SERVICES_PAGE_QUERY);
+  const { data: sp } = useSanityQuery<SanityServicesPage>(["services-page"], SERVICES_PAGE_QUERY);
   const spc = isSanityConfigured ? sp : null;
 
   const activeServices = isSanityConfigured && sanityServices && sanityServices.length > 0
@@ -341,10 +371,20 @@ export default function Services() {
   return (
     <>
       <SeoHead
-        metaTitle="Services | FLX Diamonds — Natural, Lab-Grown, Customising & IF→FL Conversion"
-        metaDescription="Four specialist diamond services: natural sourcing, lab-grown supply, bespoke customisation, and the house-signature IF→FL conversion. Trade-only. GIA-certified."
-        metaKeywords="diamond services, IF to FL conversion, natural diamonds Australia, lab grown diamonds trade, GIA certified"
-        structuredDataType="Service"
+        metaTitle={spc?.seo?.metaTitle || "Services | FLX Diamonds — Natural, Lab-Grown, Customising & IF→FL Conversion"}
+        metaDescription={spc?.seo?.metaDescription || "Four specialist diamond services: natural sourcing, lab-grown supply, bespoke customisation, and the house-signature IF→FL conversion. Trade-only. GIA-certified."}
+        metaKeywords={spc?.seo?.metaKeywords || "diamond services, IF to FL conversion, natural diamonds Australia, lab grown diamonds trade, GIA certified"}
+        ogTitle={spc?.seo?.ogTitle}
+        ogDescription={spc?.seo?.ogDescription}
+        ogImageUrl={spc?.seo?.ogImageUrl}
+        twitterCard={spc?.seo?.twitterCard}
+        twitterTitle={spc?.seo?.twitterTitle}
+        twitterDescription={spc?.seo?.twitterDescription}
+        twitterImageUrl={spc?.seo?.twitterImageUrl}
+        canonicalUrl={spc?.seo?.canonicalUrl}
+        noIndex={spc?.seo?.noIndex}
+        structuredDataType={spc?.seo?.structuredDataType || "Service"}
+        additionalJsonLd={spc?.seo?.additionalJsonLd}
         siteName="FLX Diamonds"
       />
     <div style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -489,7 +529,7 @@ export default function Services() {
                 className="w-full sm:w-auto text-[10px] uppercase tracking-[0.3em] text-white transition-all duration-200 hover:opacity-80"
                 style={{ background: "#1CA9C9", height: "50px", padding: "0 2.25rem", border: "none" }}
               >
-                Begin the Conversation
+                {spc?.ctaButtonPrimary || "Begin the Conversation"}
               </button>
             </Link>
             <Link href="/faq" data-testid="btn-services-faq">
@@ -503,13 +543,13 @@ export default function Services() {
                   color: "rgba(255,255,255,0.55)",
                 }}
               >
-                Common Questions
+                {spc?.ctaButtonSecondary || "Common Questions"}
               </button>
             </Link>
           </motion.div>
 
           <motion.div variants={fade} className="pt-8 md:pt-12 flex justify-center gap-5 md:gap-8 flex-wrap">
-            {["B2B Only", "47 Years Mastery", "GIA Certified", "Commercial Confidence"].map(tag => (
+            {(spc?.trustTags?.length ? spc.trustTags : ["B2B Only", "47 Years Mastery", "GIA Certified", "Commercial Confidence"]).map(tag => (
               <span key={tag} className="flex items-center gap-2">
                 <span className="w-1 h-1 rounded-full" style={{ background: "rgba(28,169,201,0.4)" }} />
                 <span className="text-[9px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.18)" }}>{tag}</span>

@@ -30,15 +30,22 @@ export function apiUrl(projectId: string, apiVersion: string, dataset: string) {
 export function setCors(res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  // Never cache the proxy response (edge/CDN/browser) so freshly published
-  // Sanity content is always returned on the deployed (Vercel) site.
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
-  res.setHeader("CDN-Cache-Control", "no-store");
-  res.setHeader("Vercel-CDN-Cache-Control", "no-store");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type, X-Admin-Secret, Authorization",
   );
+}
+
+/**
+ * Opt-in cache-busting for endpoints that must never be edge/browser
+ * cached (e.g. the Sanity query proxy). Call this in addition to
+ * setCors() — NOT inside it — so robots.ts/sitemap.ts keep their own
+ * long-lived Cache-Control headers untouched.
+ */
+export function setNoCache(res: VercelResponse) {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  res.setHeader("CDN-Cache-Control", "no-store");
+  res.setHeader("Vercel-CDN-Cache-Control", "no-store");
 }
 
 export function adminSecret() {

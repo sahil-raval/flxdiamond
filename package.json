@@ -10,8 +10,10 @@
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "seed": "tsx scripts/seed.ts",
-    "seed:pages": "tsx scripts/seed-pages.ts"
+    "seed:pages": "tsx scripts/seed-pages.ts",
+    "postbuild": "tsx scripts/inject-seo.ts"
   },
+  "postbuild": "tsx scripts/inject-seo.ts",
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@portabletext/react": "^6.2.0",

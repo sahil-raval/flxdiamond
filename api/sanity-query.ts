@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { sanityConfig, cdnUrl, setCors } from "./_lib.js";
+import { sanityConfig, cdnUrl, setCors, setNoCache } from "./_lib";
 
 /**
  * Public GROQ proxy. No auth token is forwarded — drafts stay hidden.
@@ -7,6 +7,7 @@ import { sanityConfig, cdnUrl, setCors } from "./_lib.js";
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   setCors(res);
+  setNoCache(res);
   if (req.method === "OPTIONS") return res.status(204).end();
 
   const { projectId, dataset, apiVersion } = sanityConfig();

@@ -67,6 +67,18 @@ function setCanonical(url: string) {
   el.setAttribute("href", url);
 }
 
+/**
+ * Self-referencing canonical: strips query string/hash and trailing slash
+ * (except root) so every indexable route gets a canonical link even when a
+ * page doesn't explicitly pass canonicalUrl.
+ */
+function buildSelfReferencingCanonical(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  const { origin, pathname } = window.location;
+  const trimmed = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  return `${origin}${trimmed}`;
+}
+
 function buildAutoJsonLd(
   type: string | undefined,
   title: string | undefined,
@@ -149,8 +161,8 @@ export default function SeoHead({
     if (resolvedTwDesc) setMetaByName("twitter:description", resolvedTwDesc);
     if (resolvedTwImg) setMetaByName("twitter:image", resolvedTwImg);
 
-    /* ── Canonical ── */
-    if (canonicalUrl) setCanonical(canonicalUrl);
+    const resolvedCanonical = canonicalUrl || buildSelfReferencingCanonical();
+    if (resolvedCanonical) setCanonical(resolvedCanonical);
 
     /* ── JSON-LD ── */
     let jsonLd: object | null = null;

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useSanityQuery } from "@/lib/useSanityData";
 import { isSanityConfigured } from "@/lib/sanity";
 import { JEWELLERY_QUERY, JEWELLERY_PAGE_QUERY } from "@/lib/sanity-queries";
+import SeoHead from "@/components/SeoHead";
 
 const collections = [
   {
@@ -65,6 +66,12 @@ export default function Jewellery() {
 
   return (
     <div className="bg-background min-h-screen pt-32 pb-24">
+      <SeoHead
+        metaTitle="Jewellery Collections | FLX Diamonds"
+        metaDescription="Explore FLX Diamonds' bespoke jewellery collections — signature rings, earrings, necklaces, and bracelets set with GIA-certified stones."
+        structuredDataType="WebPage"
+        siteName="FLX Diamonds"
+      />
       <div className="max-w-7xl mx-auto px-6">
         <motion.div 
           initial="hidden"

@@ -15,6 +15,7 @@ import service from "./service";
 import jewelleryCollection from "./jewelleryCollection";
 import conversionStone from "./conversionStone";
 import seoObject from "./seoObject";
+import diamondsPage from "./diamondsPage";
 
 export const schemaTypes = [
   /* Shared object types */
@@ -29,6 +30,7 @@ export const schemaTypes = [
   servicesPage,
   faqPage,
   jewelleryPage,
+  diamondsPage, 
   journalPage,
   /* Collections */
   diamond,

@@ -86,6 +86,16 @@ export default defineConfig({
                           .title("Contact Page")
                       ),
                     S.listItem()
+                      .title("💎  Diamonds Page")
+                      .id("diamondsPage")
+                      .child(
+                        S.document()
+                          .schemaType("diamondsPage")
+                          .documentId("diamondsPage")
+                          .title("Diamonds Page")
+                      ),
+
+                    S.listItem()
                       .title("🔧  Services Page")
                       .id("servicesPage")
                       .child(

@@ -436,7 +436,10 @@ export const SERVICES_PAGE_QUERY = `*[_type == "servicesPage"][0]{
   heroSubtext,
   closingTagline,
   closingHeading,
-  closingBody
+  closingBody,
+  ctaButtonPrimary,
+  ctaButtonSecondary,
+  trustTags
 }`;
 
 export const FAQ_PAGE_QUERY = `*[_type == "faqPage"][0]{
