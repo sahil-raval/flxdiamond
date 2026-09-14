@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { EASE } from "@/lib/motion";
 import { useSanityQuery } from "@/lib/useSanityData";
 import { isSanityConfigured } from "@/lib/sanity";
@@ -189,6 +189,47 @@ export default function About() {
   // is a direct, playable video src (see the SanityAboutPage comment above).
   const stoneVideoSrc = cms?.stoneVideo?.url || cms?.stoneVideoUrl || null;
   const journeyPhotos = cms?.journeyPhotos?.length ? cms.journeyPhotos : DEFAULT_JOURNEY_PHOTOS;
+
+  // The Journey timeline is scroll-linked: as each step scrolls through the
+  // center of the viewport, it becomes "active" — the photo stack crossfades
+  // to match it and the progress line grows down to its marker.
+  const [activeJourneyIndex, setActiveJourneyIndex] = useState(0);
+  const [journeyLineHeight, setJourneyLineHeight] = useState(0);
+  const journeyStepRefs = useRef<Array<HTMLDivElement | null>>([]);
+
+  useEffect(() => {
+    if (journeySteps.length <= 1) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = journeyStepRefs.current.indexOf(entry.target as HTMLDivElement);
+            if (idx !== -1) setActiveJourneyIndex(idx);
+          }
+        });
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
+    );
+    journeyStepRefs.current.forEach((el) => el && observer.observe(el));
+    return () => observer.disconnect();
+  }, [journeySteps.length]);
+
+  useEffect(() => {
+    const updateJourneyLine = () => {
+      const el = journeyStepRefs.current[activeJourneyIndex];
+      if (el) setJourneyLineHeight(el.offsetTop + el.offsetHeight / 2);
+    };
+    updateJourneyLine();
+    window.addEventListener("resize", updateJourneyLine);
+    return () => window.removeEventListener("resize", updateJourneyLine);
+  }, [activeJourneyIndex, journeySteps.length]);
+
+  // Photo stack cycles with the active step so the whole stack re-shuffles as
+  // you scroll (front photo = current step; the other two trail behind it).
+  const journeyPhotoCount = journeyPhotos.length || 1;
+  const journeyFrontPhoto = journeyPhotos[activeJourneyIndex % journeyPhotoCount];
+  const journeyMidPhoto = journeyPhotos[(activeJourneyIndex + 1) % journeyPhotoCount];
+  const journeyBackPhoto = journeyPhotos[(activeJourneyIndex + 2) % journeyPhotoCount];
 
   // World map pins: editors pick countries by name from Sanity (trustedCountries);
   // each name is looked up in the pre-computed COUNTRY_LOOKUP table for its pixel
@@ -455,27 +496,62 @@ export default function About() {
             </motion.div>
           </div>
 
-          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 md:gap-10 items-center">
-            {/* Photo stack */}
+          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 md:gap-10 items-start">
+            {/* Photo stack — pinned while you scroll, crossfades to match the active step */}
             <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               variants={up}
-              className="relative w-full max-w-sm mx-auto aspect-[3/4]"
+              className="relative w-full max-w-sm mx-auto aspect-[3/4] md:sticky md:top-32"
             >
-              {journeyPhotos[2] && (
-                <img src={journeyPhotos[2].url} alt={journeyPhotos[2].alt || ""} aria-hidden={!journeyPhotos[2].alt} className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[-8deg] shadow-lg" />
-              )}
-              {journeyPhotos[1] && (
-                <img src={journeyPhotos[1].url} alt={journeyPhotos[1].alt || ""} aria-hidden={!journeyPhotos[1].alt} className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[5deg] shadow-lg" />
-              )}
-              {journeyPhotos[0] && (
-                <img src={journeyPhotos[0].url} alt={journeyPhotos[0].alt || ""} className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[-2deg] shadow-xl" />
-              )}
+              <AnimatePresence>
+                {journeyBackPhoto && (
+                  <motion.img
+                    key={`back-${journeyBackPhoto.url}`}
+                    src={journeyBackPhoto.url}
+                    alt={journeyBackPhoto.alt || ""}
+                    aria-hidden={!journeyBackPhoto.alt}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, rotate: -8 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, ease: EASE }}
+                    className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover shadow-lg"
+                  />
+                )}
+              </AnimatePresence>
+              <AnimatePresence>
+                {journeyMidPhoto && (
+                  <motion.img
+                    key={`mid-${journeyMidPhoto.url}`}
+                    src={journeyMidPhoto.url}
+                    alt={journeyMidPhoto.alt || ""}
+                    aria-hidden={!journeyMidPhoto.alt}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, rotate: 5 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, ease: EASE }}
+                    className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover shadow-lg"
+                  />
+                )}
+              </AnimatePresence>
+              <AnimatePresence>
+                {journeyFrontPhoto && (
+                  <motion.img
+                    key={`front-${journeyFrontPhoto.url}`}
+                    src={journeyFrontPhoto.url}
+                    alt={journeyFrontPhoto.alt || ""}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, rotate: -2 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, ease: EASE }}
+                    className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover shadow-xl"
+                  />
+                )}
+              </AnimatePresence>
             </motion.div>
 
-            {/* Vertical timeline */}
+            {/* Vertical timeline — the teal line grows down to whichever step is centered in view */}
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -484,17 +560,32 @@ export default function About() {
               className="relative pl-8"
             >
               <div className="absolute left-[3px] top-2 bottom-2 border-l border-dashed" style={{ borderColor: "rgba(2,39,74,0.2)" }} />
-              <div className="space-y-16">
+              <motion.div
+                className="absolute left-[3px] top-2 w-px"
+                style={{ background: TEAL }}
+                animate={{ height: journeyLineHeight }}
+                transition={{ type: "spring", stiffness: 120, damping: 22 }}
+              />
+              <div className="space-y-24 md:space-y-32">
                 {journeySteps.map((step, i) => {
-                  const active = i === 0;
+                  const active = i === activeJourneyIndex;
                   return (
-                    <motion.div key={step.title} variants={up} className="relative" style={{ opacity: active ? 1 : 0.35 }}>
-                      <span
-                        className="absolute -left-8 top-1.5 w-[7px] h-[7px] rotate-45"
-                        style={{ background: active ? TEAL : "rgba(2,39,74,0.25)" }}
-                      />
-                      <h3 className="font-serif font-normal text-xl sm:text-2xl mb-2" style={{ color: "#02274A" }}>{step.title}</h3>
-                      <p className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>{step.body}</p>
+                    <motion.div
+                      key={step.title}
+                      ref={(el) => {
+                        journeyStepRefs.current[i] = el;
+                      }}
+                      variants={up}
+                      className="relative"
+                    >
+                      <div style={{ opacity: active ? 1 : 0.35, transition: "opacity 0.3s ease" }}>
+                        <span
+                          className="absolute -left-8 top-1.5 w-[7px] h-[7px] rotate-45"
+                          style={{ background: active ? TEAL : "rgba(2,39,74,0.25)", transition: "background 0.3s ease" }}
+                        />
+                        <h3 className="font-serif font-normal text-xl sm:text-2xl mb-2" style={{ color: "#02274A" }}>{step.title}</h3>
+                        <p className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>{step.body}</p>
+                      </div>
                     </motion.div>
                   );
                 })}
