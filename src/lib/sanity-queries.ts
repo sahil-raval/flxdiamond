@@ -150,6 +150,16 @@ export const HOME_PAGE_QUERY = `*[_type == "homePage"][0]{
 // matches what the rest of your site queries — adjust the `seo{...}` block below
 // if yours differs.
 
+// Replace the existing ABOUT_PAGE_QUERY export in your lib/sanity-queries.ts with
+// this one. It projects every field the rewritten About.tsx reads. Every image
+// field is projected as a nested { url, alt } object so alt text is genuinely
+// editable content from Sanity, not hardcoded in the component.
+//
+// If your project's SEO fields are on a shared object type, this assumes the
+// projection shape (metaTitle, metaDescription, ogImage.asset->url, etc.) already
+// matches what the rest of your site queries — adjust the `seo{...}` block below
+// if yours differs.
+
 export const ABOUT_PAGE_QUERY = `*[_type == "aboutPage"][0]{
   seo{
     metaTitle,
@@ -167,27 +177,44 @@ export const ABOUT_PAGE_QUERY = `*[_type == "aboutPage"][0]{
   heroHeadingLead,
   heroHeadingBold,
   heroSubtextLines,
+  "heroPhotos": heroPhotos[]{
+    "url": asset->url,
+    alt
+  },
 
   beginningEyebrow,
   beginningHeading,
   beginningBody,
-  "beginningImageUrl": beginningImage.asset->url,
+  "beginningImage": {
+    "url": beginningImage.asset->url,
+    "alt": beginningImage.alt
+  },
   originStats[]{
     value,
     label
   },
 
+  craftsmanHeadingLead,
   craftsman{
     name,
     subtext,
-    "illustrationUrl": illustration.asset->url,
+    "illustration": {
+      "url": illustration.asset->url,
+      "alt": illustration.alt
+    },
     bio
   },
 
   stoneHeadingLead,
   stoneHeadingBold,
   stoneCaption,
-  "stoneVideoPosterUrl": stoneVideoPoster.asset->url,
+  "stoneVideoPoster": {
+    "url": stoneVideoPoster.asset->url,
+    "alt": stoneVideoPoster.alt
+  },
+  "stoneVideo": {
+    "url": stoneVideo.asset->url
+  },
   stoneVideoUrl,
 
   journeyHeadingLead,
@@ -196,10 +223,18 @@ export const ABOUT_PAGE_QUERY = `*[_type == "aboutPage"][0]{
     title,
     body
   },
-  "journeyPhotos": journeyPhotos[].asset->url,
+  "journeyPhotos": journeyPhotos[]{
+    "url": asset->url,
+    alt
+  },
 
   trustedHeadingLead,
-  trustedHeadingBold
+  trustedHeadingBold,
+  trustedCountries[]{
+    country,
+    label,
+    flagEmoji
+  }
 }`;
 
 /* ─────────────────────────────────────────

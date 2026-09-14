@@ -35,16 +35,16 @@ export default defineType({
     // ── Hero ─────────────────────────────────────────────────────────
     defineField({
       name: "heroHeadingLead",
-      title: "Heading — italic lead phrase",
+      title: "Heading — first phrase",
       type: "string",
-      description: 'e.g. "A Diamond is" — rendered in italic.',
+      description: 'e.g. "A Diamond is" — first half of the heading, same line as the second phrase.',
       group: "hero",
     }),
     defineField({
       name: "heroHeadingBold",
-      title: "Heading — bold close",
+      title: "Heading — second phrase",
       type: "string",
-      description: 'e.g. "Never just a Diamond" — rendered bold, same line.',
+      description: 'e.g. "Never just a Diamond" — second half of the heading, same line as the first phrase.',
       group: "hero",
     }),
     defineField({
@@ -54,6 +54,29 @@ export default defineType({
       of: [defineArrayMember({ type: "string" })],
       description: "Each entry renders as its own line under the heading.",
       group: "hero",
+    }),
+    defineField({
+      name: "heroPhotos",
+      title: "Hero photos (exactly 3, in order)",
+      type: "array",
+      group: "hero",
+      of: [
+        defineArrayMember({
+          type: "image",
+          options: { hotspot: true },
+          fields: [
+            defineField({
+              name: "alt",
+              title: "Alt text",
+              type: "string",
+              description: "Describe the photo for screen readers and SEO.",
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
+        }),
+      ],
+      description: "Order matters: 1) top-left photo, 2) top-right photo, 3) tall right-column photo.",
+      validation: (Rule) => Rule.max(3),
     }),
 
     // ── The Beginning ────────────────────────────────────────────────
@@ -84,6 +107,15 @@ export default defineType({
       type: "image",
       options: { hotspot: true },
       group: "beginning",
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alt text",
+          type: "string",
+          description: "Describe the photo for screen readers and SEO.",
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
     }),
     defineField({
       name: "originStats",
@@ -106,6 +138,14 @@ export default defineType({
 
     // ── The Craftsman ────────────────────────────────────────────────
     defineField({
+      name: "craftsmanHeadingLead",
+      title: "Heading — first phrase",
+      type: "string",
+      initialValue: "The Craftsman",
+      description: 'The craftsman\'s name (below) fills in as the second phrase automatically.',
+      group: "craftsman",
+    }),
+    defineField({
       name: "craftsman",
       title: "Craftsman",
       type: "object",
@@ -123,6 +163,15 @@ export default defineType({
           title: "Illustration / portrait",
           type: "image",
           options: { hotspot: true },
+          fields: [
+            defineField({
+              name: "alt",
+              title: "Alt text",
+              type: "string",
+              description: "Describe the image for screen readers and SEO.",
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
         }),
         defineField({ name: "bio", title: "Biography", type: "text", rows: 6 }),
       ],
@@ -131,14 +180,14 @@ export default defineType({
     // ── The Stone Number ─────────────────────────────────────────────
     defineField({
       name: "stoneHeadingLead",
-      title: "Heading — italic lead phrase",
+      title: "Heading — first phrase",
       type: "string",
       initialValue: "The Stone Number tells you what it is",
       group: "stone",
     }),
     defineField({
       name: "stoneHeadingBold",
-      title: "Heading — bold close",
+      title: "Heading — second phrase",
       type: "string",
       initialValue: "The story tells you more.",
       group: "stone",
@@ -156,26 +205,45 @@ export default defineType({
       type: "image",
       options: { hotspot: true },
       group: "stone",
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alt text",
+          type: "string",
+          description: "Describe the image for screen readers and SEO.",
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
+    }),
+    defineField({
+      name: "stoneVideo",
+      title: "Video file (upload)",
+      type: "file",
+      options: { accept: "video/*" },
+      description:
+        "Upload the video directly (MP4 recommended). If set, this is used instead of the Video URL below — the poster becomes a play button that plays this video inline.",
+      group: "stone",
     }),
     defineField({
       name: "stoneVideoUrl",
-      title: "Video URL",
+      title: "Video URL (fallback)",
       type: "url",
-      description: "Optional — if set, the poster becomes a play button linking here.",
+      description:
+        "Only used if no video file is uploaded above. Must be a direct link to a video file (e.g. ending in .mp4) — not a YouTube/Vimeo watch-page link, since it plays inline rather than as an embed.",
       group: "stone",
     }),
 
     // ── The Journey ──────────────────────────────────────────────────
     defineField({
       name: "journeyHeadingLead",
-      title: "Heading — italic lead phrase",
+      title: "Heading — first phrase",
       type: "string",
       initialValue: "The Journey",
       group: "journey",
     }),
     defineField({
       name: "journeyHeadingBold",
-      title: "Heading — bold close",
+      title: "Heading — second phrase",
       type: "string",
       initialValue: "The Years Changed. The Curiosity didn't.",
       group: "journey",
@@ -203,24 +271,115 @@ export default defineType({
       title: "Photo stack (up to 3)",
       type: "array",
       group: "journey",
-      of: [defineArrayMember({ type: "image", options: { hotspot: true } })],
+      of: [
+        defineArrayMember({
+          type: "image",
+          options: { hotspot: true },
+          fields: [
+            defineField({
+              name: "alt",
+              title: "Alt text",
+              type: "string",
+              description: "Describe the photo for screen readers and SEO. Leave blank for a purely decorative duplicate photo.",
+            }),
+          ],
+        }),
+      ],
       validation: (Rule) => Rule.max(3),
     }),
 
     // ── Trusted by ───────────────────────────────────────────────────
     defineField({
       name: "trustedHeadingLead",
-      title: "Heading — italic lead phrase",
+      title: "Heading — first phrase",
       type: "string",
       initialValue: "Trusted by names that",
       group: "trusted",
     }),
     defineField({
       name: "trustedHeadingBold",
-      title: "Heading — bold close",
+      title: "Heading — second phrase",
       type: "string",
       initialValue: "hold their own standard.",
       group: "trusted",
+    }),
+    defineField({
+      name: "trustedCountries",
+      title: "Trusted-by countries (map pins)",
+      type: "array",
+      group: "trusted",
+      description:
+        "Pick which countries get a pin on the world map. Only countries in this list have a pre-computed map position — ask your developer to add one if you need a country that isn't here.",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "trustedCountry",
+          fields: [
+            defineField({
+              name: "country",
+              title: "Country",
+              type: "string",
+              validation: (Rule) => Rule.required(),
+              options: {
+                list: [
+                  "Germany",
+                  "Australia",
+                  "India",
+                  "Brazil",
+                  "Canada",
+                  "United States",
+                  "United Kingdom",
+                  "United Arab Emirates",
+                  "Hong Kong",
+                  "Belgium",
+                  "Israel",
+                  "South Africa",
+                  "China",
+                  "Japan",
+                  "Singapore",
+                  "Switzerland",
+                  "Italy",
+                  "France",
+                  "Netherlands",
+                  "Russia",
+                  "Botswana",
+                  "Namibia",
+                  "Thailand",
+                  "South Korea",
+                  "Mexico",
+                  "New Zealand",
+                  "Spain",
+                  "Sweden",
+                  "Turkey",
+                  "Saudi Arabia",
+                  "Egypt",
+                  "Indonesia",
+                  "Vietnam",
+                  "Ireland",
+                  "Portugal",
+                  "Poland",
+                  "Malaysia",
+                ],
+              },
+            }),
+            defineField({
+              name: "label",
+              title: "Display label override",
+              type: "string",
+              description: 'Optional — overrides the country name shown on the pin badge (e.g. "USA" instead of "United States").',
+            }),
+            defineField({
+              name: "flagEmoji",
+              title: "Flag emoji override",
+              type: "string",
+              description: "Optional — overrides the default flag emoji for this pin.",
+            }),
+          ],
+          preview: {
+            select: { title: "country", subtitle: "label" },
+          },
+        }),
+      ],
     }),
   ],
   preview: {
@@ -230,7 +389,9 @@ export default defineType({
   },
 });
 
-
+/*
+INLINE "seo" FIELD — use this instead of `type: "seo"` above if you don't already
+have a shared seo object schema registered in your studio:
 
 defineField({
   name: "seo",
@@ -249,4 +410,5 @@ defineField({
     defineField({ name: "structuredDataType", type: "string" }),
     defineField({ name: "additionalJsonLd", type: "text", rows: 4 }),
   ],
-})
+}),
+*/

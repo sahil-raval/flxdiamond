@@ -1,21 +1,33 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { EASE } from "@/lib/motion";
 import { useSanityQuery } from "@/lib/useSanityData";
 import { isSanityConfigured } from "@/lib/sanity";
 import { ABOUT_PAGE_QUERY } from "@/lib/sanity-queries";
 import SeoHead from "@/components/SeoHead";
-import { MAP_WIDTH, MAP_HEIGHT, MAP_GRAY_DOTS, MAP_ACCENT_DOTS, MAP_PINS } from "@/lib/worldMapDots";
+import {
+  MAP_WIDTH,
+  MAP_HEIGHT,
+  MAP_GRAY_DOTS,
+  MAP_ACCENT_DOTS,
+  COUNTRY_LOOKUP,
+  DEFAULT_TRUSTED_COUNTRIES,
+} from "@/lib/worldMapDots";
 
 // Served straight from /public — no bundler import needed, just the root-relative path.
-const heroJig = "/hero-jig.jpg";
-const heroLoupe = "/hero-loupe.jpg";
-const heroGrinding = "/hero-grinding.jpg";
-const beginningCraft = "/beginning-craft.jpg";
-const stoneVideoPoster = "/stone-video-poster.jpg";
-const craftsmanIllustration = "/craftsman-illustration.jpg";
-const journeyPhoto1 = "/journey-1.jpg";
-const journeyPhoto2 = "/journey-2.jpg";
-const journeyPhoto3 = "/journey-3.jpg";
+const DEFAULT_HERO_PHOTOS = [
+  { url: "/hero-jig.jpg", alt: "Craftsman examining a rough diamond under a loupe" },
+  { url: "/hero-loupe.jpg", alt: "Evaluating a polished diamond with tweezers and a loupe" },
+  { url: "/hero-grinding.jpg", alt: "Craftsman operating a precision diamond regrinding tool" },
+];
+const DEFAULT_BEGINNING_IMAGE = { url: "/beginning-craft.jpg", alt: "Precision diamond regrinding equipment" };
+const DEFAULT_STONE_VIDEO_POSTER = { url: "/stone-video-poster.jpg", alt: "Precision diamond regrinding in progress" };
+const DEFAULT_CRAFTSMAN_ILLUSTRATION = { url: "/craftsman-illustration.jpg", alt: "Babu Vekariya" };
+const DEFAULT_JOURNEY_PHOTOS = [
+  { url: "/journey-1.jpg", alt: "Master craftsman examining a diamond under a loupe" },
+  { url: "/journey-2.jpg", alt: "" },
+  { url: "/journey-3.jpg", alt: "" },
+];
 
 const up = {
   hidden: { opacity: 0, y: 22 },
@@ -39,12 +51,12 @@ const gridTexture = (lineColor: string) => ({
   backgroundSize: "56px 56px",
 });
 
-// Headline treatment used throughout this page: an italic lead phrase followed
-// by a bold close, e.g. "A Diamond is / Never just a Diamond" — both set in the
-// site's own heading font (font-serif) so this page reads identically to the
-// rest of flxdiamond.com, just toggling italic/weight for the two-tone effect.
-// Sizing is fluid (clamp) so headings scale smoothly at every viewport width
-// instead of jumping at Tailwind's breakpoints.
+// Headline treatment used throughout this page: a lead phrase followed by a
+// close, e.g. "A Diamond is / Never just a Diamond" — both set in the site's
+// own heading font (font-serif), same normal weight, no italics, so this page
+// reads identically to the rest of flxdiamond.com. Sizing is fluid (clamp) so
+// headings scale smoothly at every viewport width instead of jumping at
+// Tailwind's breakpoints.
 function SplitHeading({
   lead,
   bold,
@@ -62,11 +74,16 @@ function SplitHeading({
 }) {
   const fontSize = size === "hero" ? "clamp(2.1rem, 5.5vw, 4.25rem)" : "clamp(1.65rem, 4vw, 2.75rem)";
   return (
-    <Tag className="font-serif leading-[1.15]" style={{ fontSize }}>
-      <span className={`italic ${leadClassName}`}>{lead} </span>
-      <span className={`font-serif font-bold not-italic ${boldClassName}`}>{bold}</span>
+    <Tag className="font-serif font-normal leading-[1.15]" style={{ fontSize }}>
+      <span className={leadClassName}>{lead} </span>
+      <span className={boldClassName}>{bold}</span>
     </Tag>
   );
+}
+
+interface SanityImage {
+  url: string;
+  alt?: string;
 }
 
 interface SanityAboutPage {
@@ -82,18 +99,22 @@ interface SanityAboutPage {
   heroHeadingBold?: string;
   heroSubtextLines?: string[];
 
+  // Hero photography (top two-photo row + tall right-hand photo, in that order)
+  heroPhotos?: SanityImage[];
+
   // The Beginning (origin story card + stats)
   beginningEyebrow?: string;
   beginningHeading?: string;
   beginningBody?: string;
-  beginningImageUrl?: string;
+  beginningImage?: SanityImage;
   originStats?: { value: string; label: string }[];
 
   // The Craftsman
+  craftsmanHeadingLead?: string;
   craftsman?: {
     name?: string;
     subtext?: string;
-    illustrationUrl?: string;
+    illustration?: SanityImage;
     bio?: string;
   };
 
@@ -101,18 +122,27 @@ interface SanityAboutPage {
   stoneHeadingLead?: string;
   stoneHeadingBold?: string;
   stoneCaption?: string[];
-  stoneVideoPosterUrl?: string;
+  stoneVideoPoster?: SanityImage;
+  // Preferred: a video file uploaded directly in Sanity. Falls back to
+  // stoneVideoUrl (a direct link to a video file hosted elsewhere) if set
+  // instead. Both are played inline with a native <video> element, so
+  // neither should be a YouTube/Vimeo watch-page link — a direct .mp4 (or
+  // similar) URL only.
+  stoneVideo?: { url: string };
   stoneVideoUrl?: string;
 
   // The Journey (timeline)
   journeyHeadingLead?: string;
   journeyHeadingBold?: string;
   journeySteps?: { title: string; body: string }[];
-  journeyPhotos?: string[];
+  journeyPhotos?: SanityImage[];
 
   // Trusted by / global reach
   trustedHeadingLead?: string;
   trustedHeadingBold?: string;
+  // Pick from the countries pre-computed in lib/worldMapDots.ts (COUNTRY_LOOKUP).
+  // label/flagEmoji optionally override that country's default display name/flag.
+  trustedCountries?: { country: string; label?: string; flagEmoji?: string }[];
 }
 
 const ORIGIN_STATS_DEFAULT = [
@@ -141,6 +171,7 @@ const JOURNEY_STEPS_DEFAULT = [
 
 export default function About() {
   const { data: sanityAbout } = useSanityQuery<SanityAboutPage>(["about-page"], ABOUT_PAGE_QUERY);
+  const [isStoneVideoPlaying, setIsStoneVideoPlaying] = useState(false);
 
   const cms = isSanityConfigured ? sanityAbout : null;
 
@@ -149,9 +180,35 @@ export default function About() {
   const stoneCaption = cms?.stoneCaption?.length ? cms.stoneCaption : STONE_CAPTION_DEFAULT;
   const journeySteps = cms?.journeySteps?.length ? cms.journeySteps : JOURNEY_STEPS_DEFAULT;
 
-  const journeyPhotos = cms?.journeyPhotos?.length
-    ? cms.journeyPhotos
-    : [journeyPhoto1, journeyPhoto2, journeyPhoto3];
+  // heroPhotos is fixed order: [0] top-left, [1] top-right, [2] tall right-column photo.
+  const heroPhotos = cms?.heroPhotos?.length ? cms.heroPhotos : DEFAULT_HERO_PHOTOS;
+  const beginningImage = cms?.beginningImage || DEFAULT_BEGINNING_IMAGE;
+  const craftsmanIllustration = cms?.craftsman?.illustration || DEFAULT_CRAFTSMAN_ILLUSTRATION;
+  const stoneVideoPoster = cms?.stoneVideoPoster || DEFAULT_STONE_VIDEO_POSTER;
+  // Uploaded Sanity file wins over the external-URL fallback; either way this
+  // is a direct, playable video src (see the SanityAboutPage comment above).
+  const stoneVideoSrc = cms?.stoneVideo?.url || cms?.stoneVideoUrl || null;
+  const journeyPhotos = cms?.journeyPhotos?.length ? cms.journeyPhotos : DEFAULT_JOURNEY_PHOTOS;
+
+  // World map pins: editors pick countries by name from Sanity (trustedCountries);
+  // each name is looked up in the pre-computed COUNTRY_LOOKUP table for its pixel
+  // position + default flag, which trustedCountries can override per-entry.
+  const trustedCountries: { country: string; label?: string; flagEmoji?: string }[] = cms?.trustedCountries?.length
+    ? cms.trustedCountries
+    : DEFAULT_TRUSTED_COUNTRIES.map((country) => ({ country }));
+
+  const pins = trustedCountries
+    .map((tc) => {
+      const geo = COUNTRY_LOOKUP[tc.country];
+      if (!geo) return null;
+      return {
+        name: tc.label || tc.country,
+        flagEmoji: tc.flagEmoji || geo.flagEmoji,
+        x: geo.x,
+        y: geo.y,
+      };
+    })
+    .filter((p): p is { name: string; flagEmoji: string; x: number; y: number } => p !== null);
 
   const seo = sanityAbout?.seo;
 
@@ -214,19 +271,19 @@ export default function About() {
             <div className="lg:col-span-2 flex flex-col gap-4 md:gap-5">
               <div className="grid grid-cols-2 gap-4 md:gap-5">
                 <motion.div variants={up} className="overflow-hidden aspect-[4/3]">
-                  <img src={heroJig} alt="Craftsman examining a rough diamond under a loupe" className="w-full h-full object-cover" />
+                  <img src={heroPhotos[0]?.url} alt={heroPhotos[0]?.alt || ""} className="w-full h-full object-cover" />
                 </motion.div>
                 <motion.div variants={up} className="overflow-hidden aspect-[4/3]">
-                  <img src={heroLoupe} alt="Evaluating a polished diamond with tweezers and a loupe" className="w-full h-full object-cover" />
+                  <img src={heroPhotos[1]?.url} alt={heroPhotos[1]?.alt || ""} className="w-full h-full object-cover" />
                 </motion.div>
               </div>
 
               <motion.div variants={up} className="grid md:grid-cols-2 flex-1" style={{ background: NAVY_DEEP }}>
                 <div className="p-8 md:p-10 flex flex-col justify-center space-y-4">
-                  <p className="font-serif italic text-lg" style={{ color: TEAL }}>
+                  <p className="font-serif text-lg" style={{ color: TEAL }}>
                     {cms?.beginningEyebrow || "The Beginning"}
                   </p>
-                  <h3 className="font-serif font-bold text-xl sm:text-2xl text-white">
+                  <h3 className="font-serif font-normal text-xl sm:text-2xl text-white">
                     {cms?.beginningHeading || "Before FLX, There was the craft."}
                   </h3>
                   <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
@@ -236,8 +293,8 @@ export default function About() {
                 </div>
                 <div className="overflow-hidden min-h-[200px] md:min-h-0">
                   <img
-                    src={cms?.beginningImageUrl || beginningCraft}
-                    alt="Precision diamond regrinding equipment"
+                    src={beginningImage.url}
+                    alt={beginningImage.alt || ""}
                     className="w-full h-full object-cover opacity-80"
                   />
                 </div>
@@ -247,12 +304,12 @@ export default function About() {
             {/* Right: tall photo + stats card */}
             <div className="flex flex-col gap-4 md:gap-5">
               <motion.div variants={up} className="overflow-hidden flex-1 min-h-[220px]">
-                <img src={heroGrinding} alt="Craftsman operating a precision diamond regrinding tool" className="w-full h-full object-cover" />
+                <img src={heroPhotos[2]?.url} alt={heroPhotos[2]?.alt || ""} className="w-full h-full object-cover" />
               </motion.div>
               <motion.div variants={up} className="p-8 md:p-10 space-y-0" style={{ background: NAVY_DEEP }}>
                 {originStats.map((s, i) => (
                   <div key={i} className={`py-4 ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "rgba(28,169,201,0.2)" }}>
-                    <p className="font-serif italic text-2xl text-white leading-none mb-1">{s.value}</p>
+                    <p className="font-serif text-2xl text-white leading-none mb-1">{s.value}</p>
                     <p className="text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</p>
                   </div>
                 ))}
@@ -272,7 +329,7 @@ export default function About() {
           >
             <motion.div variants={up}>
               <SplitHeading
-                lead="The Craftsman"
+                lead={cms?.craftsmanHeadingLead || "The Craftsman"}
                 bold={cms?.craftsman?.name || "Babu Vekariya"}
                 leadClassName="text-[#02274A]"
                 boldClassName="text-[#02274A]"
@@ -291,8 +348,8 @@ export default function About() {
             className="max-w-4xl mx-auto mt-10 md:mt-14"
           >
             <img
-              src={cms?.craftsman?.illustrationUrl || craftsmanIllustration}
-              alt={cms?.craftsman?.name || "Babu Vekariya"}
+              src={craftsmanIllustration.url}
+              alt={craftsmanIllustration.alt || cms?.craftsman?.name || "Babu Vekariya"}
               className="w-full h-auto"
             />
           </motion.div>
@@ -334,26 +391,38 @@ export default function About() {
               variants={up}
               className="relative max-w-3xl mx-auto aspect-video overflow-hidden group"
             >
-              <img src={cms?.stoneVideoPosterUrl || stoneVideoPoster} alt="Precision diamond regrinding in progress" className="w-full h-full object-cover" />
-              {cms?.stoneVideoUrl ? (
-                <a
-                  href={cms.stoneVideoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="absolute inset-0 flex items-center justify-center"
-                  aria-label="Play video"
-                  data-testid="link-about-stone-video"
-                >
-                  <span className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors">
-                    <svg width="20" height="24" viewBox="0 0 20 24" fill="white"><path d="M0 0L20 12L0 24V0Z" /></svg>
-                  </span>
-                </a>
+              {isStoneVideoPlaying && stoneVideoSrc ? (
+                <video
+                  src={stoneVideoSrc}
+                  poster={stoneVideoPoster.url}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-cover"
+                  data-testid="video-about-stone"
+                />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center bg-white/10 backdrop-blur-sm">
-                    <svg width="20" height="24" viewBox="0 0 20 24" fill="white"><path d="M0 0L20 12L0 24V0Z" /></svg>
-                  </span>
-                </div>
+                <>
+                  <img src={stoneVideoPoster.url} alt={stoneVideoPoster.alt || ""} className="w-full h-full object-cover" />
+                  {stoneVideoSrc ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsStoneVideoPlaying(true)}
+                      className="absolute inset-0 flex items-center justify-center w-full"
+                      aria-label="Play video"
+                      data-testid="button-about-stone-video"
+                    >
+                      <span className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                        <svg width="20" height="24" viewBox="0 0 20 24" fill="white"><path d="M0 0L20 12L0 24V0Z" /></svg>
+                      </span>
+                    </button>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center bg-white/10 backdrop-blur-sm">
+                        <svg width="20" height="24" viewBox="0 0 20 24" fill="white"><path d="M0 0L20 12L0 24V0Z" /></svg>
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
             </motion.div>
 
@@ -396,13 +465,13 @@ export default function About() {
               className="relative w-full max-w-sm mx-auto aspect-[3/4]"
             >
               {journeyPhotos[2] && (
-                <img src={journeyPhotos[2]} alt="" aria-hidden="true" className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[-8deg] shadow-lg" />
+                <img src={journeyPhotos[2].url} alt={journeyPhotos[2].alt || ""} aria-hidden={!journeyPhotos[2].alt} className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[-8deg] shadow-lg" />
               )}
               {journeyPhotos[1] && (
-                <img src={journeyPhotos[1]} alt="" aria-hidden="true" className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[5deg] shadow-lg" />
+                <img src={journeyPhotos[1].url} alt={journeyPhotos[1].alt || ""} aria-hidden={!journeyPhotos[1].alt} className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[5deg] shadow-lg" />
               )}
               {journeyPhotos[0] && (
-                <img src={journeyPhotos[0]} alt="Master craftsman examining a diamond under a loupe" className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[-2deg] shadow-xl" />
+                <img src={journeyPhotos[0].url} alt={journeyPhotos[0].alt || ""} className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[-2deg] shadow-xl" />
               )}
             </motion.div>
 
@@ -424,7 +493,7 @@ export default function About() {
                         className="absolute -left-8 top-1.5 w-[7px] h-[7px] rotate-45"
                         style={{ background: active ? TEAL : "rgba(2,39,74,0.25)" }}
                       />
-                      <h3 className="font-serif font-bold text-xl sm:text-2xl mb-2" style={{ color: "#02274A" }}>{step.title}</h3>
+                      <h3 className="font-serif font-normal text-xl sm:text-2xl mb-2" style={{ color: "#02274A" }}>{step.title}</h3>
                       <p className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>{step.body}</p>
                     </motion.div>
                   );
@@ -470,9 +539,12 @@ export default function About() {
               {MAP_ACCENT_DOTS.map(([x, y], i) => (
                 <circle key={`a${i}`} cx={x} cy={y} r={2.6} fill={TEAL} />
               ))}
+              {pins.map((pin) => (
+                <circle key={`p-${pin.name}`} cx={pin.x} cy={pin.y} r={2.8} fill={TEAL} />
+              ))}
             </svg>
 
-            {MAP_PINS.map((pin) => (
+            {pins.map((pin) => (
               <div
                 key={pin.name}
                 className="absolute -translate-x-1/2 -translate-y-full flex flex-col items-center"
