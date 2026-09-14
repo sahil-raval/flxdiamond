@@ -1,11 +1,21 @@
 import { motion } from "framer-motion";
 import { EASE } from "@/lib/motion";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
 import { useSanityQuery } from "@/lib/useSanityData";
 import { isSanityConfigured } from "@/lib/sanity";
 import { ABOUT_PAGE_QUERY } from "@/lib/sanity-queries";
 import SeoHead from "@/components/SeoHead";
+import { MAP_WIDTH, MAP_HEIGHT, MAP_GRAY_DOTS, MAP_ACCENT_DOTS, MAP_PINS } from "@/lib/worldMapDots";
+
+// Served straight from /public — no bundler import needed, just the root-relative path.
+const heroJig = "/hero-jig.jpg";
+const heroLoupe = "/hero-loupe.jpg";
+const heroGrinding = "/hero-grinding.jpg";
+const beginningCraft = "/beginning-craft.jpg";
+const stoneVideoPoster = "/stone-video-poster.jpg";
+const craftsmanIllustration = "/craftsman-illustration.jpg";
+const journeyPhoto1 = "/journey-1.jpg";
+const journeyPhoto2 = "/journey-2.jpg";
+const journeyPhoto3 = "/journey-3.jpg";
 
 const up = {
   hidden: { opacity: 0, y: 22 },
@@ -17,38 +27,47 @@ const stagger = {
   visible: { opacity: 1, transition: { staggerChildren: 0.14 } },
 };
 
-const PARTNERSHIPS = [
-  {
-    name: "KGK Diamond",
-    role: "Sourcing & Conversion Partner",
-    detail: "Supplied precision-cut FL diamonds and specialised regrinding services across multiple production seasons.",
-  },
-  {
-    name: "Venus Jewellery",
-    role: "Technical Evaluation Partner",
-    detail: "Provided expert stone assessment and IF→FL conversion for high-value finished jewellery projects.",
-  },
-  {
-    name: "Excell Overseas",
-    role: "Long-term Trade Partner",
-    detail: "Ongoing supply relationship spanning loose FL diamonds and GIA-verified conversion parcels.",
-  },
-];
+// Brand palette used across this page.
+const NAVY = "#02274A"; // primary brand navy (nav / footer)
+const NAVY_DEEP = "#00315D"; // the slightly lighter navy used behind the About page's dark cards/sections
+const TEAL = "#1CA9C9";
+const ICE = "#DEF3F8"; // light cyan wash used behind the hero + the closing map section
 
-const PILLARS = [
-  {
-    label: "Technical Depth",
-    body: "We do not grade by eye alone. Each stone is assessed against its GIA report with full understanding of what the inclusions are, where they sit, and whether removal is viable without carat loss beyond threshold.",
-  },
-  {
-    label: "Commercial Discretion",
-    body: "Every enquiry is handled under strict commercial confidence. We do not discuss client relationships publicly, and we expect the same standard from the partners we choose to work with.",
-  },
-  {
-    label: "Geelong, Australia",
-    body: "Operating from Geelong, Victoria, we serve trade partners globally while maintaining the time-zone availability and regulatory environment of a mature, stable business jurisdiction.",
-  },
-];
+// A faint grid-line texture, used to echo the graph-paper backdrop behind the hero and the dark sections.
+const gridTexture = (lineColor: string) => ({
+  backgroundImage: `linear-gradient(${lineColor} 1px, transparent 1px), linear-gradient(90deg, ${lineColor} 1px, transparent 1px)`,
+  backgroundSize: "56px 56px",
+});
+
+// Headline treatment used throughout this page: an italic lead phrase followed
+// by a bold close, e.g. "A Diamond is / Never just a Diamond" — both set in the
+// site's own heading font (font-serif) so this page reads identically to the
+// rest of flxdiamond.com, just toggling italic/weight for the two-tone effect.
+// Sizing is fluid (clamp) so headings scale smoothly at every viewport width
+// instead of jumping at Tailwind's breakpoints.
+function SplitHeading({
+  lead,
+  bold,
+  leadClassName = "",
+  boldClassName = "",
+  as: Tag = "h2",
+  size = "section",
+}: {
+  lead: string;
+  bold: string;
+  leadClassName?: string;
+  boldClassName?: string;
+  as?: "h1" | "h2";
+  size?: "hero" | "section";
+}) {
+  const fontSize = size === "hero" ? "clamp(2.1rem, 5.5vw, 4.25rem)" : "clamp(1.65rem, 4vw, 2.75rem)";
+  return (
+    <Tag className="font-serif leading-[1.15]" style={{ fontSize }}>
+      <span className={`italic ${leadClassName}`}>{lead} </span>
+      <span className={`font-serif font-bold not-italic ${boldClassName}`}>{bold}</span>
+    </Tag>
+  );
+}
 
 interface SanityAboutPage {
   seo?: {
@@ -57,36 +76,67 @@ interface SanityAboutPage {
     twitterCard?: string; noIndex?: boolean;
     structuredDataType?: string; additionalJsonLd?: string;
   };
-  partnerships?: { name: string; role: string; detail: string }[];
-  pillars?: { label: string; body: string }[];
-  heroTagline?: string;
-  heroHeading?: string;
-  heroSubtext?: string;
-  craftsman?: { name: string; beganCutting: string; yearsMastery: string; primaryCraft: string; basedIn: string; biography?: string[]; photoUrl?: string };
-  techniqueTagline?: string;
-  techniqueHeading?: string;
-  techniqueIntro?: string[];
-  techniqueSteps?: { step: string; title: string; body: string }[];
-  ctaHeading?: string;
-  ctaBody?: string;
+
+  // Hero
+  heroHeadingLead?: string;
+  heroHeadingBold?: string;
+  heroSubtextLines?: string[];
+
+  // The Beginning (origin story card + stats)
+  beginningEyebrow?: string;
+  beginningHeading?: string;
+  beginningBody?: string;
+  beginningImageUrl?: string;
+  originStats?: { value: string; label: string }[];
+
+  // The Craftsman
+  craftsman?: {
+    name?: string;
+    subtext?: string;
+    illustrationUrl?: string;
+    bio?: string;
+  };
+
+  // The Stone Number (technique / video)
+  stoneHeadingLead?: string;
+  stoneHeadingBold?: string;
+  stoneCaption?: string[];
+  stoneVideoPosterUrl?: string;
+  stoneVideoUrl?: string;
+
+  // The Journey (timeline)
+  journeyHeadingLead?: string;
+  journeyHeadingBold?: string;
+  journeySteps?: { title: string; body: string }[];
+  journeyPhotos?: string[];
+
+  // Trusted by / global reach
+  trustedHeadingLead?: string;
+  trustedHeadingBold?: string;
 }
 
-const CRAFTSMAN_BIO = [
-  "Babu began cutting diamonds in 1978, aged 12, apprenticed to craftsmen in the diamond ateliers of Surat. The work in those ateliers was exacting: every error came out of the stone's value, which meant every error came out of his reputation.",
-  "By his late 20s he had developed what most craftsmen in the industry never acquire: the ability to read a GIA report not as a grade, but as a map. He could identify which surface inclusions were responsible for holding a stone at IF grade, and could determine, often by examination alone, whether those characteristics sat within reach of a micro-regrind.",
-  "The IF→FL conversion is not taught formally. It is developed over a career of failed attempts, successful recoveries, and accumulated judgment. Of the craftsmen who attempt it with regularity, only a handful can execute consistently at commercial scale without meaningful carat loss. Babu is among them.",
+const ORIGIN_STATS_DEFAULT = [
+  { value: "1978", label: "The first chapter" },
+  { value: "12", label: "The age it began" },
+  { value: "Surat", label: "Where the craft was learned" },
 ];
 
-const TECHNIQUE_INTRO = [
-  "GIA grades Internally Flawless (IF) stones based on the absence of internal inclusions, but allows for minor surface blemishes such as naturals, extra facets, or surface graining. FL grade requires that neither internal nor external characteristics are present under 10× magnification by a trained grader.",
-  "When the only barrier to FL is a surface-level characteristic, a precision micro-regrind of the affected facet can eliminate it entirely. The operation is measured in hundredths of a millimetre, typically under 0.01mm of material removal. Executed correctly, carat weight is preserved within GIA rounding thresholds and the stone re-grades as FL.",
+const CRAFTSMAN_BIO_DEFAULT =
+  "For Babu, diamonds have never been just a business. His understanding comes from years spent close to the craft learning how stones are cut and polished, understanding what changes their character, and developing an eye that comes from seeing thousands of diamonds over a lifetime. Today, that knowledge continues to shape the way FLX works. “He wasn't the fastest. He kept looking closer.” And he still does.";
+
+const STONE_CAPTION_DEFAULT = [
+  "A natural diamond can come with pages of information. Colour. Clarity. Cut. Carat. They tell you the characteristics of the stone. But knowing how those details come together and what they mean for the stone in front of you takes another kind of understanding. That's where experience earns its place.",
 ];
 
-const TECHNIQUE_STEPS = [
-  { step: "01", title: "Certificate Assessment", body: "The GIA report is read as a technical document, not a grade. Inclusion type, facet location, and depth are mapped against the stone." },
-  { step: "02", title: "Physical Examination", body: "The stone is examined under 10× loupe and microscopy. The surface characteristic is identified, measured, and assessed for removability." },
-  { step: "03", title: "Micro-Regrind", body: "A precision regrind of the affected facet removes the characteristic within sub-0.01mm tolerance. Polish is restored to GIA standard." },
-  { step: "04", title: "GIA Re-submission", body: "The stone is submitted to GIA for re-grading. A new FL certificate is issued. The conversion is documented and verifiable." },
+const JOURNEY_STEPS_DEFAULT = [
+  {
+    title: "Apprentice",
+    body: "Start with the basics. Learning how the work is actually done.",
+  },
+  {
+    title: "Craftsman",
+    body: "Learn the details. Understanding what happens between rough and polished.",
+  },
 ];
 
 export default function About() {
@@ -94,24 +144,14 @@ export default function About() {
 
   const cms = isSanityConfigured ? sanityAbout : null;
 
-  const partnerships = cms?.partnerships?.length
-    ? cms.partnerships
-    : PARTNERSHIPS;
+  const originStats = cms?.originStats?.length ? cms.originStats : ORIGIN_STATS_DEFAULT;
+  const craftsmanBio = cms?.craftsman?.bio || CRAFTSMAN_BIO_DEFAULT;
+  const stoneCaption = cms?.stoneCaption?.length ? cms.stoneCaption : STONE_CAPTION_DEFAULT;
+  const journeySteps = cms?.journeySteps?.length ? cms.journeySteps : JOURNEY_STEPS_DEFAULT;
 
-  const pillars = cms?.pillars?.length
-    ? cms.pillars
-    : PILLARS;
-
-  const c = cms?.craftsman;
-  const craftsmanStats = [
-    { label: "Began cutting", value: c?.beganCutting || "1978, Age 12" },
-    { label: "Years mastery", value: c?.yearsMastery || "47 Years" },
-    { label: "Primary craft", value: c?.primaryCraft || "IF → FL Conversion" },
-    { label: "Based in",      value: c?.basedIn || "Geelong, VIC" },
-  ];
-  const craftsmanBio = c?.biography?.length ? c.biography : CRAFTSMAN_BIO;
-  const techniqueIntro = cms?.techniqueIntro?.length ? cms.techniqueIntro : TECHNIQUE_INTRO;
-  const techniqueSteps = cms?.techniqueSteps?.length ? cms.techniqueSteps : TECHNIQUE_STEPS;
+  const journeyPhotos = cms?.journeyPhotos?.length
+    ? cms.journeyPhotos
+    : [journeyPhoto1, journeyPhoto2, journeyPhoto3];
 
   const seo = sanityAbout?.seo;
 
@@ -130,253 +170,330 @@ export default function About() {
         additionalJsonLd={seo?.additionalJsonLd}
         siteName="FLX Diamonds"
       />
-    <div className="" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ fontFamily: "'Inter', sans-serif" }}>
 
-      {/* ── Hero ── */}
-      <section className="pt-28 md:pt-40 pb-20 md:pb-28 px-8 md:px-14 lg:px-20" style={{ background: "#02274A" }}>
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={stagger}
-          className="grid md:grid-cols-2 gap-10 md:gap-20 items-center"
-        >
-          <div className="space-y-5 md:space-y-6">
-            <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em] font-medium" style={{ color: "#1CA9C9" }}>
-              {(isSanityConfigured && sanityAbout?.heroTagline) || "Our Story"}
-            </motion.p>
-            <motion.h1 variants={up} className="font-serif leading-[1.05]" style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)", color: "rgba(255,255,255,0.92)" }}>
-              {(isSanityConfigured && sanityAbout?.heroHeading) || "Heritage. Mastery. Quiet Confidence."}
-            </motion.h1>
-            <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
-          </div>
-          <motion.p variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.42)" }}>
-            {(isSanityConfigured && sanityAbout?.heroSubtext) || "FLX Diamonds was built around one craftsman's 47 years of accumulated knowledge, knowledge that cannot be certified, cannot be replicated, and cannot be rushed."}
-          </motion.p>
-        </motion.div>
-      </section>
+        {/* ── Hero + Origin photography ── */}
+        <section className="pt-28 md:pt-40 pb-14 md:pb-20 px-6 md:px-14 lg:px-20 relative overflow-hidden" style={{ background: ICE }}>
+          <div className="absolute inset-0 opacity-60 pointer-events-none" style={gridTexture("rgba(2,39,74,0.06)")} />
 
-      {/* ── The Origin ── */}
-      <section className="py-20 md:py-28 px-6" style={{ background: "#F4F8FC" }}>
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-10 md:gap-16 items-start">
           <motion.div
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-60px" }}
+            animate="visible"
             variants={stagger}
-            className="lg:col-span-1 space-y-6"
+            className="relative max-w-4xl mx-auto text-center space-y-5 md:space-y-6"
           >
-            {sanityAbout?.craftsman?.photoUrl && (
-              <motion.div variants={up} className="overflow-hidden" style={{ aspectRatio: "3/4", maxHeight: "320px" }}>
-                <img
-                  src={sanityAbout.craftsman.photoUrl}
-                  alt={sanityAbout.craftsman?.name || "Babu Vekariya"}
-                  className="w-full h-full object-cover object-top"
-                />
-              </motion.div>
-            )}
-            <motion.p variants={up} className="text-[10px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>
-              The Craftsman
-            </motion.p>
-            <motion.h2 variants={up} className="font-serif text-4xl text-[#02274A] leading-tight">
-              {sanityAbout?.craftsman?.name || "Babu Vekariya"}
-            </motion.h2>
-            <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
-            <motion.div variants={up} className="space-y-0">
-              {craftsmanStats.map((s, i) => (
-                <div key={i} className="flex justify-between items-baseline border-b py-3" style={{ borderColor: "#02274A10" }}>
-                  <span className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(2,39,74,0.35)" }}>{s.label}</span>
-                  <span className="text-sm text-[#02274A]">{s.value}</span>
-                </div>
+            <motion.div variants={up}>
+              <SplitHeading
+                as="h1"
+                size="hero"
+                lead={(isSanityConfigured && sanityAbout?.heroHeadingLead) || "A Diamond is"}
+                bold={(isSanityConfigured && sanityAbout?.heroHeadingBold) || "Never just a Diamond"}
+                leadClassName="text-[#02274A]"
+                boldClassName="text-[#02274A]"
+              />
+            </motion.div>
+            <motion.div variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>
+              {((isSanityConfigured && sanityAbout?.heroSubtextLines) || [
+                "What matters is knowing the difference.",
+                "For over four decades, we've learned to see it.",
+              ]).map((line, i) => (
+                <p key={i}>{line}</p>
               ))}
             </motion.div>
           </motion.div>
 
+          {/* Photo grid + origin card */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
             variants={stagger}
-            className="lg:col-span-2 space-y-6 lg:pt-16"
+            className="relative max-w-7xl mx-auto mt-12 md:mt-16 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5"
           >
-            {craftsmanBio.map((para, i) => (
-              <motion.p key={i} variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.5)" }}>
-                {para}
-              </motion.p>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+            {/* Left: two photos + The Beginning card */}
+            <div className="lg:col-span-2 flex flex-col gap-4 md:gap-5">
+              <div className="grid grid-cols-2 gap-4 md:gap-5">
+                <motion.div variants={up} className="overflow-hidden aspect-[4/3]">
+                  <img src={heroJig} alt="Craftsman examining a rough diamond under a loupe" className="w-full h-full object-cover" />
+                </motion.div>
+                <motion.div variants={up} className="overflow-hidden aspect-[4/3]">
+                  <img src={heroLoupe} alt="Evaluating a polished diamond with tweezers and a loupe" className="w-full h-full object-cover" />
+                </motion.div>
+              </div>
 
-      {/* ── The Technique ── */}
-      <section className="py-20 md:py-28 px-6" style={{ background: "#02274A" }}>
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={stagger}
-            className="grid lg:grid-cols-2 gap-12 md:gap-20 items-start"
-          >
-            <div className="space-y-6">
-              <motion.p variants={up} className="text-[10px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>
-                {cms?.techniqueTagline || "The Technique"}
-              </motion.p>
-              <motion.h2 variants={up} className="font-serif text-4xl text-white leading-tight">
-                {cms?.techniqueHeading ? cms.techniqueHeading : (<>What the conversion<br /><span style={{ color: "rgba(255,255,255,0.3)" }}>actually requires.</span></>)}
-              </motion.h2>
-              <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
-              {techniqueIntro.map((para, i) => (
-                <motion.p key={i} variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.42)" }}>
-                  {para}
-                </motion.p>
-              ))}
+              <motion.div variants={up} className="grid md:grid-cols-2 flex-1" style={{ background: NAVY_DEEP }}>
+                <div className="p-8 md:p-10 flex flex-col justify-center space-y-4">
+                  <p className="font-serif italic text-lg" style={{ color: TEAL }}>
+                    {cms?.beginningEyebrow || "The Beginning"}
+                  </p>
+                  <h3 className="font-serif font-bold text-xl sm:text-2xl text-white">
+                    {cms?.beginningHeading || "Before FLX, There was the craft."}
+                  </h3>
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+                    {cms?.beginningBody ||
+                      "In 1978, Babu Vekariya entered the diamond trade at twelve. There were no shortcuts. He learned by standing close to the work watching craftsmen, understanding the process and slowly discovering how much there was to notice in a single stone. What stayed with him wasn't just the craft. It was the habit of paying attention."}
+                  </p>
+                </div>
+                <div className="overflow-hidden min-h-[200px] md:min-h-0">
+                  <img
+                    src={cms?.beginningImageUrl || beginningCraft}
+                    alt="Precision diamond regrinding equipment"
+                    className="w-full h-full object-cover opacity-80"
+                  />
+                </div>
+              </motion.div>
             </div>
 
+            {/* Right: tall photo + stats card */}
+            <div className="flex flex-col gap-4 md:gap-5">
+              <motion.div variants={up} className="overflow-hidden flex-1 min-h-[220px]">
+                <img src={heroGrinding} alt="Craftsman operating a precision diamond regrinding tool" className="w-full h-full object-cover" />
+              </motion.div>
+              <motion.div variants={up} className="p-8 md:p-10 space-y-0" style={{ background: NAVY_DEEP }}>
+                {originStats.map((s, i) => (
+                  <div key={i} className={`py-4 ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "rgba(28,169,201,0.2)" }}>
+                    <p className="font-serif italic text-2xl text-white leading-none mb-1">{s.value}</p>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</p>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* ── The Craftsman ── */}
+        <section className="py-20 md:py-28 px-6" style={{ background: "#FFFFFF" }}>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={stagger}
+            className="max-w-3xl mx-auto text-center space-y-4"
+          >
+            <motion.div variants={up}>
+              <SplitHeading
+                lead="The Craftsman"
+                bold={cms?.craftsman?.name || "Babu Vekariya"}
+                leadClassName="text-[#02274A]"
+                boldClassName="text-[#02274A]"
+              />
+            </motion.div>
+            <motion.p variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.55)" }}>
+              {cms?.craftsman?.subtext || "47+ Years in the diamond trade — a craft you don't stop learning."}
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            variants={up}
+            className="max-w-4xl mx-auto mt-10 md:mt-14"
+          >
+            <img
+              src={cms?.craftsman?.illustrationUrl || craftsmanIllustration}
+              alt={cms?.craftsman?.name || "Babu Vekariya"}
+              className="w-full h-auto"
+            />
+          </motion.div>
+
+          <motion.p
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={up}
+            className="max-w-2xl mx-auto mt-10 md:mt-14 text-center text-sm sm:text-base leading-relaxed"
+            style={{ color: "rgba(2,39,74,0.6)" }}
+          >
+            {craftsmanBio}
+          </motion.p>
+        </section>
+
+        {/* ── The Stone Number (technique + video) ── */}
+        <section className="py-20 md:py-28 px-6 relative overflow-hidden" style={{ background: NAVY_DEEP }}>
+          <div className="absolute inset-0 opacity-50 pointer-events-none" style={gridTexture("rgba(255,255,255,0.05)")} />
+          <div className="relative max-w-4xl mx-auto text-center space-y-8 md:space-y-10">
             <motion.div
-              variants={stagger}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="space-y-4 lg:pt-16"
+              variants={up}
             >
-              {techniqueSteps.map((s) => (
-                <motion.div key={s.step} variants={up} className="flex gap-6 items-start p-5 border" style={{ borderColor: "rgba(28,169,201,0.12)", background: "rgba(28,169,201,0.04)" }}>
-                  <span className="text-xl shrink-0 font-medium tabular-nums" style={{ color: "rgba(28,169,201,0.4)" }}>{s.step}</span>
-                  <div>
-                    <p className="text-white text-sm font-medium tracking-wide mb-1">{s.title}</p>
-                    <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.42)" }}>{s.body}</p>
-                  </div>
-                </motion.div>
-              ))}
+              <SplitHeading
+                lead={cms?.stoneHeadingLead || "The Stone Number tells you what it is"}
+                bold={cms?.stoneHeadingBold || "The story tells you more."}
+                leadClassName="text-white"
+                boldClassName="text-white"
+              />
+            </motion.div>
+
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={up}
+              className="relative max-w-3xl mx-auto aspect-video overflow-hidden group"
+            >
+              <img src={cms?.stoneVideoPosterUrl || stoneVideoPoster} alt="Precision diamond regrinding in progress" className="w-full h-full object-cover" />
+              {cms?.stoneVideoUrl ? (
+                <a
+                  href={cms.stoneVideoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="absolute inset-0 flex items-center justify-center"
+                  aria-label="Play video"
+                  data-testid="link-about-stone-video"
+                >
+                  <span className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors">
+                    <svg width="20" height="24" viewBox="0 0 20 24" fill="white"><path d="M0 0L20 12L0 24V0Z" /></svg>
+                  </span>
+                </a>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center bg-white/10 backdrop-blur-sm">
+                    <svg width="20" height="24" viewBox="0 0 20 24" fill="white"><path d="M0 0L20 12L0 24V0Z" /></svg>
+                  </span>
+                </div>
+              )}
+            </motion.div>
+
+            {stoneCaption.map((para, i) => (
+              <motion.p
+                key={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={up}
+                className="text-sm sm:text-base leading-relaxed max-w-2xl mx-auto"
+                style={{ color: "rgba(255,255,255,0.55)" }}
+              >
+                {para}
+              </motion.p>
+            ))}
+          </div>
+        </section>
+
+        {/* ── The Journey ── */}
+        <section className="py-20 md:py-28 px-6" style={{ background: "#FFFFFF" }}>
+          <div className="max-w-4xl mx-auto text-center mb-14 md:mb-20">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={up}>
+              <SplitHeading
+                lead={cms?.journeyHeadingLead || "The Journey"}
+                bold={cms?.journeyHeadingBold || "The Years Changed. The Curiosity didn't."}
+                leadClassName="text-[#02274A]"
+                boldClassName="text-[#02274A]"
+              />
+            </motion.div>
+          </div>
+
+          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 md:gap-10 items-center">
+            {/* Photo stack */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={up}
+              className="relative w-full max-w-sm mx-auto aspect-[3/4]"
+            >
+              {journeyPhotos[2] && (
+                <img src={journeyPhotos[2]} alt="" aria-hidden="true" className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[-8deg] shadow-lg" />
+              )}
+              {journeyPhotos[1] && (
+                <img src={journeyPhotos[1]} alt="" aria-hidden="true" className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[5deg] shadow-lg" />
+              )}
+              {journeyPhotos[0] && (
+                <img src={journeyPhotos[0]} alt="Master craftsman examining a diamond under a loupe" className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover rotate-[-2deg] shadow-xl" />
+              )}
+            </motion.div>
+
+            {/* Vertical timeline */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={stagger}
+              className="relative pl-8"
+            >
+              <div className="absolute left-[3px] top-2 bottom-2 border-l border-dashed" style={{ borderColor: "rgba(2,39,74,0.2)" }} />
+              <div className="space-y-16">
+                {journeySteps.map((step, i) => {
+                  const active = i === 0;
+                  return (
+                    <motion.div key={step.title} variants={up} className="relative" style={{ opacity: active ? 1 : 0.35 }}>
+                      <span
+                        className="absolute -left-8 top-1.5 w-[7px] h-[7px] rotate-45"
+                        style={{ background: active ? TEAL : "rgba(2,39,74,0.25)" }}
+                      />
+                      <h3 className="font-serif font-bold text-xl sm:text-2xl mb-2" style={{ color: "#02274A" }}>{step.title}</h3>
+                      <p className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>{step.body}</p>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── Trusted globally (world map) ── */}
+        <section
+          className="pt-20 md:pt-28 pb-0 px-6 relative overflow-hidden"
+          style={{ background: `linear-gradient(180deg, #FFFFFF 0%, ${ICE} 100%)` }}
+        >
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="max-w-2xl mx-auto text-center space-y-4 relative z-10"
+          >
+            <motion.div variants={up}>
+              <SplitHeading
+                lead={cms?.trustedHeadingLead || "Trusted by names that"}
+                bold={cms?.trustedHeadingBold || "hold their own standard."}
+                leadClassName="text-[#02274A]"
+                boldClassName="text-[#02274A]"
+              />
             </motion.div>
           </motion.div>
-        </div>
-      </section>
-
-      {/* ── Notable Partnerships ── */}
-      <section className="py-20 md:py-28 px-6" style={{ background: "#F4F8FC" }}>
-        <div className="max-w-7xl mx-auto space-y-10 md:space-y-16">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="max-w-2xl space-y-5"
-          >
-            <motion.p variants={up} className="text-[10px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>
-              Notable Relationships
-            </motion.p>
-            <motion.h2 variants={up} className="font-serif text-4xl text-[#02274A] leading-tight">
-              Trusted by names that<br />
-              <span style={{ color: "rgba(2,39,74,0.3)" }}>hold their own standard.</span>
-            </motion.h2>
-            <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
-            <motion.p variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.45)" }}>
-              Over four decades, Babu's craft earned the trust of established names in the diamond and
-              jewellery trade. These are relationships built on consistent output, not on contracts alone.
-            </motion.p>
-          </motion.div>
 
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="grid lg:grid-cols-3 gap-8"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={up}
+            className="relative max-w-5xl mx-auto mt-10 md:mt-14"
           >
-            {partnerships.map((p) => (
-              <motion.div
-                key={p.name}
-                variants={up}
-                className="p-8 space-y-4 border-t-2"
-                style={{ background: "white", borderTopColor: "#1CA9C9" }}
+            <svg viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`} className="w-full h-auto" role="img" aria-label="World map highlighting FLX Diamonds trade partner countries">
+              {MAP_GRAY_DOTS.map(([x, y], i) => (
+                <circle key={`g${i}`} cx={x} cy={y} r={2.1} fill="rgba(2,39,74,0.14)" />
+              ))}
+              {MAP_ACCENT_DOTS.map(([x, y], i) => (
+                <circle key={`a${i}`} cx={x} cy={y} r={2.6} fill={TEAL} />
+              ))}
+            </svg>
+
+            {MAP_PINS.map((pin) => (
+              <div
+                key={pin.name}
+                className="absolute -translate-x-1/2 -translate-y-full flex flex-col items-center"
+                style={{ left: `${(pin.x / MAP_WIDTH) * 100}%`, top: `${(pin.y / MAP_HEIGHT) * 100}%` }}
               >
-                <h3 className="font-serif text-xl text-[#02274A]">{p.name}</h3>
-                <p className="text-[10px] uppercase tracking-[0.3em] font-medium" style={{ color: "#1CA9C9" }}>
-                  {p.role}
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.5)" }}>{p.detail}</p>
-              </motion.div>
+                <span
+                  className="flex items-center gap-1 sm:gap-1.5 bg-white shadow-md px-1.5 py-1 sm:px-3 sm:py-1.5 text-[9px] sm:text-xs font-medium whitespace-nowrap"
+                  style={{ color: "#02274A" }}
+                >
+                  <span className="text-xs sm:text-base leading-none">{pin.flagEmoji}</span>
+                  {pin.name}
+                </span>
+                <span className="w-px h-2" style={{ background: TEAL }} />
+              </div>
             ))}
           </motion.div>
-        </div>
-      </section>
 
-      {/* ── What We Stand For ── */}
-      <section className="py-20 md:py-28 px-6" style={{ background: "#02274A" }}>
-        <div className="max-w-7xl mx-auto space-y-10 md:space-y-16">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="text-center space-y-4 max-w-xl mx-auto"
-          >
-            <motion.p variants={up} className="text-[10px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>
-              Our Position
-            </motion.p>
-            <motion.h2 variants={up} className="font-serif text-4xl text-white leading-tight">
-              How we operate.
-            </motion.h2>
-          </motion.div>
+          <div className="h-14 md:h-20" />
+        </section>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="grid lg:grid-cols-3 gap-10"
-          >
-            {pillars.map((p) => (
-              <motion.div key={p.label} variants={up} className="space-y-4 pt-6 border-t" style={{ borderColor: "rgba(28,169,201,0.2)" }}>
-                <h3 className="font-serif text-xl text-white">{p.label}</h3>
-                <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{p.body}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── Closing CTA ── */}
-      <section className="py-20 md:py-28 px-6 text-center" style={{ background: "#F4F8FC" }}>
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={stagger}
-          className="max-w-2xl mx-auto space-y-8"
-        >
-          <motion.h2 variants={up} className="font-serif text-4xl text-[#02274A] leading-tight">
-            {(isSanityConfigured && sanityAbout?.ctaHeading) || "Ready to begin a serious conversation?"}
-          </motion.h2>
-          <motion.p variants={up} className="text-base" style={{ color: "rgba(2,39,74,0.45)" }}>
-            {(isSanityConfigured && sanityAbout?.ctaBody) || "All enquiries are handled directly and under strict commercial confidence."}
-          </motion.p>
-          <motion.div variants={up} className="flex justify-center gap-4 flex-wrap">
-            <Link href="/talk-to-us">
-              <Button
-                className="rounded-none text-[10px] uppercase tracking-[0.25em] text-white hover:opacity-90"
-                style={{ background: "#1CA9C9", height: "48px", padding: "0 2rem" }}
-                data-testid="btn-about-contact"
-              >
-                Begin the Conversation
-              </Button>
-            </Link>
-            <Link href="/faq">
-              <Button
-                variant="outline"
-                className="rounded-none text-[10px] uppercase tracking-[0.25em] text-[#02274A] hover:bg-[#02274A] hover:text-white transition-colors"
-                style={{ borderColor: "#02274A", height: "48px", padding: "0 2rem" }}
-                data-testid="btn-about-faq"
-              >
-                Read FAQ
-              </Button>
-            </Link>
-          </motion.div>
-        </motion.div>
-      </section>
-
-    </div>
+      </div>
     </>
   );
 }

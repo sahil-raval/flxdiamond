@@ -140,23 +140,66 @@ export const HOME_PAGE_QUERY = `*[_type == "homePage"][0]{
 /* ─────────────────────────────────────────
    About Page
    ───────────────────────────────────────── */
+// Replace the existing ABOUT_PAGE_QUERY export in your lib/sanity-queries.ts with
+// this one. It projects every field the rewritten About.tsx reads, and flattens
+// each Sanity image reference straight to a usable `...Url` string so the
+// component never has to know about asset refs.
+//
+// If your project's SEO fields are on a shared object type, this assumes the
+// projection shape (metaTitle, metaDescription, ogImage.asset->url, etc.) already
+// matches what the rest of your site queries — adjust the `seo{...}` block below
+// if yours differs.
+
 export const ABOUT_PAGE_QUERY = `*[_type == "aboutPage"][0]{
-  ${SEO_PROJECTION},
-  heroTagline,
-  heroHeading,
-  heroSubtext,
-  "craftsman": craftsman {
-    name, beganCutting, yearsMastery, primaryCraft, basedIn, biography,
-    "photoUrl": photo.asset->url
+  seo{
+    metaTitle,
+    metaDescription,
+    metaKeywords,
+    ogTitle,
+    ogDescription,
+    "ogImageUrl": ogImage.asset->url,
+    twitterCard,
+    noIndex,
+    structuredDataType,
+    additionalJsonLd
   },
-  techniqueTagline,
-  techniqueHeading,
-  techniqueIntro,
-  techniqueSteps,
-  partnerships,
-  pillars,
-  ctaHeading,
-  ctaBody
+
+  heroHeadingLead,
+  heroHeadingBold,
+  heroSubtextLines,
+
+  beginningEyebrow,
+  beginningHeading,
+  beginningBody,
+  "beginningImageUrl": beginningImage.asset->url,
+  originStats[]{
+    value,
+    label
+  },
+
+  craftsman{
+    name,
+    subtext,
+    "illustrationUrl": illustration.asset->url,
+    bio
+  },
+
+  stoneHeadingLead,
+  stoneHeadingBold,
+  stoneCaption,
+  "stoneVideoPosterUrl": stoneVideoPoster.asset->url,
+  stoneVideoUrl,
+
+  journeyHeadingLead,
+  journeyHeadingBold,
+  journeySteps[]{
+    title,
+    body
+  },
+  "journeyPhotos": journeyPhotos[].asset->url,
+
+  trustedHeadingLead,
+  trustedHeadingBold
 }`;
 
 /* ─────────────────────────────────────────
