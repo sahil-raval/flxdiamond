@@ -219,7 +219,7 @@ export function Navbar() {
         // gradient so the glass look survives; after scroll it's solid.
         background: solid
           ? "rgba(2,39,74,0.96)"
-          : "linear-gradient(180deg, rgba(2,39,74,0.65) 0%, rgba(2,39,74,0.35) 60%, transparent 100%)",
+          : "linear-gradient(180deg, rgba(1, 39, 74, 0.26) 0%, rgba(2,39,74,0.35) 60%, transparent 100%)",
         borderColor: solid ? "rgba(28,169,201,0.12)" : "transparent",
         backdropFilter: solid ? "blur(14px)" : "blur(2px)",
         WebkitBackdropFilter: solid ? "blur(14px)" : "blur(2px)",
@@ -230,7 +230,7 @@ export function Navbar() {
         {/* Logo — white variant while the nav is transparent over the hero, original once solid */}
         <Link href="/" className="flex items-center shrink-0" data-testid="nav-logo">
           <img
-            src={solid ? "/flx-logo.png" : "/white-logo.png"}
+            src={solid ? "/white-logo.png" : "/white-logo.png"}
             alt="FLX Diamond"
             style={{ height: "44px", width: "auto", mixBlendMode: "screen" }}
           />

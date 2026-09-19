@@ -39,7 +39,7 @@ export function Footer() {
   const { data: ssData } = useSanityQuery<SanitySiteSettings>(["site-settings"], SITE_SETTINGS_QUERY);
   const ss = isSanityConfigured ? ssData : null;
 
-  const logoUrl = "/flx-logo.png";
+  const logoUrl = "/white-logo.png";
   const footerTagline = ss?.footerTagline || "Every FL certificate begins with a practiced eye and 47 years of accumulated judgment.";
   const footerNote = ss?.footerNote || "B2B diamond sourcing and precision IF→FL conversion. Serving diamond traders, jewellers, and investors globally from Geelong, Victoria, Australia.";
   const contacts = (ss?.email || ss?.phones?.length || ss?.address)
