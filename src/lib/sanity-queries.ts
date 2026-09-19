@@ -27,57 +27,39 @@ export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0]{
   siteName,
   tagline,
   "logoUrl": logo.asset->url,
-  logoAlt,
-  globalSeo {
-    defaultTitle,
-    titleSeparator,
-    defaultDescription,
-    "defaultOgImageUrl": defaultOgImage.asset->url,
-    twitterHandle,
-    googleSiteVerification,
-    bingVerification
-  },
-  organizationSchema {
-    legalName,
-    abn,
-    foundingYear,
-    logoUrl,
-    sameAs
-  },
-  contact {
-    email,
-    phoneAU,
-    phoneIN,
-    address,
-    googleMapsUrl
-  },
-  social {
-    instagram,
-    linkedin,
-    facebook,
-    twitter,
-    youtube
-  },
+  "logoAlt": logo.alt,
+  titleTemplate,
+  siteUrl,
+  twitterHandle,
+  googleSiteVerification
+
+
+
   footerTagline,
   footerNote,
   seoDescription,
   email,
   phones,
   address,
-  googleMapsUrl
+  googleMapsUrl,
+  socialProfiles[]{ platform, url }
 }`;
 
 /* ─────────────────────────────────────────
    Home Page
    ───────────────────────────────────────── */
 export const HOME_PAGE_QUERY = `*[_type == "homePage"][0]{
-  ${SEO_PROJECTION},
+  seo {
+    metaTitle, metaDescription, metaKeywords,
+    ogTitle, ogDescription, ogImageUrl,
+    twitterCard, noIndex, structuredDataType, additionalJsonLd
+  },
   heroOverline,
   heroHeading,
   heroSubtext,
   heroCta,
   heroSecondaryCta,
-  "heroVideoUrl": heroVideo.asset->url,
+  heroVideoUrl,
   marqueeItems,
   signalStripItems,
   clientLogos,
@@ -95,17 +77,16 @@ export const HOME_PAGE_QUERY = `*[_type == "homePage"][0]{
   manufacturingTagline,
   manufacturingHeading,
   manufacturingBody,
-  manufacturingCta,
-  "manufacturingVideoUrl": manufacturingVideo.asset->url,
-  "manufacturingImageUrl": manufacturingImage.asset->url,
+
   processBadges,
   processCta,
   fourCs,
+  featureVideoUrl,
   iftflTagline,
   iftflHeading,
   iftflBody,
-  iftflCta,
-  iftflSecondaryCta,
+  iftflCtaPrimary,
+  iftflCtaSecondary,
   whyTagline,
   whyHeading,
   whyCards,
@@ -325,7 +306,7 @@ export const TRADE_PAGE_QUERY = `*[_type == "tradePage"][0]{
   jewellersBody,
   ctaHeading,
   ctaBody,
-  "galleryImageUrls": galleryImages[].asset->url
+  ctaBody
 }`;
 
 /* ─────────────────────────────────────────

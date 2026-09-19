@@ -54,7 +54,7 @@ const DEFAULT_ROUTES = ["/diamonds", "/jewellery", "/services", "/faq", "/journa
 const SEO_FIELDS = `
   seo {
     metaTitle, metaDescription, metaKeywords,
-    ogTitle, ogDescription, "ogImageUrl": ogImage.asset->url,
+    ogTitle, ogDescription, "ogImageUrl": coalesce(ogImage.asset->url, ogImageUrl),
     twitterCard, twitterTitle, twitterDescription,
     "twitterImageUrl": twitterImage.asset->url,
     canonicalUrl, noIndex, structuredDataType, additionalJsonLd

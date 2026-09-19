@@ -47,7 +47,11 @@ export async function sanityFetch<T>(query: string, params?: Record<string, unkn
       body: JSON.stringify({ query, params: params ?? {} }),
       cache: "no-store",
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      console.warn(`[sanity] /api/sanity-query responded ${res.status} — showing fallback content.`, detail.slice(0, 200));
+      return null;
+    }
     const json = await res.json() as { result?: T };
     return json.result ?? null;
   } catch (error) {

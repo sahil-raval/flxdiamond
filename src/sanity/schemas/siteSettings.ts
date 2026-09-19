@@ -86,6 +86,23 @@ export default defineType({
       initialValue: "https://flxdiamond.com.au",
     }),
     defineField({
+      name: "footerTagline",
+      title: "Footer Tagline",
+      type: "string",
+      group: "brand",
+      description: "Large serif line shown in the site footer.",
+      initialValue: "Every FL certificate begins with a practiced eye and 47 years of accumulated judgment.",
+    }),
+    defineField({
+      name: "footerNote",
+      title: "Footer Description",
+      type: "text",
+      rows: 3,
+      group: "brand",
+      description: "Short paragraph shown under the footer logo.",
+      initialValue: "B2B diamond sourcing and precision IF→FL conversion. Serving diamond traders, jewellers, and investors globally from Geelong, Victoria, Australia.",
+    }),
+    defineField({
       name: "twitterHandle",
       title: "Twitter / X Handle",
       type: "string",

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { sanityConfig, cdnUrl, setCors, setNoCache } from "./_lib";
+import { sanityConfig, cdnUrl, setCors, setNoCache } from "./_lib.js";
 
 /**
  * Public GROQ proxy. No auth token is forwarded — drafts stay hidden.
@@ -54,9 +54,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query, params: params || {} }),
     });
-    const data = await r.json();
-    if (!r.ok) return res.status(r.status).json(data);
-    return res.status(200).json(data);
+    const text = await r.text();
+    let data: unknown;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return res.status(502).json({
+        error: `Upstream returned non-JSON response (HTTP ${r.status}): ${text.slice(0, 200)}`,
+      });
+    }
+    return res.status(r.ok ? 200 : r.status).json(data);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return res.status(500).json({ error: message });
