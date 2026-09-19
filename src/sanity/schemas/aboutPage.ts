@@ -3,10 +3,11 @@
 // it in schemas/index.ts. Every field here maps 1:1 to a field the rewritten About.tsx
 // reads — nothing here is decorative, and nothing About.tsx reads is missing here.
 //
-// NOTE: this assumes you already have a shared reusable "seo" object schema (most
-// projects with an SeoHead component like yours do — it's referenced by other page
-// types too). If you don't, replace the `{ name: "seo", type: "seo" }` field below
-// with the inline field set commented at the bottom of this file.
+// The "seo" field below is a fully inline object — it doesn't depend on a shared
+// "seo" schema type being registered elsewhere in your Studio. If your project
+// DOES already have its own shared "seo" object type used by other page types,
+// you can swap this field's `type: "object"` + `fields: [...]` for `type: "seo"`
+// instead, so all your page types share one seo schema.
 
 import { defineType, defineField, defineArrayMember } from "sanity";
 
@@ -28,8 +29,20 @@ export default defineType({
     defineField({
       name: "seo",
       title: "SEO",
-      type: "seo", // swap for the inline object at the bottom of this file if you don't have a shared "seo" type
+      type: "object",
       group: "seo",
+      fields: [
+        defineField({ name: "metaTitle", title: "Meta title", type: "string" }),
+        defineField({ name: "metaDescription", title: "Meta description", type: "text", rows: 3 }),
+        defineField({ name: "metaKeywords", title: "Meta keywords", type: "string" }),
+        defineField({ name: "ogTitle", title: "OG title", type: "string" }),
+        defineField({ name: "ogDescription", title: "OG description", type: "text", rows: 3 }),
+        defineField({ name: "ogImage", title: "OG image", type: "image" }),
+        defineField({ name: "twitterCard", title: "Twitter card type", type: "string" }),
+        defineField({ name: "noIndex", title: "No-index this page", type: "boolean" }),
+        defineField({ name: "structuredDataType", title: "Structured data type", type: "string" }),
+        defineField({ name: "additionalJsonLd", title: "Additional JSON-LD", type: "text", rows: 4 }),
+      ],
     }),
 
     // ── Hero ─────────────────────────────────────────────────────────
@@ -388,27 +401,3 @@ export default defineType({
     },
   },
 });
-
-/*
-INLINE "seo" FIELD — use this instead of `type: "seo"` above if you don't already
-have a shared seo object schema registered in your studio:
-
-defineField({
-  name: "seo",
-  title: "SEO",
-  type: "object",
-  group: "seo",
-  fields: [
-    defineField({ name: "metaTitle", type: "string" }),
-    defineField({ name: "metaDescription", type: "text", rows: 3 }),
-    defineField({ name: "metaKeywords", type: "string" }),
-    defineField({ name: "ogTitle", type: "string" }),
-    defineField({ name: "ogDescription", type: "text", rows: 3 }),
-    defineField({ name: "ogImage", type: "image" }),
-    defineField({ name: "twitterCard", type: "string" }),
-    defineField({ name: "noIndex", type: "boolean" }),
-    defineField({ name: "structuredDataType", type: "string" }),
-    defineField({ name: "additionalJsonLd", type: "text", rows: 4 }),
-  ],
-}),
-*/
