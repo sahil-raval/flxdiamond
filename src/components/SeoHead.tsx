@@ -75,7 +75,12 @@ function setCanonical(url: string) {
 function buildSelfReferencingCanonical(): string | undefined {
   if (typeof window === "undefined") return undefined;
   const { origin, pathname } = window.location;
-  const trimmed = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  // Normalise root to no trailing slash so it always matches the
+  // "https://www.flxdiamond.com" (no slash) form baked into index.html —
+  // otherwise the homepage's JS-set canonical ("…com/") would disagree
+  // with the raw HTML's static one ("…com"), which some SEO auditors flag
+  // as an inconsistency in its own right.
+  const trimmed = pathname.replace(/\/+$/, "");
   return `${origin}${trimmed}`;
 }
 
@@ -93,7 +98,12 @@ function buildAutoJsonLd(
     "@type": type,
     name: title ?? siteName ?? "FLX Diamonds",
     description: description,
-    url: url ?? typeof window !== "undefined" ? window.location.href : undefined,
+    // Fixed: the previous version, `url ?? typeof window !== "undefined" ? window.location.href : undefined`,
+    // has `??` binding tighter than `?:` — so whenever `url` was any truthy
+    // string, the ternary still fired on it and silently threw the real
+    // value away in favor of window.location.href. Parenthesizing makes the
+    // intent (use `url` if present, else fall back) actually happen.
+    url: url ?? (typeof window !== "undefined" ? window.location.href : undefined),
     image: imageUrl,
   };
   if (type === "Organization" || type === "LocalBusiness") {
@@ -175,7 +185,12 @@ export default function SeoHead({
         structuredDataType,
         metaTitle,
         metaDescription,
-        canonicalUrl,
+        // Fixed: was passing the raw `canonicalUrl` prop (usually undefined,
+        // since most pages rely on auto self-referencing rather than an
+        // explicit override), instead of the actually-resolved canonical
+        // used for the <link> tag itself. Now the JSON-LD's `url` field and
+        // the canonical tag always agree.
+        resolvedCanonical,
         ogImageUrl,
         siteName,
       );
