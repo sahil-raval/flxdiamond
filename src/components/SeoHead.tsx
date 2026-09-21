@@ -69,17 +69,20 @@ function setCanonical(url: string) {
 
 /**
  * Self-referencing canonical: strips query string/hash and trailing slash
- * (except root) so every indexable route gets a canonical link even when a
- * page doesn't explicitly pass canonicalUrl.
+ * on every route EXCEPT root, so every indexable route gets a canonical
+ * link even when a page doesn't explicitly pass canonicalUrl.
+ *
+ * Root is kept as "origin/" (with the trailing slash) to match the
+ * LocalBusiness JSON-LD's "url" field already in index.html
+ * ("https://www.flxdiamond.com/") — pick this form as the single source of
+ * truth and make sure index.html's static <link rel="canonical"> tag and
+ * the WebSite JSON-LD's "url"/"@id" (currently "https://flxdiamond.com/",
+ * missing "www") are updated to match it exactly.
  */
 function buildSelfReferencingCanonical(): string | undefined {
   if (typeof window === "undefined") return undefined;
   const { origin, pathname } = window.location;
-  // Normalise root to no trailing slash so it always matches the
-  // "https://www.flxdiamond.com" (no slash) form baked into index.html —
-  // otherwise the homepage's JS-set canonical ("…com/") would disagree
-  // with the raw HTML's static one ("…com"), which some SEO auditors flag
-  // as an inconsistency in its own right.
+  if (pathname === "/") return `${origin}/`;
   const trimmed = pathname.replace(/\/+$/, "");
   return `${origin}${trimmed}`;
 }

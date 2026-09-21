@@ -141,7 +141,12 @@ function buildHead(opts: { html: string; site: any; seo: any; fallbackTitle?: st
   const twitterTitle = seo?.twitterTitle || ogTitle;
   const twitterDescription = seo?.twitterDescription || ogDescription;
   const twitterImage = seo?.twitterImageUrl || ogImage;
-  const canonicalUrl = seo?.canonicalUrl || `${siteBase}${routePath === "/" ? "" : routePath}`;
+  // Fixed: root used to fall through to "" here, so canonicalUrl became
+  // just `siteBase` (no trailing slash) — inconsistent with buildOrgSchema()
+  // below, which uses the raw, un-stripped site.siteUrl (which already ends
+  // in "/") for the LocalBusiness/Organization schema's own "url" field.
+  // Root now gets "/" explicitly so both agree on the exact same URL.
+  const canonicalUrl = seo?.canonicalUrl || `${siteBase}${routePath === "/" ? "/" : routePath}`;
   const robots = seo?.noIndex ? "noindex, nofollow" : "index, follow";
 
   let extraSchema = "";
