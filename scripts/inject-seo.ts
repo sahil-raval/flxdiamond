@@ -158,7 +158,10 @@ function buildHead(opts: { html: string; site: any; seo: any; fallbackTitle?: st
   const { html, site, seo, fallbackTitle, routePath } = opts;
   const siteBase = (site?.siteUrl || "").replace(/\/$/, "");
 
-  const rawTitle = seo?.metaTitle || fallbackTitle || site?.siteName || "FLX Diamonds";
+  // .trim() guards against a stray trailing/leading space typed into the
+  // Sanity metaTitle field (e.g. "...Diamonds " + " | FLXDIAMOND" from the
+  // template = a visible double space before the pipe in the raw HTML).
+  const rawTitle = (seo?.metaTitle || fallbackTitle || site?.siteName || "FLX Diamonds").trim();
   const title = applyTitleTemplate(rawTitle, site?.titleTemplate);
   const description = seo?.metaDescription || site?.seoDescription || "";
   const ogTitle = seo?.ogTitle || rawTitle;
