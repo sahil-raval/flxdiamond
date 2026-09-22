@@ -95,6 +95,34 @@ function escapeHtml(str = "") {
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+/**
+ * Applies siteSettings.titleTemplate ("{title} | FLXDIAMOND", etc.) to a raw
+ * page title WITHOUT double-appending when the raw title already ends (or
+ * starts) with the exact text the template would add.
+ *
+ * This is what was producing "... | FLXDIAMOND | FLXDIAMOND": the Home
+ * Page's metaTitle field already ends in "| FLXDIAMOND", and the template
+ * appended "| FLXDIAMOND" again on top of it. The template itself is not
+ * the bug and is left fully in place (per request — the default SEO
+ * templating for the home page, and every other page, still runs exactly
+ * as before) — it's just made idempotent against a title that already
+ * carries the suffix/prefix.
+ */
+function applyTitleTemplate(rawTitle: string, template?: string): string {
+  if (!template?.includes("{title}")) return rawTitle;
+  const idx = template.indexOf("{title}");
+  const prefix = template.slice(0, idx);
+  const suffix = template.slice(idx + "{title}".length);
+  let title = rawTitle;
+  if (suffix && title.toLowerCase().endsWith(suffix.toLowerCase())) {
+    title = title.slice(0, title.length - suffix.length).trimEnd();
+  }
+  if (prefix && title.toLowerCase().startsWith(prefix.toLowerCase())) {
+    title = title.slice(prefix.length).trimStart();
+  }
+  return `${prefix}${title}${suffix}`;
+}
+
 function buildOrgSchema(s: any) {
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -131,9 +159,7 @@ function buildHead(opts: { html: string; site: any; seo: any; fallbackTitle?: st
   const siteBase = (site?.siteUrl || "").replace(/\/$/, "");
 
   const rawTitle = seo?.metaTitle || fallbackTitle || site?.siteName || "FLX Diamonds";
-  const title = site?.titleTemplate?.includes("{title}")
-    ? site.titleTemplate.replace("{title}", rawTitle)
-    : rawTitle;
+  const title = applyTitleTemplate(rawTitle, site?.titleTemplate);
   const description = seo?.metaDescription || site?.seoDescription || "";
   const ogTitle = seo?.ogTitle || rawTitle;
   const ogDescription = seo?.ogDescription || description;
