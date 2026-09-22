@@ -170,6 +170,11 @@ function buildHead(opts: { html: string; site: any; seo: any; fallbackTitle?: st
   const twitterTitle = seo?.twitterTitle || ogTitle;
   const twitterDescription = seo?.twitterDescription || ogDescription;
   const twitterImage = seo?.twitterImageUrl || ogImage;
+  // og:site_name was never being rewritten by this script at all — it was
+  // left as whatever literal text is hardcoded in the Vite index.html
+  // template ("FLX Diamonds"), completely disconnected from Sanity. Wiring
+  // it to site.siteName makes it editable content like everything else here.
+  const ogSiteName = site?.siteName || "FLXDIAMOND";
   // Fixed: root used to fall through to "" here, so canonicalUrl became
   // just `siteBase` (no trailing slash) — inconsistent with buildOrgSchema()
   // below, which uses the raw, un-stripped site.siteUrl (which already ends
@@ -195,6 +200,7 @@ function buildHead(opts: { html: string; site: any; seo: any; fallbackTitle?: st
   out = out.replace(/<meta property="og:title" content=".*?"\s*\/>/s, `<meta property="og:title" content="${escapeHtml(ogTitle)}" />`);
   out = out.replace(/<meta property="og:description" content=".*?"\s*\/>/s, `<meta property="og:description" content="${escapeHtml(ogDescription)}" />`);
   out = out.replace(/<meta property="og:image" content=".*?"\s*\/>/s, `<meta property="og:image" content="${escapeHtml(ogImage)}" />`);
+  out = out.replace(/<meta property="og:site_name" content=".*?"\s*\/>/s, `<meta property="og:site_name" content="${escapeHtml(ogSiteName)}" />`);
   out = out.replace(/<meta name="twitter:title" content=".*?"\s*\/>/s, `<meta name="twitter:title" content="${escapeHtml(twitterTitle)}" />`);
   out = out.replace(/<meta name="twitter:description" content=".*?"\s*\/>/s, `<meta name="twitter:description" content="${escapeHtml(twitterDescription)}" />`);
   out = out.replace(/<meta name="twitter:image" content=".*?"\s*\/>/s, `<meta name="twitter:image" content="${escapeHtml(twitterImage)}" />`);
