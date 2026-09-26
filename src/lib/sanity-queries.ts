@@ -122,16 +122,6 @@ export const HOME_PAGE_QUERY = `*[_type == "homePage"][0]{
    About Page
    ───────────────────────────────────────── */
 // Replace the existing ABOUT_PAGE_QUERY export in your lib/sanity-queries.ts with
-// this one. It projects every field the rewritten About.tsx reads, and flattens
-// each Sanity image reference straight to a usable `...Url` string so the
-// component never has to know about asset refs.
-//
-// If your project's SEO fields are on a shared object type, this assumes the
-// projection shape (metaTitle, metaDescription, ogImage.asset->url, etc.) already
-// matches what the rest of your site queries — adjust the `seo{...}` block below
-// if yours differs.
-
-// Replace the existing ABOUT_PAGE_QUERY export in your lib/sanity-queries.ts with
 // this one. It projects every field the rewritten About.tsx reads. Every image
 // field is projected as a nested { url, alt } object so alt text is genuinely
 // editable content from Sanity, not hardcoded in the component.
@@ -175,20 +165,35 @@ export const ABOUT_PAGE_QUERY = `*[_type == "aboutPage"][0]{
     label
   },
 
-  craftsmanHeadingLead,
-  craftsman{
-    name,
-    subtext,
-    "illustration": {
-      "url": illustration.asset->url,
-      "alt": illustration.alt
-    },
-    bio
+  learningHeadingLead,
+  learningHeadingBold,
+  learningBody,
+  "learningImage": {
+    "url": learningImage.asset->url,
+    "alt": learningImage.alt
   },
+  learningCaption,
+  "learningPortrait": {
+    "url": learningPortrait.asset->url,
+    "alt": learningPortrait.alt
+  },
+
+  trustHeadingLead,
+  trustHeadingBold,
+  trustSubtext,
+  "trustBackgroundImage": {
+    "url": trustBackgroundImage.asset->url
+  },
+  "trustPhoto": {
+    "url": trustPhoto.asset->url,
+    "alt": trustPhoto.alt
+  },
+  trustCardHeading,
+  trustCardBody,
 
   stoneHeadingLead,
   stoneHeadingBold,
-  stoneCaption,
+  stoneSubtext,
   "stoneVideoPoster": {
     "url": stoneVideoPoster.asset->url,
     "alt": stoneVideoPoster.alt
@@ -197,16 +202,9 @@ export const ABOUT_PAGE_QUERY = `*[_type == "aboutPage"][0]{
     "url": stoneVideo.asset->url
   },
   stoneVideoUrl,
-
-  journeyHeadingLead,
-  journeyHeadingBold,
-  journeySteps[]{
+  stoneFeatures[]{
     title,
-    body
-  },
-  "journeyPhotos": journeyPhotos[]{
-    "url": asset->url,
-    alt
+    description
   },
 
   trustedHeadingLead,
@@ -217,7 +215,6 @@ export const ABOUT_PAGE_QUERY = `*[_type == "aboutPage"][0]{
     flagEmoji
   }
 }`;
-
 /* ─────────────────────────────────────────
    Investment Page
    ───────────────────────────────────────── */

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { EASE } from "@/lib/motion";
 import { useSanityQuery } from "@/lib/useSanityData";
 import { isSanityConfigured } from "@/lib/sanity";
@@ -16,18 +16,17 @@ import {
 
 // Served straight from /public — no bundler import needed, just the root-relative path.
 const DEFAULT_HERO_PHOTOS = [
-  { url: "/hero-jig.jpg", alt: "Craftsman examining a rough diamond under a loupe" },
-  { url: "/hero-loupe.jpg", alt: "Evaluating a polished diamond with tweezers and a loupe" },
-  { url: "/hero-grinding.jpg", alt: "Craftsman operating a precision diamond regrinding tool" },
+  { url: "/hero-jig-v2.jpg", alt: "Craftsman fitting a rough diamond into a cutting jig" },
+  { url: "/hero-loupe-v2.jpg", alt: "Evaluating a polished diamond with tweezers and a loupe" },
+  { url: "/hero-diamonds-gradient.jpg", alt: "Loose polished diamonds scattered across a dark studio backdrop" },
 ];
 const DEFAULT_BEGINNING_IMAGE = { url: "/beginning-craft.jpg", alt: "Precision diamond regrinding equipment" };
 const DEFAULT_STONE_VIDEO_POSTER = { url: "/stone-video-poster.jpg", alt: "Precision diamond regrinding in progress" };
-const DEFAULT_CRAFTSMAN_ILLUSTRATION = { url: "/craftsman-illustration.jpg", alt: "Babu Vekariya" };
-const DEFAULT_JOURNEY_PHOTOS = [
-  { url: "/journey-1.jpg", alt: "Master craftsman examining a diamond under a loupe" },
-  { url: "/journey-2.jpg", alt: "" },
-  { url: "/journey-3.jpg", alt: "" },
-];
+// Placeholders reuse existing site photography until the two new "Learning
+// the Craft" photos and the trust-card portrait are uploaded in Sanity.
+const DEFAULT_LEARNING_IMAGE = { url: "/hero-loupe.jpg", alt: "Loose diamonds being examined with tweezers" };
+const DEFAULT_LEARNING_PORTRAIT = { url: "/craftsman-illustration.jpg", alt: "Babu Vekariya at his desk" };
+const DEFAULT_TRUST_PHOTO = { url: "/craftsman-illustration.jpg", alt: "Babu Vekariya" };
 
 const up = {
   hidden: { opacity: 0, y: 22 },
@@ -52,7 +51,7 @@ const gridTexture = (lineColor: string) => ({
 });
 
 // Headline treatment used throughout this page: a lead phrase followed by a
-// close, e.g. "A Diamond is / Never just a Diamond" — both set in the site's
+// close, e.g. "The House of / Exceptional Diamonds" — both set in the site's
 // own heading font (font-serif), same normal weight, no italics, so this page
 // reads identically to the rest of flxdiamond.com. Sizing is fluid (clamp) so
 // headings scale smoothly at every viewport width instead of jumping at
@@ -109,19 +108,27 @@ interface SanityAboutPage {
   beginningImage?: SanityImage;
   originStats?: { value: string; label: string }[];
 
-  // The Craftsman
-  craftsmanHeadingLead?: string;
-  craftsman?: {
-    name?: string;
-    subtext?: string;
-    illustration?: SanityImage;
-    bio?: string;
-  };
+  // Learning the Craft
+  learningHeadingLead?: string;
+  learningHeadingBold?: string;
+  learningBody?: string;
+  learningImage?: SanityImage;
+  learningCaption?: string;
+  learningPortrait?: SanityImage;
 
-  // The Stone Number (technique / video)
+  // Character & Trust
+  trustHeadingLead?: string;
+  trustHeadingBold?: string;
+  trustSubtext?: string;
+  trustBackgroundImage?: SanityImage;
+  trustPhoto?: SanityImage;
+  trustCardHeading?: string;
+  trustCardBody?: string;
+
+  // The Next Chapter (technique / video)
   stoneHeadingLead?: string;
   stoneHeadingBold?: string;
-  stoneCaption?: string[];
+  stoneSubtext?: string;
   stoneVideoPoster?: SanityImage;
   // Preferred: a video file uploaded directly in Sanity. Falls back to
   // stoneVideoUrl (a direct link to a video file hosted elsewhere) if set
@@ -130,12 +137,7 @@ interface SanityAboutPage {
   // similar) URL only.
   stoneVideo?: { url: string };
   stoneVideoUrl?: string;
-
-  // The Journey (timeline)
-  journeyHeadingLead?: string;
-  journeyHeadingBold?: string;
-  journeySteps?: { title: string; body: string }[];
-  journeyPhotos?: SanityImage[];
+  stoneFeatures?: { title: string; description: string }[];
 
   // Trusted by / global reach
   trustedHeadingLead?: string;
@@ -151,22 +153,26 @@ const ORIGIN_STATS_DEFAULT = [
   { value: "Surat", label: "Where the craft was learned" },
 ];
 
-const CRAFTSMAN_BIO_DEFAULT =
-  "For Babu, diamonds have never been just a business. His understanding comes from years spent close to the craft learning how stones are cut and polished, understanding what changes their character, and developing an eye that comes from seeing thousands of diamonds over a lifetime. Today, that knowledge continues to shape the way FLX works. “He wasn't the fastest. He kept looking closer.” And he still does.";
+const LEARNING_BODY_DEFAULT =
+  "The early years were anything but easy. With little money and nowhere else to stay, there were times when the diamond factory became home. Every day demanded sacrifice, discipline and an unwavering commitment to keep learning.";
 
-const STONE_CAPTION_DEFAULT = [
-  "A natural diamond can come with pages of information. Colour. Clarity. Cut. Carat. They tell you the characteristics of the stone. But knowing how those details come together and what they mean for the stone in front of you takes another kind of understanding. That's where experience earns its place.",
-];
+const LEARNING_CAPTION_DEFAULT =
+  "Compared with others, he wasn't the fastest at the polishing wheel. But speed was never his ambition. While others learned how to polish diamonds, he wanted to understand them from rough crystal to the finished stone, from light performance to proportions, from natural formation to modern manufacturing.";
 
-const JOURNEY_STEPS_DEFAULT = [
-  {
-    title: "Apprentice",
-    body: "Start with the basics. Learning how the work is actually done.",
-  },
-  {
-    title: "Craftsman",
-    body: "Learn the details. Understanding what happens between rough and polished.",
-  },
+const TRUST_SUBTEXT_DEFAULT =
+  "Years of dedication shaped more than technical skill. They shaped his reputation. Known for his discipline, humility and unwavering work ethic, Babu became someone others trusted with their most important work.";
+
+const TRUST_CARD_BODY_DEFAULT =
+  "Decades of industry experience and trusted global relationships give FLX direct access to carefully sourced diamonds and leading trade partners.";
+
+const STONE_SUBTEXT_DEFAULT =
+  "FLX wasn't created to tell one man's story. It was created to carry his life's work forward. Today, every part of FLX reflects a chapter of that journey.";
+
+const STONE_FEATURES_DEFAULT = [
+  { title: "Natural Diamonds", description: "Shaped by decades of manufacturing knowledge" },
+  { title: "Lab-Grown Diamonds", description: "Selected with the same standards of judgement" },
+  { title: "IF→FL Transformation", description: "Refined through years of precision craftsmanship" },
+  { title: "Investment Diamonds", description: "Chosen for rarity, quality and long-term significance" },
 ];
 
 export default function About() {
@@ -176,60 +182,23 @@ export default function About() {
   const cms = isSanityConfigured ? sanityAbout : null;
 
   const originStats = cms?.originStats?.length ? cms.originStats : ORIGIN_STATS_DEFAULT;
-  const craftsmanBio = cms?.craftsman?.bio || CRAFTSMAN_BIO_DEFAULT;
-  const stoneCaption = cms?.stoneCaption?.length ? cms.stoneCaption : STONE_CAPTION_DEFAULT;
-  const journeySteps = cms?.journeySteps?.length ? cms.journeySteps : JOURNEY_STEPS_DEFAULT;
+  const learningBody = cms?.learningBody || LEARNING_BODY_DEFAULT;
+  const learningCaption = cms?.learningCaption || LEARNING_CAPTION_DEFAULT;
+  const trustSubtext = cms?.trustSubtext || TRUST_SUBTEXT_DEFAULT;
+  const trustCardBody = cms?.trustCardBody || TRUST_CARD_BODY_DEFAULT;
+  const stoneSubtext = cms?.stoneSubtext || STONE_SUBTEXT_DEFAULT;
+  const stoneFeatures = cms?.stoneFeatures?.length ? cms.stoneFeatures : STONE_FEATURES_DEFAULT;
 
   // heroPhotos is fixed order: [0] top-left, [1] top-right, [2] tall right-column photo.
   const heroPhotos = cms?.heroPhotos?.length ? cms.heroPhotos : DEFAULT_HERO_PHOTOS;
   const beginningImage = cms?.beginningImage || DEFAULT_BEGINNING_IMAGE;
-  const craftsmanIllustration = cms?.craftsman?.illustration || DEFAULT_CRAFTSMAN_ILLUSTRATION;
+  const learningImage = cms?.learningImage || DEFAULT_LEARNING_IMAGE;
+  const learningPortrait = cms?.learningPortrait || DEFAULT_LEARNING_PORTRAIT;
+  const trustPhoto = cms?.trustPhoto || DEFAULT_TRUST_PHOTO;
   const stoneVideoPoster = cms?.stoneVideoPoster || DEFAULT_STONE_VIDEO_POSTER;
   // Uploaded Sanity file wins over the external-URL fallback; either way this
   // is a direct, playable video src (see the SanityAboutPage comment above).
   const stoneVideoSrc = cms?.stoneVideo?.url || cms?.stoneVideoUrl || null;
-  const journeyPhotos = cms?.journeyPhotos?.length ? cms.journeyPhotos : DEFAULT_JOURNEY_PHOTOS;
-
-  // The Journey timeline is scroll-linked: as each step scrolls through the
-  // center of the viewport, it becomes "active" — the photo stack crossfades
-  // to match it and the progress line grows down to its marker.
-  const [activeJourneyIndex, setActiveJourneyIndex] = useState(0);
-  const [journeyLineHeight, setJourneyLineHeight] = useState(0);
-  const journeyStepRefs = useRef<Array<HTMLDivElement | null>>([]);
-
-  useEffect(() => {
-    if (journeySteps.length <= 1) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const idx = journeyStepRefs.current.indexOf(entry.target as HTMLDivElement);
-            if (idx !== -1) setActiveJourneyIndex(idx);
-          }
-        });
-      },
-      { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
-    );
-    journeyStepRefs.current.forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, [journeySteps.length]);
-
-  useEffect(() => {
-    const updateJourneyLine = () => {
-      const el = journeyStepRefs.current[activeJourneyIndex];
-      if (el) setJourneyLineHeight(el.offsetTop + el.offsetHeight / 2);
-    };
-    updateJourneyLine();
-    window.addEventListener("resize", updateJourneyLine);
-    return () => window.removeEventListener("resize", updateJourneyLine);
-  }, [activeJourneyIndex, journeySteps.length]);
-
-  // Photo stack cycles with the active step so the whole stack re-shuffles as
-  // you scroll (front photo = current step; the other two trail behind it).
-  const journeyPhotoCount = journeyPhotos.length || 1;
-  const journeyFrontPhoto = journeyPhotos[activeJourneyIndex % journeyPhotoCount];
-  const journeyMidPhoto = journeyPhotos[(activeJourneyIndex + 1) % journeyPhotoCount];
-  const journeyBackPhoto = journeyPhotos[(activeJourneyIndex + 2) % journeyPhotoCount];
 
   // World map pins: editors pick countries by name from Sanity (trustedCountries);
   // each name is looked up in the pre-computed COUNTRY_LOOKUP table for its pixel
@@ -284,16 +253,16 @@ export default function About() {
               <SplitHeading
                 as="h1"
                 size="hero"
-                lead={(isSanityConfigured && sanityAbout?.heroHeadingLead) || "A Diamond is"}
-                bold={(isSanityConfigured && sanityAbout?.heroHeadingBold) || "Never just a Diamond"}
+                lead={(isSanityConfigured && sanityAbout?.heroHeadingLead) || "The House of"}
+                bold={(isSanityConfigured && sanityAbout?.heroHeadingBold) || "Exceptional Diamonds"}
                 leadClassName="text-[#02274A]"
                 boldClassName="text-[#02274A]"
               />
             </motion.div>
             <motion.div variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>
               {((isSanityConfigured && sanityAbout?.heroSubtextLines) || [
-                "What matters is knowing the difference.",
-                "For over four decades, we've learned to see it.",
+                "Every diamond we offer is chosen or transformed to deserve its place.",
+                "Our Customers don't leave thinking, \"I bought a diamond.\" They leave thinking, \"I own something with a story worth telling.\"",
               ]).map((line, i) => (
                 <p key={i}>{line}</p>
               ))}
@@ -311,10 +280,12 @@ export default function About() {
             {/* Left: two photos + The Beginning card */}
             <div className="lg:col-span-2 flex flex-col gap-4 md:gap-5">
               <div className="grid grid-cols-2 gap-4 md:gap-5">
-                <motion.div variants={up} className="overflow-hidden aspect-[4/3]">
+                {/* aspect-[6/5]: matches the design's close-up crop (~1.15:1) rather
+                    than a generic 4:3, so object-cover doesn't over-crop these. */}
+                <motion.div variants={up} className="overflow-hidden aspect-[6/5]">
                   <img src={heroPhotos[0]?.url} alt={heroPhotos[0]?.alt || ""} className="w-full h-full object-cover" />
                 </motion.div>
-                <motion.div variants={up} className="overflow-hidden aspect-[4/3]">
+                <motion.div variants={up} className="overflow-hidden aspect-[6/5]">
                   <img src={heroPhotos[1]?.url} alt={heroPhotos[1]?.alt || ""} className="w-full h-full object-cover" />
                 </motion.div>
               </div>
@@ -342,87 +313,152 @@ export default function About() {
               </motion.div>
             </div>
 
-            {/* Right: tall photo + stats card */}
-            <div className="flex flex-col gap-4 md:gap-5">
-              <motion.div variants={up} className="overflow-hidden flex-1 min-h-[220px]">
-                <img src={heroPhotos[2]?.url} alt={heroPhotos[2]?.alt || ""} className="w-full h-full object-cover" />
-              </motion.div>
-              <motion.div variants={up} className="p-8 md:p-10 space-y-0" style={{ background: NAVY_DEEP }}>
+            {/* Right: one continuous photo, stats overlaid at the bottom via a
+                dark gradient — matches the design (a single tall panel), not
+                a photo stacked on top of a separate flat-navy card. */}
+            <motion.div variants={up} className="relative overflow-hidden min-h-[420px] md:min-h-0">
+              <img
+                src={heroPhotos[2]?.url}
+                alt={heroPhotos[2]?.alt || ""}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: "linear-gradient(180deg, rgba(0,49,93,0) 0%, rgba(0,49,93,0.55) 45%, rgba(0,49,93,0.97) 72%)" }}
+              />
+              <div className="relative h-full flex flex-col justify-end p-8 md:p-10">
                 {originStats.map((s, i) => (
                   <div key={i} className={`py-4 ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "rgba(28,169,201,0.2)" }}>
                     <p className="font-serif text-2xl text-white leading-none mb-1">{s.value}</p>
                     <p className="text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</p>
                   </div>
                 ))}
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
           </motion.div>
         </section>
 
-        {/* ── The Craftsman ── */}
-        <section className="py-20 md:py-28 px-6" style={{ background: "#FFFFFF" }}>
+        {/* ── Learning the Craft ── */}
+        <section className="py-20 md:py-28 px-6 md:px-14 lg:px-20" style={{ background: "#FFFFFF" }}>
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
             variants={stagger}
-            className="max-w-3xl mx-auto text-center space-y-4"
+            className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 md:gap-14"
+          >
+            {/* Left column: photo, then caption below it. aspect-[3/4]: both
+                Learning photos are portrait-oriented in the design, not
+                landscape — a 4:3 box here would crop out most of the shot. */}
+            <div className="flex flex-col gap-6">
+              <motion.div variants={up} className="overflow-hidden aspect-[3/4]">
+                <img src={learningImage.url} alt={learningImage.alt || ""} className="w-full h-full object-cover" />
+              </motion.div>
+              <motion.p variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.55)" }}>
+                {learningCaption}
+              </motion.p>
+            </div>
+
+            {/* Right column: heading + body, then photo below it */}
+            <div className="flex flex-col gap-6">
+              <motion.div variants={up} className="space-y-4">
+                <SplitHeading
+                  lead={cms?.learningHeadingLead || "Learning the craft."}
+                  bold={cms?.learningHeadingBold || "Living the craft"}
+                  leadClassName="text-[#02274A]"
+                  boldClassName="text-[#02274A]"
+                />
+                <p className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>
+                  {learningBody}
+                </p>
+              </motion.div>
+              <motion.div variants={up} className="overflow-hidden aspect-[3/4]">
+                <img src={learningPortrait.url} alt={learningPortrait.alt || ""} className="w-full h-full object-cover" />
+              </motion.div>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* ── Character & Trust ── */}
+        <section className="py-20 md:py-28 px-6 relative overflow-hidden text-center" style={{ background: NAVY_DEEP }}>
+          {cms?.trustBackgroundImage?.url ? (
+            <>
+              <img
+                src={cms.trustBackgroundImage.url}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none"
+              />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: "rgba(0,49,93,0.75)" }} />
+            </>
+          ) : (
+            <div className="absolute inset-0 opacity-50 pointer-events-none" style={gridTexture("rgba(255,255,255,0.05)")} />
+          )}
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="relative max-w-3xl mx-auto space-y-4"
           >
             <motion.div variants={up}>
               <SplitHeading
-                lead={cms?.craftsmanHeadingLead || "The Craftsman"}
-                bold={cms?.craftsman?.name || "Babu Vekariya"}
-                leadClassName="text-[#02274A]"
-                boldClassName="text-[#02274A]"
+                lead={cms?.trustHeadingLead || "Character earned trust"}
+                bold={cms?.trustHeadingBold || "before titles"}
+                leadClassName="text-white"
+                boldClassName="text-white"
               />
             </motion.div>
-            <motion.p variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.55)" }}>
-              {cms?.craftsman?.subtext || "47+ Years in the diamond trade — a craft you don't stop learning."}
+            <motion.p variants={up} className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+              {trustSubtext}
             </motion.p>
           </motion.div>
 
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-60px" }}
-            variants={up}
-            className="max-w-4xl mx-auto mt-10 md:mt-14"
-          >
-            <img
-              src={craftsmanIllustration.url}
-              alt={craftsmanIllustration.alt || cms?.craftsman?.name || "Babu Vekariya"}
-              className="w-full h-auto"
-            />
-          </motion.div>
-
-          <motion.p
-            initial="hidden"
-            whileInView="visible"
             viewport={{ once: true }}
             variants={up}
-            className="max-w-2xl mx-auto mt-10 md:mt-14 text-center text-sm sm:text-base leading-relaxed"
-            style={{ color: "rgba(2,39,74,0.6)" }}
+            className="relative max-w-md mx-auto mt-12 md:mt-16 text-left"
+            style={{ background: "#FFFFFF" }}
           >
-            {craftsmanBio}
-          </motion.p>
+            <div className="aspect-[4/3] overflow-hidden">
+              <img src={trustPhoto.url} alt={trustPhoto.alt || ""} className="w-full h-full object-cover" />
+            </div>
+            <div className="p-6 md:p-8 space-y-2 text-center">
+              <h3 className="font-serif font-normal text-xl" style={{ color: "#02274A" }}>
+                {cms?.trustCardHeading || "Decades of Expertise"}
+              </h3>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>
+                {trustCardBody}
+              </p>
+            </div>
+          </motion.div>
         </section>
 
-        {/* ── The Stone Number (technique + video) ── */}
-        <section className="py-20 md:py-28 px-6 relative overflow-hidden" style={{ background: NAVY_DEEP }}>
-          <div className="absolute inset-0 opacity-50 pointer-events-none" style={gridTexture("rgba(255,255,255,0.05)")} />
-          <div className="relative max-w-4xl mx-auto text-center space-y-8 md:space-y-10">
+        {/* ── The Next Chapter (technique + video) ── */}
+        {/* Outer wrapper is max-w-6xl (matching the Learning section's width)
+            so the video and feature grid can run wide, as in the design —
+            only the heading/subtext block below is narrowed and centered. */}
+        <section className="py-20 md:py-28 px-6" style={{ background: "#FFFFFF" }}>
+          <div className="max-w-6xl mx-auto space-y-8 md:space-y-10">
             <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               variants={up}
+              className="max-w-2xl mx-auto text-center"
             >
               <SplitHeading
-                lead={cms?.stoneHeadingLead || "The Stone Number tells you what it is"}
-                bold={cms?.stoneHeadingBold || "The story tells you more."}
-                leadClassName="text-white"
-                boldClassName="text-white"
+                lead={cms?.stoneHeadingLead || "The next chapter became"}
+                bold={cms?.stoneHeadingBold || "FLX."}
+                leadClassName="text-[#02274A]"
+                boldClassName="text-[#02274A]"
               />
+              <p className="mt-3 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>
+                {stoneSubtext}
+              </p>
             </motion.div>
 
             <motion.div
@@ -430,7 +466,7 @@ export default function About() {
               whileInView="visible"
               viewport={{ once: true }}
               variants={up}
-              className="relative max-w-3xl mx-auto aspect-video overflow-hidden group"
+              className="relative aspect-video overflow-hidden group"
             >
               {isStoneVideoPlaying && stoneVideoSrc ? (
                 <video
@@ -467,129 +503,28 @@ export default function About() {
               )}
             </motion.div>
 
-            {stoneCaption.map((para, i) => (
-              <motion.p
-                key={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={up}
-                className="text-sm sm:text-base leading-relaxed max-w-2xl mx-auto"
-                style={{ color: "rgba(255,255,255,0.55)" }}
-              >
-                {para}
-              </motion.p>
-            ))}
-          </div>
-        </section>
-
-        {/* ── The Journey ── */}
-        <section className="py-20 md:py-28 px-6" style={{ background: "#FFFFFF" }}>
-          <div className="max-w-4xl mx-auto text-center mb-14 md:mb-20">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={up}>
-              <SplitHeading
-                lead={cms?.journeyHeadingLead || "The Journey"}
-                bold={cms?.journeyHeadingBold || "The Years Changed. The Curiosity didn't."}
-                leadClassName="text-[#02274A]"
-                boldClassName="text-[#02274A]"
-              />
-            </motion.div>
-          </div>
-
-          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-16 md:gap-10 items-start">
-            {/* Photo stack — pinned while you scroll, crossfades to match the active step */}
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={up}
-              className="relative w-full max-w-sm mx-auto aspect-[3/4] md:sticky md:top-32"
-            >
-              <AnimatePresence>
-                {journeyBackPhoto && (
-                  <motion.img
-                    key={`back-${journeyBackPhoto.url}`}
-                    src={journeyBackPhoto.url}
-                    alt={journeyBackPhoto.alt || ""}
-                    aria-hidden={!journeyBackPhoto.alt}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1, rotate: -8 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: EASE }}
-                    className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover shadow-lg"
-                  />
-                )}
-              </AnimatePresence>
-              <AnimatePresence>
-                {journeyMidPhoto && (
-                  <motion.img
-                    key={`mid-${journeyMidPhoto.url}`}
-                    src={journeyMidPhoto.url}
-                    alt={journeyMidPhoto.alt || ""}
-                    aria-hidden={!journeyMidPhoto.alt}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1, rotate: 5 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: EASE }}
-                    className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover shadow-lg"
-                  />
-                )}
-              </AnimatePresence>
-              <AnimatePresence>
-                {journeyFrontPhoto && (
-                  <motion.img
-                    key={`front-${journeyFrontPhoto.url}`}
-                    src={journeyFrontPhoto.url}
-                    alt={journeyFrontPhoto.alt || ""}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1, rotate: -2 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: EASE }}
-                    className="absolute inset-0 w-[92%] h-[92%] m-auto object-cover shadow-xl"
-                  />
-                )}
-              </AnimatePresence>
-            </motion.div>
-
-            {/* Vertical timeline — the teal line grows down to whichever step is centered in view */}
             <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
               variants={stagger}
-              className="relative pl-8"
+              className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-8 md:gap-x-8 text-left pt-2"
             >
-              <div className="absolute left-[3px] top-2 bottom-2 border-l border-dashed" style={{ borderColor: "rgba(2,39,74,0.2)" }} />
-              <motion.div
-                className="absolute left-[3px] top-2 w-px"
-                style={{ background: TEAL }}
-                animate={{ height: journeyLineHeight }}
-                transition={{ type: "spring", stiffness: 120, damping: 22 }}
-              />
-              <div className="space-y-24 md:space-y-32">
-                {journeySteps.map((step, i) => {
-                  const active = i === activeJourneyIndex;
-                  return (
-                    <motion.div
-                      key={step.title}
-                      ref={(el) => {
-                        journeyStepRefs.current[i] = el;
-                      }}
-                      variants={up}
-                      className="relative"
-                    >
-                      <div style={{ opacity: active ? 1 : 0.35, transition: "opacity 0.3s ease" }}>
-                        <span
-                          className="absolute -left-8 top-1.5 w-[7px] h-[7px] rotate-45"
-                          style={{ background: active ? TEAL : "rgba(2,39,74,0.25)", transition: "background 0.3s ease" }}
-                        />
-                        <h3 className="font-serif font-normal text-xl sm:text-2xl mb-2" style={{ color: "#02274A" }}>{step.title}</h3>
-                        <p className="text-sm sm:text-base leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>{step.body}</p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+              {stoneFeatures.map((feature, i) => (
+                <motion.div
+                  key={feature.title}
+                  variants={up}
+                  className={i > 0 ? "md:border-l md:pl-6 lg:pl-8" : ""}
+                  style={{ borderColor: "rgba(2,39,74,0.15)" }}
+                >
+                  <h4 className="font-serif font-normal text-lg sm:text-xl mb-1" style={{ color: "#02274A" }}>
+                    {feature.title}
+                  </h4>
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.6)" }}>
+                    {feature.description}
+                  </p>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
         </section>
