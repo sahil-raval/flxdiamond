@@ -227,13 +227,27 @@ export default function IFtoFLHorizontalScroll() {
 
   // Rounded, discrete index — drives the photo deck and which step reads as
   // "active" in the text list, so the deck doesn't reshuffle continuously.
+  //
+  // IMPORTANT: `scrollYProgress` is a MotionValue whose identity never
+  // changes across re-renders, so a dependency array of just
+  // [scrollYProgress] would only ever run this effect once, on mount — and
+  // the `TOTAL` it captured in that first closure would then stay frozen
+  // for the component's whole lifetime. Sanity data usually isn't back yet
+  // on the very first render, so that frozen TOTAL is the *fallback*
+  // H_PANELS length (7), not the real CMS panel count (e.g. 10). Once the
+  // CMS data arrives and TOTAL correctly becomes 10 everywhere else, this
+  // effect would keep computing `idx = round(v * (7 - 1))`, which can never
+  // exceed 6 — so panels past index 6 never get marked active, even though
+  // the list itself (which reads the live TOTAL) keeps scrolling past them.
+  // Including TOTAL here makes the effect re-subscribe with the correct
+  // value whenever the panel count changes.
   useEffect(
     () =>
       scrollYProgress.on("change", (v) => {
         const idx = Math.round(v * (TOTAL - 1));
         setActiveIndex(Math.max(0, Math.min(TOTAL - 1, idx)));
       }),
-    [scrollYProgress]
+    [scrollYProgress, TOTAL]
   );
 
   const scrollToPanel = (idx: number) => {
