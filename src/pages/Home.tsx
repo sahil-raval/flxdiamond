@@ -513,9 +513,9 @@ export default function Home() {
               </>
             )}
           </video>
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(2,39,74,0.55) 0%, rgba(2,39,74,0.22) 30%, rgba(2,39,74,0.62) 68%, rgba(2,39,74,0.92) 100%)" }} />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(2,39,74,0.72) 0%, rgba(2,39,74,0.15) 55%, rgba(2,39,74,0.4) 100%)" }} />
-          <div className="absolute inset-0" style={{ background: "radial-gradient(80% 60% at 18% 88%, rgba(2,39,74,0.65) 0%, rgba(2,39,74,0) 60%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(2,39,74,0.23) 0%, rgba(2,39,74,0.10) 30%, rgba(2,39,74,0.26) 68%, rgba(2,39,74,0.38) 100%)" }} />
+<div className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(2,39,74,0.30) 0%, rgba(2,39,74,0.06) 55%, rgba(2,39,74,0.17) 100%)" }} />
+<div className="absolute inset-0" style={{ background: "radial-gradient(80% 60% at 18% 88%, rgba(2,39,74,0.27) 0%, rgba(2,39,74,0) 60%)" }} />
 
           <ParallaxLayer speed={0.08} style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none" }}>
             {PARTICLES.map((p, i) => (

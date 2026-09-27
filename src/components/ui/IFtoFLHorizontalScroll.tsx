@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState, useCallback } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef, useEffect, useState, type CSSProperties } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useSanityQuery } from "@/lib/useSanityData";
 import { INVESTMENT_PANELS_QUERY } from "@/lib/sanity-queries";
 
@@ -83,261 +83,102 @@ type SanityPanel = {
   imgUrl?: string;
 };
 
-const TOTAL = H_PANELS.length;
+// ── Brand palette (matches the rest of flxdiamond.com — see About.tsx) ────
+const NAVY = "#02274A";
+const TEAL = "#1CA9C9";
+const INACTIVE_HEAD = "rgba(2,39,74,0.28)";
+const INACTIVE_TAG = "rgba(2,39,74,0.32)";
+const BODY = "rgba(2,39,74,0.6)";
+const LINE = "rgba(2,39,74,0.15)";
 
-// ── Dark navy wall palette ─────────────────────────────────────────────
-// Base wall tone: #03274a. The rest of the palette is derived from it so
-// the rail, skirting, and vignette all stay in the same hue family.
-const WALL        = "#03274a";
-const WALL_MID     = "#02203d";
-const WALL_SHADOW = "#010b18";
-const WALL_LIGHT  = "#0f4172";
-
-// Teal palette — brightened slightly so it reads clearly on a dark ground
-const T = {
-  full:  "#2FC6E8",
-  mid:   "rgba(47,198,232,0.65)",
-  soft:  "rgba(47,198,232,0.35)",
-  dim:   "rgba(47,198,232,0.15)",
-  text:  "#5FDBF0",
-};
-
-// Text on the dark wall
-const INK       = "#F2F5F9";
-const INK_SOFT  = "rgba(242,245,249,0.58)";
-const INK_FAINT = "rgba(242,245,249,0.38)";
-
-// Single smooth easing curve used everywhere so nothing feels jerky
-// relative to anything else on the page.
 const EASE = [0.4, 0, 0.2, 1] as const;
 
-// Subtle grain texture as an inline SVG noise tile — this is what gives
-// the whole scene a filmic, non-flat quality instead of looking like a
-// clean vector render.
-const GRAIN_URI =
-  "data:image/svg+xml;utf8," +
-  encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'>
-      <filter id='n'>
-        <feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/>
-        <feColorMatrix type='saturate' values='0'/>
-      </filter>
-      <rect width='100%' height='100%' filter='url(#n)'/>
-    </svg>`
-  );
+// Vertical distance (in px) the step list travels per step. Also doubles as
+// each list item's own height, so the active item always lands at the same
+// anchor point at the top of the sticky viewport. Sized generously (and
+// paired with overflow-hidden + line-clamping below) so a long CMS-edited
+// body paragraph can never bleed into the next step instead of being cut
+// off cleanly.
+const ITEM_HEIGHT = 440;
 
-function getSlotStyle(distance: number) {
-  if (distance === 0) return { scale: 1,    opacity: 1,    zIndex: 10, blur: 0 };
-  if (distance === 1) return { scale: 0.81, opacity: 0.4,  zIndex: 6,  blur: 2 };
-  if (distance === 2) return { scale: 0.65, opacity: 0.16, zIndex: 2,  blur: 4 };
-  return                      { scale: 0.52, opacity: 0.06, zIndex: 1,  blur: 6 };
+// Clamp helper: truncates text to N lines with an ellipsis instead of
+// letting it overflow its row (protects against long Sanity-edited copy).
+function clampStyle(lines: number): CSSProperties {
+  return {
+    display: "-webkit-box",
+    WebkitLineClamp: lines,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+  };
 }
 
-function cssEase(e: readonly [number, number, number, number]) {
-  return `cubic-bezier(${e[0]}, ${e[1]}, ${e[2]}, ${e[3]})`;
-}
-
-// ── Single gallery frame ────────────────────────────────────────────────
-function GalleryFrame({
-  panel,
-  index,
-  activeIndex,
-  onClick,
-}: {
-  panel: Panel;
-  index: number;
-  activeIndex: number;
-  onClick: () => void;
-}) {
-  const isEnd      = panel.type === "end";
-  const isDecision = panel.type === "decision";
-  const isIntro    = panel.type === "intro";
-  const isActive   = index === activeIndex;
-  const distance   = Math.abs(index - activeIndex);
-  const { scale, opacity, zIndex, blur } = getSlotStyle(distance);
-
-  // ── Responsive sizing ──────────────────────────────────────────────
-  const frameSize = isActive
-  ? "clamp(260px, min(50vh, 56vw), 520px)"
-  : "clamp(190px, min(36vh, 40vw), 380px)";
-  const frameMax  = isActive ? "520px" : "380px";
+// ── The polaroid-style photo stack. The front card is the active step's
+// photo; the two behind it preview the next two steps, so the whole deck
+// visibly re-shuffles as the reader scrolls, not just the top photo. ──────
+function PhotoDeck({ panels, activeIndex }: { panels: Panel[]; activeIndex: number }) {
+  const front = panels[activeIndex];
+  const mid = panels[(activeIndex + 1) % panels.length];
+  const back = panels[(activeIndex + 2) % panels.length];
 
   return (
-    <motion.div
-      onClick={onClick}
-      animate={{ scale, opacity }}
-      transition={{ duration: 0.85, ease: EASE }}
-      style={{
-        position: "relative", flexShrink: 0,
-        display: "flex", flexDirection: "column", alignItems: "center",
-        zIndex, cursor: isActive ? "default" : "pointer",
-        width: "100vw",
-      }}
-    >
-      {/* Image container — a plate the image sits centered inside of.
-          Depth-of-field blur (via getSlotStyle) does the work of pulling
-          focus toward the active frame, cinematic-lens style, instead of
-          a glow shape doing it. */}
-      <div style={{
-        position: "relative",
-        width: frameSize, height: frameSize,
-        maxWidth: frameMax, maxHeight: frameMax,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        overflow: "hidden",
-        background: "transparent",
-        boxShadow: isActive
-          ? "0 24px 70px rgba(0,0,0,0.6)"
-          : "0 8px 24px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.4)",
-        transition: [
-          `width 0.85s ${cssEase(EASE)}`,
-          `height 0.85s ${cssEase(EASE)}`,
-          `max-width 0.85s ${cssEase(EASE)}`,
-          `max-height 0.85s ${cssEase(EASE)}`,
-          `box-shadow 0.6s ${cssEase(EASE)}`,
-        ].join(", "),
-        flexShrink: 0,
-      }}>
-        {/* Image — centered, contained, no crop, no border */}
-        <img
-          src={panel.img}
-          alt={panel.imgAlt}
-          style={{
-            display: "block",
-            margin: "auto",
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            objectPosition: "center",
-            filter: isActive
-              ? "brightness(1.1) contrast(1.1) saturate(1.05)"
-              : `brightness(0.32) contrast(0.92) saturate(0.5) blur(${blur}px)`,
-            transition: `filter 0.7s ${cssEase(EASE)}`,
-            zIndex: 1,
-          }}
-        />
-
-        {/* Rim-light sweep across the top of the active image, like a
-            spotlight grazing the surface */}
-        {isActive && (
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "linear-gradient(160deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.05) 22%, transparent 46%)",
-            pointerEvents: "none", zIndex: 2, mixBlendMode: "screen",
-          }} />
-        )}
-
-        {/* Cool falloff at the base — the beam's light pools and fades
-            toward the bottom of the frame rather than stopping sharply */}
-        {isActive && (
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "linear-gradient(to top, rgba(1,11,24,0.35) 0%, transparent 40%)",
-            pointerEvents: "none", zIndex: 2,
-          }} />
-        )}
-
-        {/* Ghosted IF→FL on intro */}
-        {isIntro && (
-          <div style={{
-            position: "absolute", inset: 0,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontFamily: "Georgia, serif",
-            fontSize: "clamp(1.5rem, 5vw, 4rem)",
-            letterSpacing: "-0.04em",
-            color: "rgba(47,198,232,0.08)",
-            pointerEvents: "none", zIndex: 2, userSelect: "none",
-          }}>IF→FL</div>
-        )}
-
-        {/* Step badge */}
-        {panel.step && isActive && (
-          <div style={{
-            position: "absolute",
-            top: "10px", left: "10px",
-            padding: "4px 10px",
-            fontFamily: "Georgia, serif", fontSize: "10px", letterSpacing: "0.1em",
-            color: isEnd ? T.full : T.text,
-            background: "rgba(1,11,24,0.72)",
-            boxShadow: "0 1px 6px rgba(0,0,0,0.4)",
-            zIndex: 8,
-          }}>{panel.step}</div>
-        )}
-
-        {/* Decision badge */}
-        {isDecision && isActive && (
-          <div style={{
-            position: "absolute",
-            bottom: "10px", right: "10px",
-            padding: "4px 10px", fontSize: "7px",
-            fontFamily: "'Inter', sans-serif", letterSpacing: "0.35em", textTransform: "uppercase",
-            color: T.text,
-            background: "rgba(1,11,24,0.72)",
-            boxShadow: "0 1px 6px rgba(0,0,0,0.4)",
-            zIndex: 8,
-          }}>~20% qualify</div>
-        )}
-
-        {/* FL badge */}
-        {isEnd && isActive && (
-          <div style={{
-            position: "absolute",
-            top: "10px", right: "10px",
-            padding: "4px 12px", fontSize: "7px",
-            fontFamily: "'Inter', sans-serif", letterSpacing: "0.35em", textTransform: "uppercase",
-            color: T.full,
-            background: "rgba(1,11,24,0.72)",
-            boxShadow: "0 1px 6px rgba(0,0,0,0.4)",
-            zIndex: 8,
-          }}>Flawless</div>
-        )}
-      </div>
-
-      {/* Caption */}
+    <div className="relative mx-auto w-full max-w-sm" style={{ aspectRatio: "4 / 5" }}>
       <motion.div
-        animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 8 }}
-        transition={{ duration: 0.6, ease: EASE, delay: isActive ? 0.15 : 0 }}
-        style={{
-          marginTop: "22px", textAlign: "center",
-          pointerEvents: "none", maxWidth: "min(64vw, 500px)",
-        }}
+        key={`back-${back.title}`}
+        className="absolute inset-0 bg-white p-2 md:p-3"
+        style={{ boxShadow: "0 18px 40px rgba(2,39,74,0.16)" }}
+        initial={false}
+        animate={{ rotate: 7, x: 28, y: 22, scale: 0.9 }}
+        transition={{ duration: 0.65, ease: EASE }}
       >
-        <p style={{
-          fontFamily: "'Inter', sans-serif", fontSize: "8px",
-          letterSpacing: "0.5em", textTransform: "uppercase",
-          color: isEnd ? T.full : T.text, marginBottom: "8px", fontWeight: 500,
-        }}>{panel.tag}</p>
-
-        <h2 style={{
-          fontFamily: "Georgia, serif",
-          fontSize: "clamp(1rem, 1.9vw, 1.3rem)",
-          letterSpacing: "0.14em", textTransform: "uppercase",
-          color: INK, lineHeight: 1.35, whiteSpace: "pre-line", marginBottom: "10px",
-        }}>{panel.title}</h2>
-
-        <p style={{
-          fontFamily: "Georgia, serif", fontStyle: "italic",
-          fontSize: "clamp(0.7rem, 1vw, 0.82rem)",
-          color: INK_SOFT, letterSpacing: "0.02em", lineHeight: 1.7,
-        }}>{panel.body}</p>
-
-        {isDecision && (
-          <div style={{
-            display: "inline-flex", alignItems: "flex-start", gap: "10px",
-            marginTop: "14px", padding: "10px 16px",
-            background: "rgba(47,198,232,0.06)", maxWidth: "340px", textAlign: "left",
-          }}>
-            <span style={{
-              fontSize: "7px", letterSpacing: "0.35em", textTransform: "uppercase",
-              color: T.text, marginTop: "2px", flexShrink: 0,
-              fontFamily: "'Inter', sans-serif",
-            }}>If no →</span>
-            <p style={{ fontSize: "11px", color: INK_FAINT, lineHeight: 1.55, fontFamily: "'Inter', sans-serif" }}>
-              Stone returned unchanged. No cost. No risk. Full discretion maintained.
-            </p>
-          </div>
-        )}
+        <div className="w-full h-full overflow-hidden">
+          <img src={back.img} alt="" className="w-full h-full object-cover" />
+        </div>
       </motion.div>
-    </motion.div>
+
+      <motion.div
+        key={`mid-${mid.title}`}
+        className="absolute inset-0 bg-white p-2 md:p-3"
+        style={{ boxShadow: "0 14px 32px rgba(2,39,74,0.16)" }}
+        initial={false}
+        animate={{ rotate: -6, x: 14, y: 12, scale: 0.95 }}
+        transition={{ duration: 0.65, ease: EASE }}
+      >
+        <div className="w-full h-full overflow-hidden">
+          <img src={mid.img} alt="" className="w-full h-full object-cover" />
+        </div>
+      </motion.div>
+
+      <AnimatePresence initial={false} mode="popLayout">
+        <motion.div
+          key={`front-${front.title}`}
+          className="absolute inset-0 bg-white p-2 md:p-3"
+          style={{ boxShadow: "0 26px 60px rgba(2,39,74,0.24)" }}
+          initial={{ opacity: 0, rotate: -3, scale: 0.96, y: 14 }}
+          animate={{ opacity: 1, rotate: 0, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 1.03, transition: { duration: 0.3 } }}
+          transition={{ duration: 0.55, ease: EASE }}
+        >
+          <div className="w-full h-full overflow-hidden">
+            <img src={front.img} alt={front.imgAlt} className="w-full h-full object-cover" />
+          </div>
+          {/* Step badge — CMS-editable (`step` on the panel document). Colored
+              teal for the final "FL" step, otherwise a plain white chip.
+              Intro has no step number, so nothing renders for it. */}
+          {front.step && (
+            <div
+              className="absolute top-3 left-3 md:top-4 md:left-4 px-2.5 py-1 text-[11px] font-semibold tracking-[0.15em]"
+              style={{
+                color: front.type === "end" ? "#FFFFFF" : NAVY,
+                background: front.type === "end" ? TEAL : "rgba(255,255,255,0.92)",
+                boxShadow: "0 2px 8px rgba(2,39,74,0.15)",
+              }}
+            >
+              {front.step}
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -346,223 +187,144 @@ function GalleryFrame({
 // ══════════════════════════════════════════════════════════════════════
 export default function IFtoFLHorizontalScroll() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [vpWidth, setVpWidth]         = useState(() => typeof window !== "undefined" ? window.innerWidth : 1440);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Pull editable panel content from Sanity. Each field falls back to the
-  // built-in default when empty, so the component always renders fully.
+  // Pull editable panel content from Sanity. When editors have added panels
+  // there, the step count follows THEIR array (add or remove a step in the
+  // CMS and the page's scroll length / step list follow) — each entry only
+  // falls back to the built-in defaults field-by-field, for whichever local
+  // step shares its position, so a lone missing field doesn't blank out the
+  // rest of a CMS-authored step. Only when Sanity has no panels at all does
+  // the component fall back to the full built-in set.
   const { data } = useSanityQuery<{ conversionPanels?: SanityPanel[] }>(
     ["investment-conversion-panels"],
     INVESTMENT_PANELS_QUERY
   );
-  const panels: Panel[] = H_PANELS.map((def, i) => {
-    const s = data?.conversionPanels?.[i];
-    if (!s) return def;
-    return {
-      ...def,
-      type: s.type || def.type,
-      step: s.step ?? def.step,
-      tag: s.tag || def.tag,
-      title: s.title || def.title,
-      body: s.body || def.body,
-      img: s.imgUrl || def.img,
-      imgAlt: s.imgAlt || def.imgAlt,
-    };
-  });
+  const cmsPanels = data?.conversionPanels;
+  const panels: Panel[] =
+    cmsPanels && cmsPanels.length > 0
+      ? cmsPanels.map((s, i) => {
+          const def = H_PANELS[i] || H_PANELS[H_PANELS.length - 1];
+          return {
+            type: s.type || def.type,
+            step: s.step ?? def.step,
+            tag: s.tag || def.tag,
+            title: s.title || def.title,
+            body: s.body || def.body,
+            img: s.imgUrl || def.img,
+            imgAlt: s.imgAlt || def.imgAlt,
+          };
+        })
+      : H_PANELS;
 
-  useEffect(() => {
-    const h = () => setVpWidth(window.innerWidth);
-    window.addEventListener("resize", h);
-    return () => window.removeEventListener("resize", h);
-  }, []);
+  const TOTAL = panels.length;
 
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] });
 
-  useEffect(() => scrollYProgress.on("change", (v) => {
-    const idx = Math.round(v * (TOTAL - 1));
-    setActiveIndex(Math.max(0, Math.min(TOTAL - 1, idx)));
-  }), [scrollYProgress]);
+  // Continuous (unrounded) vertical travel for the step list — smooth, tied
+  // directly to scroll position rather than snapping between steps.
+  const listY = useTransform(scrollYProgress, [0, 1], [0, -(TOTAL - 1) * ITEM_HEIGHT]);
 
-  const x           = useTransform(scrollYProgress, [0, 1], [0, -(TOTAL - 1) * vpWidth]);
-  const hintOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
+  // Rounded, discrete index — drives the photo deck and which step reads as
+  // "active" in the text list, so the deck doesn't reshuffle continuously.
+  useEffect(
+    () =>
+      scrollYProgress.on("change", (v) => {
+        const idx = Math.round(v * (TOTAL - 1));
+        setActiveIndex(Math.max(0, Math.min(TOTAL - 1, idx)));
+      }),
+    [scrollYProgress]
+  );
 
-  const scrollToPanel = useCallback((idx: number) => {
+  const scrollToPanel = (idx: number) => {
     if (!containerRef.current) return;
-    const el  = containerRef.current;
+    const el = containerRef.current;
     const top = el.offsetTop + (idx / (TOTAL - 1)) * (el.scrollHeight - window.innerHeight);
     window.scrollTo({ top, behavior: "smooth" });
-  }, []);
+  };
 
   return (
     <div ref={containerRef} style={{ height: `${TOTAL * 100}vh`, position: "relative" }}>
+      <div className="sticky top-0 h-screen flex items-center overflow-hidden" style={{ background: "#FFFFFF" }}>
+        <div className="w-full max-w-6xl mx-auto px-6 md:px-14 lg:px-20 grid md:grid-cols-2 gap-12 md:gap-16 items-center">
 
-      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", background: WALL }}>
+          {/* Left: the photo deck */}
+          <div className="order-2 md:order-1">
+            <PhotoDeck panels={panels} activeIndex={activeIndex} />
+          </div>
 
-        {/* Wall: dark navy radial — brighter navy centre fading to near-black edges */}
-        <div style={{
-          position: "absolute", inset: 0,
-          background: `radial-gradient(ellipse 80% 75% at 50% 40%, ${WALL_LIGHT} 0%, ${WALL} 52%, ${WALL_SHADOW} 100%)`,
-          zIndex: 0, pointerEvents: "none",
-        }} />
-
-        {/* Ambient ceiling wash — very large, very soft, just enough to
-            suggest the light source without ever forming a visible shape */}
-        <div style={{
-          position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
-          width: "70vw", height: "92vh",
-          background: "radial-gradient(ellipse 48% 56% at 50% 0%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 40%, transparent 68%)",
-          pointerEvents: "none", zIndex: 1,
-        }} />
-
-        {/* Teal ambient bleed from the ceiling apex */}
-        <div style={{
-          position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
-          width: "50vw", height: "42vh",
-          background: "radial-gradient(ellipse 45% 50% at 50% 0%, rgba(47,198,232,0.09) 0%, transparent 70%)",
-          pointerEvents: "none", zIndex: 1,
-        }} />
-
-        {/* ── Picture rail — dark brushed-metal moulding ── */}
-        <div style={{
-          position: "absolute", top: "57px", left: 0, right: 0, height: "4px",
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.35), transparent)",
-          zIndex: 3, pointerEvents: "none",
-        }} />
-        <div style={{
-          position: "absolute", top: "61px", left: 0, right: 0, height: "10px",
-          background: `linear-gradient(to bottom, ${WALL_LIGHT} 0%, ${WALL_MID} 45%, ${WALL_SHADOW} 100%)`,
-          boxShadow: [
-            "0 4px 10px rgba(0,0,0,0.45)",
-            "0 1px 3px rgba(0,0,0,0.30)",
-            "inset 0 1px 0 rgba(255,255,255,0.18)",
-            "inset 0 -1px 0 rgba(0,0,0,0.3)",
-          ].join(", "),
-          zIndex: 3, pointerEvents: "none",
-        }} />
-        <div style={{
-          position: "absolute", top: "71px", left: 0, right: 0, height: "10px",
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.35), transparent)",
-          zIndex: 3, pointerEvents: "none",
-        }} />
-        <div style={{
-          position: "absolute", top: "81px", left: "12%", right: "12%", height: "1px",
-          background: `linear-gradient(90deg, transparent, ${T.dim} 20%, ${T.soft} 50%, ${T.dim} 80%, transparent)`,
-          zIndex: 3, pointerEvents: "none",
-        }} />
-
-        {/* ── Skirting board — dark navy metal ── */}
-        <div style={{
-          position: "absolute", bottom: "48px", left: 0, right: 0, height: "1px",
-          background: "rgba(255,255,255,0.10)",
-          zIndex: 3, pointerEvents: "none",
-        }} />
-        <div style={{
-          position: "absolute", bottom: "30px", left: 0, right: 0, height: "18px",
-          background: `linear-gradient(to bottom, ${WALL_LIGHT} 0%, ${WALL_MID} 45%, ${WALL_SHADOW} 100%)`,
-          boxShadow: [
-            "0 -3px 8px rgba(0,0,0,0.35)",
-            "inset 0 1px 0 rgba(255,255,255,0.14)",
-          ].join(", "),
-          zIndex: 3, pointerEvents: "none",
-        }} />
-        {/* Baseboard */}
-        <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0, height: "30px",
-          background: `linear-gradient(to bottom, ${WALL_SHADOW} 0%, #010509 100%)`,
-          boxShadow: "inset 0 2px 5px rgba(0,0,0,0.4)",
-          zIndex: 3, pointerEvents: "none",
-        }} />
-
-        {/* Side wall shadow vignette */}
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(to right, rgba(0,0,0,0.55) 0%, transparent 13%, transparent 87%, rgba(0,0,0,0.55) 100%)",
-          pointerEvents: "none", zIndex: 9,
-        }} />
-
-        {/* Gallery track — vertically centered so the frame sits with
-            balanced space above and below, instead of hugging the rail
-            and leaving a large empty gap at the bottom */}
-        <motion.div style={{
-          x, display: "flex", alignItems: "center",
-          height: "100%", willChange: "transform", paddingTop: "40px",
-        }}>
-          {panels.map((panel, i) => (
-            <GalleryFrame
-              key={i} panel={panel} index={i} activeIndex={activeIndex}
-              onClick={() => { if (i !== activeIndex) scrollToPanel(i); }}
+          {/* Right: vertical step list, translated upward as the reader
+              scrolls so the active step always lands at the same anchor. */}
+          <div className="order-1 md:order-2 relative" style={{ height: `${ITEM_HEIGHT * 1.5}px`, overflow: "hidden" }}>
+            {/* dashed connector running the full list */}
+            <div
+              className="absolute top-0 bottom-0"
+              style={{ left: "6px", borderLeft: `1.5px dashed ${LINE}` }}
             />
-          ))}
-        </motion.div>
 
-        {/* Cinematic vignette — darkens the corners so the eye is pulled
-            toward the lit frame at centre, like a stage seen from the
-            audience rather than a flat screenshot */}
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "radial-gradient(ellipse 100% 100% at 50% 48%, transparent 45%, rgba(0,0,0,0.22) 78%, rgba(0,0,0,0.5) 100%)",
-          pointerEvents: "none", zIndex: 11,
-        }} />
-
-        {/* Film grain — subtle texture so the scene reads as photographed
-            light rather than a flat vector render */}
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: `url("${GRAIN_URI}")`,
-          backgroundSize: "140px 140px",
-          opacity: 0.05,
-          mixBlendMode: "overlay",
-          pointerEvents: "none", zIndex: 12,
-        }} />
-
-        {/* FLX wordmark — top left */}
-        <div style={{
-          position: "absolute", top: "16px", left: "28px",
-          fontFamily: "Georgia, serif", fontSize: "10px",
-          letterSpacing: "0.45em", textTransform: "uppercase",
-          color: INK_FAINT, zIndex: 15, userSelect: "none",
-        }}>FLX · IF→FL</div>
-
-        {/* Step counter — top right */}
-        <div style={{
-          position: "absolute", top: "16px", right: "28px",
-          fontFamily: "'Inter', sans-serif", fontSize: "9px",
-          letterSpacing: "0.35em", color: INK_FAINT,
-          zIndex: 15, userSelect: "none",
-        }}>{String(activeIndex + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}</div>
-
-        {/* Dot nav */}
-        <div style={{
-          position: "absolute", bottom: "10px", left: "50%", transform: "translateX(-50%)",
-          display: "flex", alignItems: "center", gap: "8px", zIndex: 15,
-        }}>
-          {panels.map((_, i) => (
-            <button key={i} onClick={() => scrollToPanel(i)} aria-label={`Go to step ${i + 1}`} style={{
-              width: i === activeIndex ? "30px" : "5px", height: "2px",
-              background: i === activeIndex ? T.full : "rgba(47,198,232,0.28)",
-              border: "none", padding: 0, cursor: "pointer",
-              transition: `all 0.6s ${cssEase(EASE)}`,
-            }} />
-          ))}
+            <motion.div style={{ y: listY }} className="absolute inset-x-0 top-0">
+              {panels.map((panel, i) => {
+                const isActive = i === activeIndex;
+                return (
+                  <div
+                    key={i}
+                    className="relative pl-8 overflow-hidden"
+                    style={{ height: `${ITEM_HEIGHT}px` }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => scrollToPanel(i)}
+                      aria-label={`Go to step ${i + 1}`}
+                      className="absolute -left-0.5 top-2 w-3 h-3 rotate-45 transition-colors"
+                      style={{ background: isActive ? TEAL : "rgba(2,39,74,0.12)" }}
+                    />
+                    <p
+                      className="text-xs font-medium uppercase tracking-[0.2em] mb-3 transition-colors duration-500"
+                      style={{ color: isActive ? TEAL : INACTIVE_TAG, ...clampStyle(1) }}
+                    >
+                      {panel.tag}
+                    </p>
+                    <h3
+                      className="font-sans font-extrabold leading-tight mb-3 whitespace-pre-line transition-all duration-500"
+                      style={{
+                        fontSize: isActive ? "clamp(1.75rem, 3.2vw, 2.5rem)" : "1.35rem",
+                        color: isActive ? NAVY : INACTIVE_HEAD,
+                        ...clampStyle(2),
+                      }}
+                    >
+                      {panel.title}
+                    </h3>
+                    {/* Body copy only renders for the active step — CMS text
+                        length varies a lot between steps, so an inactive row
+                        never reserves (or bleeds) space for a paragraph it
+                        isn't showing. The clamp is a hard ceiling for
+                        whichever step is active, in case its own copy runs
+                        unusually long. */}
+                    {isActive && (
+                      <motion.p
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: EASE }}
+                        className="text-sm sm:text-base leading-relaxed max-w-md"
+                        style={{ color: BODY, ...clampStyle(6) }}
+                      >
+                        {panel.body}
+                      </motion.p>
+                    )}
+                  </div>
+                );
+              })}
+            </motion.div>
+          </div>
         </div>
 
-        {/* Scroll hint */}
-        <motion.div style={{
-          opacity: hintOpacity, position: "absolute", bottom: "54px", left: "28px", zIndex: 15,
-        }}>
-          <p style={{
-            fontFamily: "'Inter', sans-serif", fontSize: "8px",
-            letterSpacing: "0.45em", textTransform: "uppercase",
-            color: INK_FAINT, marginBottom: "7px",
-          }}>Scroll to explore</p>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <div style={{ width: "22px", height: "1px", background: T.soft }} />
-            <svg width="5" height="9" viewBox="0 0 5 9" fill="none">
-              <path d="M1 1l3 3.5L1 8" stroke={T.mid} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </motion.div>
-
+        {/* step counter, bottom-right */}
+        <div
+          className="absolute bottom-6 right-6 md:right-10 text-xs tracking-[0.25em]"
+          style={{ color: "rgba(2,39,74,0.4)" }}
+        >
+          {String(activeIndex + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
+        </div>
       </div>
     </div>
   );
