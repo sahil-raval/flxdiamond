@@ -303,11 +303,24 @@ export default function About() {
                       "In 1978, Babu Vekariya entered the diamond trade at twelve. There were no shortcuts. He learned by standing close to the work watching craftsmen, understanding the process and slowly discovering how much there was to notice in a single stone. What stayed with him wasn't just the craft. It was the habit of paying attention."}
                   </p>
                 </div>
-                <div className="overflow-hidden min-h-[200px] md:min-h-0">
+                <div className="relative overflow-hidden min-h-[200px] md:min-h-0">
                   <img
                     src={beginningImage.url}
                     alt={beginningImage.alt || ""}
-                    className="w-full h-full object-cover opacity-80"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  {/* Blends the photo into the navy text panel it sits beside, instead
+                      of the old flat opacity-80 dim (which read as a hard, washed-out
+                      border along the seam). Fades from the panel's own navy at the
+                      seam it touches — left edge on desktop's side-by-side layout,
+                      top edge once the two stack on mobile. */}
+                  <div
+                    className="absolute inset-0 pointer-events-none hidden md:block"
+                    style={{ background: `linear-gradient(90deg, ${NAVY_DEEP} 0%, rgba(0,49,93,0) 40%)` }}
+                  />
+                  <div
+                    className="absolute inset-0 pointer-events-none md:hidden"
+                    style={{ background: `linear-gradient(180deg, ${NAVY_DEEP} 0%, rgba(0,49,93,0) 40%)` }}
                   />
                 </div>
               </motion.div>
@@ -345,7 +358,7 @@ export default function About() {
             whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
             variants={stagger}
-            className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 md:gap-14"
+            className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 md:gap-14"
           >
             {/* Left column: photo, then caption below it. aspect-[3/4]: both
                 Learning photos are portrait-oriented in the design, not
@@ -423,10 +436,15 @@ export default function About() {
             className="relative max-w-md mx-auto mt-12 md:mt-16 text-left"
             style={{ background: "#FFFFFF" }}
           >
-            <div className="aspect-[4/3] overflow-hidden">
-              <img src={trustPhoto.url} alt={trustPhoto.alt || ""} className="w-full h-full object-cover" />
+            {/* The design frames this photo with a visible white margin inside
+                the card (like a polaroid), rather than running it edge-to-edge
+                against the card's own edges. */}
+            <div className="p-3 md:p-4">
+              <div className="aspect-[4/3] overflow-hidden">
+                <img src={trustPhoto.url} alt={trustPhoto.alt || ""} className="w-full h-full object-cover" />
+              </div>
             </div>
-            <div className="p-6 md:p-8 space-y-2 text-center">
+            <div className="px-6 md:px-8 pb-6 md:pb-8 pt-1 space-y-2 text-center">
               <h3 className="font-serif font-normal text-xl" style={{ color: "#02274A" }}>
                 {cms?.trustCardHeading || "Decades of Expertise"}
               </h3>
