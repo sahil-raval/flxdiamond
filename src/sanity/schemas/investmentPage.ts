@@ -13,10 +13,18 @@ export default defineType({
       initialValue: "Investment Grade",
     }),
     defineField({
-      name: "heroHeading",
-      title: "Hero Heading",
+      name: "heroHeadingLine1",
+      title: "Hero Heading — first phrase",
+      description: "First line of the hero heading, e.g. \"Diamonds as a\".",
       type: "string",
-      initialValue: "Diamonds as a Portable, Stateless Asset.",
+      initialValue: "Diamonds as a",
+    }),
+    defineField({
+      name: "heroHeadingLine2",
+      title: "Hero Heading — second phrase",
+      description: "Second line of the hero heading, shown directly below the first, e.g. \"Store of Value.\".",
+      type: "string",
+      initialValue: "Store of Value.",
     }),
     defineField({
       name: "heroSubtext",

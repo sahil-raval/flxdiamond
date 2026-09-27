@@ -31,10 +31,7 @@ export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0]{
   titleTemplate,
   siteUrl,
   twitterHandle,
-  googleSiteVerification
-
-
-
+  googleSiteVerification,
   footerTagline,
   footerNote,
   seoDescription,
@@ -221,7 +218,8 @@ export const ABOUT_PAGE_QUERY = `*[_type == "aboutPage"][0]{
 export const INVESTMENT_PAGE_QUERY = `*[_type == "investmentPage"][0]{
   ${SEO_PROJECTION},
   heroTagline,
-  heroHeading,
+  heroHeadingLine1,
+  heroHeadingLine2,
   heroSubtext,
   heroCta,
   heroSecondaryCta,
@@ -245,7 +243,7 @@ export const INVESTMENT_PAGE_QUERY = `*[_type == "investmentPage"][0]{
   opportunityBody2,
   opportunityStats,
   opportunityDisclaimer,
-  pillars, 
+  pillars,
   ctaButtonPrimary,
   ctaButtonSecondary,
   processTagline,
@@ -284,7 +282,8 @@ export const INVESTMENT_PANELS_QUERY = `*[_type == "investmentPage"][0]{
 export const TRADE_PAGE_QUERY = `*[_type == "tradePage"][0]{
   ${SEO_PROJECTION},
   heroTagline,
-  heroHeading,
+  heroHeadingLine1,
+  heroHeadingLine2,
   heroSubtext,
   heroCta,
   heroSecondaryCta,
@@ -302,7 +301,6 @@ export const TRADE_PAGE_QUERY = `*[_type == "tradePage"][0]{
   jewellersHeading,
   jewellersBody,
   ctaHeading,
-  ctaBody,
   ctaBody
 }`;
 

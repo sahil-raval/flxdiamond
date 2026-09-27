@@ -42,13 +42,22 @@ export function Footer() {
   const logoUrl = "/white-logo.png";
   const footerTagline = ss?.footerTagline || "Every FL certificate begins with a practiced eye and 47 years of accumulated judgment.";
   const footerNote = ss?.footerNote || "B2B diamond sourcing and precision IF→FL conversion. Serving diamond traders, jewellers, and investors globally from Geelong, Victoria, Australia.";
-  const contacts = (ss?.email || ss?.phones?.length || ss?.address)
-    ? [
-        ...(ss?.email ? [{ label: "Email", value: ss.email, teal: true }] : []),
-        ...((ss?.phones || []).map(p => ({ label: p.label, value: p.value, teal: false }))),
-        ...(ss?.address ? [{ label: "Location", value: ss.address, teal: false }] : []),
-      ]
-    : CONTACTS;
+  // Each field falls back to its own hardcoded default independently, instead
+  // of all-or-nothing. The old version switched to the CMS values the moment
+  // *any one* of email/phones/address was set in Sanity — so an editor filling
+  // in just the email would silently wipe out the Australia/India phone
+  // numbers below, since ss.phones would be empty and get mapped to `[]`
+  // rather than falling back to CONTACTS. Phones stays a single unit (using
+  // whichever full list is present) since merging individual phone entries
+  // doesn't make sense the way merging three unrelated fields doesn't.
+  const staticPhones = CONTACTS.filter(c => c.label === "Australia" || c.label === "India");
+  const contacts = [
+    { label: "Email", value: ss?.email || CONTACTS[0].value, teal: true },
+    ...(ss?.phones && ss.phones.length > 0
+      ? ss.phones.map(p => ({ label: p.label, value: p.value, teal: false }))
+      : staticPhones),
+    { label: "Location", value: ss?.address || CONTACTS[CONTACTS.length - 1].value, teal: false },
+  ];
 
   return (
     <footer style={{ background: "#02274A", fontFamily: "'Inter', sans-serif" }}>
@@ -98,7 +107,7 @@ export function Footer() {
           >
             <p
               className="font-serif leading-snug mb-4"
-              style={{ fontSize: "clamp(1.2rem, 2.5vw, 1.6rem)", color: "rgba(255,255,255,0.6)" }}
+              style={{ fontSize: "clamp(1.35rem, 2.7vw, 1.75rem)", color: "rgba(255,255,255,0.75)" }}
             >
               {footerTagline}
             </p>
@@ -109,6 +118,16 @@ export function Footer() {
       </div>
 
       {/* ── Main grid ── */}
+      {/* This whole grid was originally built on rgba(255,255,255,0.4)/0.45
+          for every secondary label at 8-9px — "Navigate", "Talk to us",
+          "Trusted By", the EMAIL/AUSTRALIA/INDIA/LOCATION labels, partner
+          roles, and the "All enquiries..." disclaimer — which measured
+          3.56-4.15:1 against this navy (#02274A), failing AA's 4.5:1. Sizes
+          bumped up a step (8px→10px, 9px→11px, 11px→text-sm) and opacities
+          raised again (labels to 0.75, primary values/links to 0.9-white)
+          per a follow-up "still looks dull, make it bigger" request — well
+          past the AA floor now, prioritizing comfortable reading over
+          keeping this footer's original very-quiet, low-key styling. */}
       <div
         className="max-w-7xl mx-auto px-6 pb-16"
         style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
@@ -117,10 +136,10 @@ export function Footer() {
 
           {/* Brand column */}
           <div className="sm:col-span-2 md:col-span-1 space-y-6">
-            <p className="text-[9px] uppercase tracking-[0.45em] font-medium" style={{ color: "#1CA9C9" }}>
+            <p className="text-[11px] uppercase tracking-[0.4em] font-medium" style={{ color: "#1CA9C9" }}>
               Est. 1978
             </p>
-            <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.6)", maxWidth: "200px" }}>
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)", maxWidth: "230px" }}>
               {footerNote}
             </p>
             <div
@@ -128,7 +147,7 @@ export function Footer() {
               style={{ borderColor: "rgba(28,169,201,0.3)", background: "rgba(28,169,201,0.08)" }}
             >
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#1CA9C9", opacity: 0.9 }} />
-              <span className="text-[9px] uppercase tracking-[0.3em]" style={{ color: "#1CA9C9" }}>
+              <span className="text-[10px] uppercase tracking-[0.25em]" style={{ color: "#1CA9C9" }}>
                 B2B Enquiries Only
               </span>
             </div>
@@ -136,7 +155,7 @@ export function Footer() {
 
           {/* Navigation */}
           <div className="space-y-6">
-            <p className="text-[9px] uppercase tracking-[0.45em] font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <p className="text-[11px] uppercase tracking-[0.4em] font-medium" style={{ color: "rgba(255,255,255,0.75)" }}>
               Navigate
             </p>
             <ul className="space-y-3">
@@ -144,8 +163,8 @@ export function Footer() {
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    className="text-[11px] tracking-wide transition-all duration-200 hover:translate-x-1 inline-block"
-                    style={{ color: "rgba(255,255,255,0.72)" }}
+                    className="text-sm tracking-wide transition-all duration-200 hover:translate-x-1 inline-block"
+                    style={{ color: "rgba(255,255,255,0.92)" }}
                     data-testid={`footer-link-${l.label.toLowerCase()}`}
                   >
                     {l.label}
@@ -157,18 +176,18 @@ export function Footer() {
 
           {/* Talk to us */}
           <div className="space-y-6">
-            <p className="text-[9px] uppercase tracking-[0.45em] font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <p className="text-[11px] uppercase tracking-[0.4em] font-medium" style={{ color: "rgba(255,255,255,0.75)" }}>
               Talk to us
             </p>
             <ul className="space-y-4">
               {contacts.map(c => (
                 <li key={c.label} className="space-y-0.5">
-                  <p className="text-[8px] uppercase tracking-[0.35em]" style={{ color: "rgba(255,255,255,0.4)" }}>
+                  <p className="text-[10px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.75)" }}>
                     {c.label}
                   </p>
                   <p
-                    className="text-[11px] leading-snug"
-                    style={{ color: c.teal ? "#1CA9C9" : "rgba(255,255,255,0.8)" }}
+                    className="text-sm leading-snug"
+                    style={{ color: c.teal ? "#1CA9C9" : "rgba(255,255,255,0.92)" }}
                   >
                     {c.value}
                   </p>
@@ -179,7 +198,7 @@ export function Footer() {
 
           {/* Trusted Partners */}
           <div className="sm:col-span-2 md:col-span-1 space-y-6">
-            <p className="text-[9px] uppercase tracking-[0.45em] font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <p className="text-[11px] uppercase tracking-[0.4em] font-medium" style={{ color: "rgba(255,255,255,0.75)" }}>
               Trusted By
             </p>
             <ul className="space-y-4">
@@ -189,12 +208,12 @@ export function Footer() {
                 { name: "Excell Overseas", role: "Trade Partner" },
               ].map(p => (
                 <li key={p.name} className="space-y-0.5">
-                  <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.8)" }}>{p.name}</p>
-                  <p className="text-[8px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.4)" }}>{p.role}</p>
+                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.92)" }}>{p.name}</p>
+                  <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: "rgba(255,255,255,0.75)" }}>{p.role}</p>
                 </li>
               ))}
             </ul>
-            <p className="text-[10px] leading-relaxed pt-2" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <p className="text-xs leading-relaxed pt-2" style={{ color: "rgba(255,255,255,0.75)" }}>
               All enquiries handled under strict commercial confidence.
             </p>
           </div>
@@ -217,7 +236,7 @@ export function Footer() {
           ].map((item, i) => (
             <span key={i} className="flex items-center gap-2">
               <span className="w-1 h-1 rounded-full" style={{ background: "rgba(28,169,201,0.7)" }} />
-              <span className="text-[9px] uppercase tracking-[0.3em]" style={{ color: "rgba(255,255,255,0.5)" }}>
+              <span className="text-[11px] uppercase tracking-[0.25em]" style={{ color: "rgba(255,255,255,0.75)" }}>
                 {item}
               </span>
             </span>
@@ -230,7 +249,7 @@ export function Footer() {
         className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row justify-between items-center gap-3"
         style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
       >
-        <p className="text-[9px] tracking-[0.3em] uppercase" style={{ color: "rgba(255,255,255,0.4)" }}>
+        <p className="text-[11px] tracking-[0.2em] uppercase" style={{ color: "rgba(255,255,255,0.75)" }}>
           &copy; {new Date().getFullYear()} FLX Diamonds Pty Ltd &mdash; ABN 43 665 467 274 &mdash; Geelong, Victoria, Australia
         </p>
         <div className="flex gap-6">
@@ -238,8 +257,8 @@ export function Footer() {
             <Link
               key={l.href}
               href={l.href}
-              className="text-[9px] tracking-[0.3em] uppercase transition-colors hover:text-white"
-              style={{ color: "rgba(255,255,255,0.4)" }}
+              className="text-[11px] tracking-[0.2em] uppercase transition-colors hover:text-white"
+              style={{ color: "rgba(255,255,255,0.75)" }}
             >
               {l.label}
             </Link>

@@ -155,7 +155,9 @@ const STEPS = [
 // CHANGE 1: Added interface with videoRef and onTimeUpdate props
 interface DiamondVideoProps {
   height: number;
-  videoRef: React.RefObject<HTMLVideoElement>;
+  // React.RefObject<HTMLVideoElement | null> — matches what useRef<HTMLVideoElement>(null)
+  // actually produces; the non-nullable version was rejecting videoRef at all 3 call sites.
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   onTimeUpdate: (currentTime: number, duration: number) => void;
   videoSrc?: string;
 }
@@ -208,6 +210,14 @@ function DiamondVideo({ height, videoRef, onTimeUpdate, videoSrc }: DiamondVideo
 
 // ══════════════════════════════════════════════════════════════════════
 // TRACEABILITY SECTION — fully responsive
+// NOTE: this whole component is currently commented out below (not
+// rendered on the live Journal page — see "Diamond Journey with Video").
+// It was left as-is during this contrast pass since it isn't visible to
+// users yet, but it has the exact same rgba(2,39,74, low-alpha) and
+// rgba(255,255,255, low-alpha) pattern as the rest of this file. If this
+// section gets re-enabled, run the same fix over it before shipping:
+// bump navy text below ~0.65 alpha and white-on-navy text below ~0.6
+// alpha up to those floors.
 // ══════════════════════════════════════════════════════════════════════
 
 // CHANGE 3: Removed SLIDE_INTERVAL — video duration drives timing instead
@@ -680,12 +690,16 @@ export default function Journal() {
             <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em] font-medium" style={{ color: "#1CA9C9" }}>
               {jpc?.heroTagline || "Knowledge & Insight"}
             </motion.p>
+            {/* "Insights." was rgba(255,255,255,0.3) — 2.59:1 against this navy, under
+                even the 3:1 floor large text gets. 0.45 clears it (4.13:1) while still
+                reading as the intentionally "ghosted" second word next to solid white. */}
             <motion.h1 variants={up} className="font-serif text-5xl md:text-6xl lg:text-7xl text-white leading-tight">
-              {jpc?.heroHeading ? jpc.heroHeading : (<>Journal &amp;<br /><span style={{ color: "rgba(255,255,255,0.3)" }}>Insights.</span></>)}
+              {jpc?.heroHeading ? jpc.heroHeading : (<>Journal &amp;<br /><span style={{ color: "rgba(255,255,255,0.45)" }}>Insights.</span></>)}
             </motion.h1>
             <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
           </div>
-          <motion.p variants={up} className="text-white/40 text-sm md:text-base leading-relaxed md:pb-3">
+          {/* text-white/40 measured 3.56:1 on this navy — under AA. /70 measures 8.0:1. */}
+          <motion.p variants={up} className="text-white/70 text-sm md:text-base leading-relaxed md:pb-3">
             {jpc?.heroSubtext || "Perspectives on diamond grading, investment-grade stones, and the IF→FL conversion process, written for trade professionals who already understand the fundamentals."}
           </motion.p>
         </motion.div>
@@ -694,7 +708,12 @@ export default function Journal() {
       {/* ── Featured Article ── */}
       <section className="py-20 md:py-28 px-6" style={{ background: "#F4F8FC" }}>
         <div className="max-w-7xl mx-auto">
-          <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-[9px] uppercase tracking-[0.45em] mb-10 font-medium" style={{ color: "#1CA9C9" }}>
+          {/* Raw brand teal (#1CA9C9) used as TEXT on a light background only
+              measures 2.77:1 — badly fails AA's 4.5:1. #137186 is the same hue
+              and saturation, darkened until it clears AA (5.3-5.6:1 here). Kept
+              as a plain hex since this file doesn't pull from the shared
+              globals.css tokens — same fix as --accent-text there. */}
+          <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-[9px] uppercase tracking-[0.45em] mb-10 font-medium" style={{ color: "#137186" }}>
             Featured
           </motion.p>
           <motion.article
@@ -705,14 +724,18 @@ export default function Journal() {
           >
             <div className="space-y-5">
               <div className="flex items-center gap-4">
-                <span className="text-[8px] uppercase tracking-[0.42em]" style={{ color: "#1CA9C9" }}>{featured.category}</span>
+                <span className="text-[8px] uppercase tracking-[0.42em]" style={{ color: "#137186" }}>{featured.category}</span>
                 <span className="w-6 h-px" style={{ background: "rgba(28,169,201,0.3)" }} />
-                <span className="text-[8px] uppercase tracking-[0.3em]" style={{ color: "rgba(2,39,74,0.3)" }}>{featured.date}</span>
+                {/* rgba(2,39,74,0.3) measured 1.88:1 on white — one of the worst
+                    offenders found in this audit. 0.68 measures 5.45:1. */}
+                <span className="text-[8px] uppercase tracking-[0.3em]" style={{ color: "rgba(2,39,74,0.68)" }}>{featured.date}</span>
               </div>
               <h2 className="font-serif text-3xl md:text-4xl leading-tight" style={{ color: "#02274A" }}>{featured.title}</h2>
               <span className="block w-8 h-px" style={{ background: "#1CA9C9" }} />
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.5)" }}>{featured.excerpt}</p>
-              <Link href={linkFor(featured)} className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] font-medium transition-colors hover:gap-3" style={{ color: "#1CA9C9" }}>
+              {/* rgba(2,39,74,0.5) measured 3.16:1 on white — fails AA for this
+                  normal-size (text-sm) paragraph. 0.68 measures 5.45:1. */}
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.68)" }}>{featured.excerpt}</p>
+              <Link href={linkFor(featured)} className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] font-medium transition-colors hover:gap-3" style={{ color: "#137186" }}>
                 Read Article <ArrowRight size={11} />
               </Link>
             </div>
@@ -725,8 +748,17 @@ export default function Journal() {
               </div>
               )}
               <div className="absolute bottom-8 left-8">
-                <p className="text-[9px] uppercase tracking-[0.4em] mb-1" style={{ color: "rgba(28,169,201,0.6)" }}>GIA Documentation</p>
-                <p className="text-white/20 text-xs">Certificate interpretation for professionals</p>
+                {/* rgba(28,169,201,0.6) — teal at 60% alpha over this navy
+                    gradient — only measured ~2.5-2.9:1. Even the raw teal at
+                    full opacity barely clears 4.3:1 against the lighter end of
+                    this gradient (#04385E), just under AA. #1FBDE0 is the same
+                    hue lightened until it clears 4.5:1 against both ends of the
+                    gradient (5.4:1 / 6.8:1). */}
+                <p className="text-[9px] uppercase tracking-[0.4em] mb-1" style={{ color: "#1FBDE0" }}>GIA Documentation</p>
+                {/* text-white/20 measured ~1.8:1 on this navy gradient — nearly
+                    invisible, and the dimmest text found on the page. /70
+                    measures 6.7:1. */}
+                <p className="text-white/70 text-xs">Certificate interpretation for professionals</p>
               </div>
             </div>
           </motion.article>
@@ -739,7 +771,7 @@ export default function Journal() {
       {/* ── Article List ── */}
       <section className="py-20 md:py-28 px-6" style={{ background: "white" }}>
         <div className="max-w-7xl mx-auto">
-          <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-[9px] uppercase tracking-[0.45em] mb-10 font-medium" style={{ color: "#1CA9C9" }}>
+          <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-[9px] uppercase tracking-[0.45em] mb-10 font-medium" style={{ color: "#137186" }}>
             All Articles
           </motion.p>
           <div className="divide-y" style={{ borderTop: "1px solid rgba(2,39,74,0.07)", borderColor: "rgba(2,39,74,0.07)" }}>
@@ -751,17 +783,22 @@ export default function Journal() {
                 className="py-10 grid md:grid-cols-[180px_1fr_auto] gap-6 md:gap-12 items-start group"
               >
                 <div className="space-y-1">
-                  <p className="text-[8px] uppercase tracking-[0.42em] font-medium" style={{ color: "#1CA9C9" }}>{article.category}</p>
-                  <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: "rgba(2,39,74,0.3)" }}>{article.date}</p>
+                  <p className="text-[8px] uppercase tracking-[0.42em] font-medium" style={{ color: "#137186" }}>{article.category}</p>
+                  <p className="text-[10px] uppercase tracking-[0.25em]" style={{ color: "rgba(2,39,74,0.68)" }}>{article.date}</p>
                 </div>
                 <div className="space-y-3">
-                  <h2 className="font-serif text-xl md:text-2xl leading-snug group-hover:text-[#1CA9C9] transition-colors" style={{ color: "#02274A" }}>
+                  <h2 className="font-serif text-xl md:text-2xl leading-snug group-hover:text-[#137186] transition-colors" style={{ color: "#02274A" }}>
                     {article.title}
                   </h2>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.45)" }}>{article.excerpt}</p>
+                  {/* rgba(2,39,74,0.45) measured 2.85:1 on white — fails AA. 0.68 measures 5.45:1. */}
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.68)" }}>{article.excerpt}</p>
                 </div>
                 <div className="flex items-start pt-1">
-                  <Link href={linkFor(article)} className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] shrink-0 group-hover:gap-3 transition-all" style={{ color: "rgba(2,39,74,0.3)" }}>
+                  {/* rgba(2,39,74,0.3) — the same near-invisible "READ →" seen in
+                      the screenshot — measured 1.88:1. Switched to the same
+                      #137186 used for the other links here so it also reads as
+                      a clickable accent instead of dead-looking gray text. */}
+                  <Link href={linkFor(article)} className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] shrink-0 group-hover:gap-3 transition-all" style={{ color: "#137186" }}>
                     Read <ArrowRight size={10} />
                   </Link>
                 </div>
@@ -779,7 +816,9 @@ export default function Journal() {
             <p className="font-serif text-2xl text-white">Ready to discuss your stones?</p>
           </div>
           <Link href="/talk-to-us">
-            <button className="text-[10px] uppercase tracking-[0.3em] text-white transition-all hover:opacity-80" style={{ background: "#1CA9C9", height: "50px", padding: "0 2.5rem", border: "none" }}>
+            {/* White text on this teal button measured 2.77:1 — fails AA.
+                Navy text on the same teal measures 5.49:1. */}
+            <button className="text-[10px] uppercase tracking-[0.3em] transition-all hover:opacity-80" style={{ background: "#1CA9C9", color: "#02274A", height: "50px", padding: "0 2.5rem", border: "none" }}>
               Begin the Conversation →
             </button>
           </Link>

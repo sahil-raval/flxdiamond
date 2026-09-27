@@ -13,10 +13,18 @@ export default defineType({
       initialValue: "Trade Partners",
     }),
     defineField({
-      name: "heroHeading",
-      title: "Hero Heading",
+      name: "heroHeadingLine1",
+      title: "Hero Heading — first phrase",
+      description: "First line of the hero heading, e.g. \"Beyond supply.\".",
       type: "string",
-      initialValue: "Where the Diamond Trade Comes to Source.",
+      initialValue: "Beyond supply.",
+    }),
+    defineField({
+      name: "heroHeadingLine2",
+      title: "Hero Heading — second phrase",
+      description: "Second line of the hero heading, shown directly below the first, e.g. \"Built for long-term partnerships.\".",
+      type: "string",
+      initialValue: "Built for long-term partnerships.",
     }),
     defineField({
       name: "heroSubtext",

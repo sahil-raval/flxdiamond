@@ -28,6 +28,7 @@
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-accent-border: var(--accent-border);
+  --color-accent-text: hsl(var(--accent-text));
   --color-gold: hsl(var(--gold));
   --color-gold-foreground: hsl(var(--gold-foreground));
   --color-destructive: hsl(var(--destructive));
@@ -52,14 +53,31 @@
   --primary: 209 95% 15%;
   --primary-foreground: 0 0% 100%;
 
-  /* Teal #1CA9C9 — ocean surface, primary accent */
+  /* Teal #1CA9C9 — ocean surface, primary accent.
+     accent-foreground was white (2.74:1 on this teal — fails WCAG AA's
+     4.5:1 for text, which is why anything using text-accent-foreground on
+     a teal fill — buttons, badges, active nav/sidebar pills — reads as
+     washed-out "text on a blue background". Swapped to the navy primary,
+     which measures 5.49:1 on the same teal. */
   --accent: 191 76% 45%;
-  --accent-foreground: 0 0% 100%;
+  --accent-foreground: 209 95% 15%;
   --accent-border: 191 76% 45%;
+  /* This raw teal is only safe for BACKGROUNDS/fills/icons — as a text
+     color on white or any light background it measures 2.77:1 (a badly
+     failing 4.5:1 needed for AA). That's the exact pattern behind labels
+     like "FEATURED", the "EXPERTISE" article tag, and "READ ARTICLE →"
+     links reading dull/washed out: they're using this teal directly as
+     text-accent color. accent-text is the same hue and saturation, just
+     darkened until it's legible as text: 5.6:1 on white, 4.9:1 on the
+     --background wash. Use text-accent-text (not text-accent) for any
+     actual teal-colored copy or links on a light background; keep
+     text-accent only for icons/borders/backgrounds. */
+  --accent-text: 191 75% 30%;
 
-  /* Gold */
+  /* Gold — same issue as accent above: white-on-gold only measured 2.44:1.
+     Navy-on-gold measures 6.18:1. */
   --gold: 43 74% 47%;
-  --gold-foreground: 0 0% 100%;
+  --gold-foreground: 209 95% 15%;
 
   /* Backgrounds */
   --background: 210 30% 98%;
@@ -81,16 +99,31 @@
   --secondary-foreground: 209 40% 12%;
 
   --muted: 210 20% 94%;
-  --muted-foreground: 209 20% 50%;
+  /* This is the systemic contrast problem: text-muted-foreground is what
+     drives most "secondary" gray text sitewide — category labels, dates,
+     card descriptions, link subtext (this is almost certainly the exact
+     gray used for the Journal page's article list). At 50% lightness it
+     only measured 3.6-4.1:1 against white/card/muted backgrounds — under
+     WCAG AA's 4.5:1 floor for normal text, which forces the "turn up my
+     screen brightness" workaround. Darkened to 42% lightness (same hue and
+     saturation, so it's still visually the same muted slate-blue, just
+     legible) — now 4.76-5.44:1 across all three backgrounds it appears on. */
+  --muted-foreground: 209 20% 42%;
 
-  --destructive: 0 84% 60%;
+  /* Darkened from 60% → 48% lightness: white text on the original red only
+     measured 3.78:1 (fails AA for normal-size text like button labels).
+     This still reads as the same red, now at 4.87:1. */
+  --destructive: 0 84% 48%;
   --destructive-foreground: 0 0% 100%;
 
   --sidebar: 209 95% 12%;
   --sidebar-foreground: 0 0% 100%;
   --sidebar-border: 209 40% 20%;
   --sidebar-primary: 191 76% 45%;
-  --sidebar-primary-foreground: 0 0% 100%;
+  /* Same teal as --accent, same fix: navy text instead of white (5.49:1
+     instead of 2.74:1) wherever an active/selected sidebar item uses this
+     teal as its own background fill. */
+  --sidebar-primary-foreground: 209 95% 15%;
   --sidebar-accent: 209 40% 20%;
   --sidebar-accent-foreground: 0 0% 100%;
   --sidebar-ring: 191 76% 45%;

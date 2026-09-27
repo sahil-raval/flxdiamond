@@ -440,7 +440,36 @@ function IFtoFLMindmap() {
 }
 
 /* ── Stone Before / After card ─────────────────────── */
-type Stone = typeof STONES[number];
+type Stone = {
+  id: string;
+  carat: string;
+  colour: string;
+  cut: string;
+  shape: string;
+  before: {
+    grade: string;
+    label: string;
+    comment: string;
+    value: string;
+    note: string;
+    videoSrc: string | null;
+    certPdf: string | null;
+    certLabel: string | null;
+  };
+  after: {
+    grade: string;
+    label: string;
+    comment: string;
+    value: string;
+    note: string;
+    videoSrc: string | null;
+    certPdf: string | null;
+    certLabel: string | null;
+  };
+  uplift: string;
+  weeks: string;
+  removed: string;
+};
 
 function StoneCard({ stone, index }: { stone: Stone; index: number }) {
   return (
@@ -674,7 +703,7 @@ interface SanityInvestmentPage {
     twitterCard?: string; noIndex?: boolean;
     structuredDataType?: string; additionalJsonLd?: string;
   };
-  heroTagline?: string; heroHeading?: string; heroSubtext?: string;
+  heroTagline?: string; heroHeadingLine1?: string; heroHeadingLine2?: string; heroSubtext?: string;
   heroCta?: string; heroSecondaryCta?: string; heroImageUrl?: string;
   assetClassTagline?: string; assetClassHeading?: string;
   assetClassPoints?: { title: string; body: string; tag: string }[];
@@ -702,7 +731,7 @@ export default function Investment() {
   const inv = isSanityConfigured ? sanityInvestment : null;
   const seo = inv?.seo;
 
-  const stones = isSanityConfigured && sanityStones && sanityStones.length > 0
+  const stones: Stone[] = isSanityConfigured && sanityStones && sanityStones.length > 0
     ? sanityStones.map((s) => ({
         id: s.stoneId,
         carat: s.carat,
@@ -775,7 +804,13 @@ export default function Investment() {
               className="font-serif leading-tight"
               style={{ fontSize: "clamp(2.4rem, 6vw, 5rem)", color: "rgba(255,255,255,0.9)" }}
             >
-              {inv?.heroHeading || "Diamonds as a Store of Value."}
+              {/* Split into two lines, same pattern as the Trade page hero:
+                  each line falls back independently rather than one combined
+                  string, so an editor can set just one line in Sanity without
+                  losing the other. */}
+              {inv?.heroHeadingLine1 || "Diamonds as a"}
+              <br />
+              {inv?.heroHeadingLine2 || "Store of Value."}
             </motion.h1>
             <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
           </div>

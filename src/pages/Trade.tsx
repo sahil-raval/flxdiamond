@@ -223,7 +223,7 @@ interface SanityTradePage {
     twitterCard?: string; noIndex?: boolean;
     structuredDataType?: string; additionalJsonLd?: string;
   };
-  heroTagline?: string; heroHeading?: string; heroSubtext?: string;
+  heroTagline?: string; heroHeadingLine1?: string; heroHeadingLine2?: string; heroSubtext?: string;
   heroCta?: string; heroSecondaryCta?: string;
   heroVideoUrl?: string; heroImageUrl?: string;
   partnerTypesTagline?: string; partnerTypesHeading?: string;
@@ -352,13 +352,21 @@ export default function Trade() {
               {sanityTrade?.heroTagline || "Trade Partnership — B2B Only"}
             </motion.p>
 
+            {/* heroHeading was a single flat string field. Split into two
+                separate CMS fields (heroHeadingLine1 / heroHeadingLine2) so
+                the line break is explicit, editable content — not just
+                wherever the text happens to wrap. Each line falls back
+                independently, matching the current live copy in Sanity
+                ("Beyond supply." / "Built for long-term partnerships."). */}
             <motion.h1 variants={up} style={{
               fontFamily: "'Playfair Display', serif",
               fontSize: "clamp(42px, 6vw, 84px)",
               fontWeight: 400, color: "#fff", lineHeight: 1.05,
               marginBottom: "32px", maxWidth: "780px",
             }}>
-              {sanityTrade?.heroHeading || "Where the Diamond Trade Comes to Source."}
+              {sanityTrade?.heroHeadingLine1 || "Beyond supply."}
+              <br />
+              {sanityTrade?.heroHeadingLine2 || "Built for long-term partnerships."}
             </motion.h1>
 
             <motion.p variants={up} style={{
