@@ -120,6 +120,18 @@ const STONES = [
   },
 ];
 
+// Fallback for the "How It Works" process steps, matching the field shape
+// of the Investment Page schema's `processSteps` array (n / tag / title /
+// body — note this is a different shape than the Trade page's equivalent
+// field, which uses `step` instead of `n` and has no `tag`).
+const PROCESS_STEPS_FALLBACK = [
+  { n: "01", tag: "", title: "Submit GIA Cert", body: "Send us your IF certificate number. We read the GIA Comments field for language that signals conversion candidacy." },
+  { n: "02", tag: "", title: "Comment Read", body: "Our team decodes the GIA Comments section for surface characteristics invisible to the naked eye and removable without touching carat weight." },
+  { n: "?", tag: "", title: "Qualifies?", body: "Roughly 1 in 5 IF stones pass this filter. You receive a clear yes or no, at no cost." },
+  { n: "03", tag: "", title: "Precision Regrind", body: "Babu Vekariya executes the micro-regrind — under 0.01mm removed from the affected facet, by hand." },
+  { n: "FL", tag: "", title: "New GIA FL Cert", body: "The stone is independently resubmitted to GIA. A new Flawless certificate is issued, permanent and verifiable." },
+];
+
 const PILLARS = [
   {
     title: "Wealth Preservation",
@@ -714,6 +726,9 @@ interface SanityInvestmentPage {
   ctaHeading?: string; ctaBody?: string;
   galleryImageUrls?: string[];
   conversionPanels?: SanityConversionPanel[];
+  processTagline?: string;
+  processHeading?: string;
+  processSteps?: { n?: string; tag?: string; title?: string; body?: string }[];
   casestudiesTagline?: string;
   casestudiesHeading?: string;
   casestudiesSubtext?: string;
@@ -745,6 +760,10 @@ export default function Investment() {
         removed: s.removed,
       }))
     : STONES;
+
+  const processSteps = isSanityConfigured && inv?.processSteps?.length
+    ? inv.processSteps
+    : PROCESS_STEPS_FALLBACK;
 
   return (
     <>
@@ -846,6 +865,55 @@ export default function Investment() {
             )}
           </motion.div>
         </motion.div>
+      </section>
+
+      {/* ── How It Works ── */}
+      <section className="py-20 md:py-28 px-6" style={{ background: "white" }}>
+        <div className="max-w-7xl mx-auto space-y-12 md:space-y-16">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="max-w-xl space-y-4"
+          >
+            <motion.p variants={up} className="text-[10px] uppercase tracking-[0.45em]" style={{ color: "#1CA9C9" }}>
+              {inv?.processTagline || "How It Works"}
+            </motion.p>
+            <motion.h2 variants={up} className="font-serif leading-tight" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", color: "#02274A" }}>
+              {inv?.processHeading || "The Path from IF to Flawless."}
+            </motion.h2>
+            <motion.span variants={up} className="block w-10 h-px" style={{ background: "#1CA9C9" }} />
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid sm:grid-cols-2 lg:grid-cols-5 gap-8"
+          >
+            {processSteps.map((p, i) => (
+              <motion.div key={i} variants={up}>
+                <div
+                  className="w-11 h-11 flex items-center justify-center mb-6"
+                  style={{ border: "1px solid #1CA9C9" }}
+                >
+                  <span className="text-[11px] tracking-[0.2em] font-semibold" style={{ color: "#1CA9C9" }}>
+                    {p.n}
+                  </span>
+                </div>
+                {p.tag && (
+                  <p className="text-[9px] uppercase tracking-widest mb-2" style={{ color: "rgba(2,39,74,0.35)" }}>
+                    {p.tag}
+                  </p>
+                )}
+                <h3 className="font-serif text-lg mb-3" style={{ color: "#02274A" }}>{p.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(2,39,74,0.58)" }}>{p.body}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </section>
 
       {/* ── IF→FL Horizontal Scroll Journey — Full Width, Pinned ── */}
