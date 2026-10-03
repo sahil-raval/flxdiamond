@@ -327,7 +327,32 @@ export const CONTACT_PAGE_QUERY = `*[_type == "contactPage"][0]{
 /* ─────────────────────────────────────────
    Diamonds
    ───────────────────────────────────────── */
-export const DIAMONDS_QUERY = `*[_type == "diamond" && available != false] | order(carat desc){
+/*
+ * Replace the existing DIAMONDS_QUERY export in src/lib/sanity-queries.ts with this one.
+ *
+ * - Aliases the schema's long trade-field names to the short names the Diamonds page reads
+ * - Resolves image / video / PDF asset references to URLs
+ * - Hides stones marked unavailable (stones with no value set are still shown)
+ * - Never projects tradePrice or notes
+ */
+/*
+ * Replace the existing DIAMONDS_QUERY export in src/lib/sanity-queries.ts with this one.
+ *
+ * - Aliases the schema's long trade-field names to the short names the Diamonds page reads
+ * - Resolves image / video / PDF asset references to URLs
+ * - Hides stones marked unavailable (stones with no value set are still shown)
+ * - Never projects tradePrice or notes
+ */
+/*
+ * Replace the existing DIAMONDS_QUERY export in src/lib/sanity-queries.ts with this one.
+ *
+ * - Aliases the schema's long trade-field names to the short names the Diamonds page reads
+ * - Resolves image / video / PDF asset references to URLs
+ * - Hides stones marked unavailable (stones with no value set are still shown)
+ * - Never projects notes. No price fields are stored or shown.
+ */
+export const DIAMONDS_QUERY = `
+*[_type == "diamond" && defined(stockId) && available != false] | order(featured desc, stockId asc) {
   _id,
   stockId,
   type,
@@ -342,24 +367,19 @@ export const DIAMONDS_QUERY = `*[_type == "diamond" && available != false] | ord
   measurements,
   certification,
   certificateNumber,
-  "imageUrl": image.asset->url,
-  "images": images[].asset->url,
+  origin,
+  shade,
+  "imageUrl": select(defined(image.asset) => image.asset->url + "?w=600&auto=format", null),
+  "images": images[defined(asset)].asset->url,
   "videoUrl": video.asset->url,
   giaReportUrl,
   "giaReportPdfUrl": giaReportPdf.asset->url,
-  featured,
-  "rap": rapPrice,
-  "listedDisc": discountPercent,
-  "listedPrCt": pricePerCarat,
-  "listedAmt": totalPrice,
   "tableP": tablePercent,
   "depth": depthPercent,
   "ca": crownAngle,
   "pa": pavilionAngle,
   "ratio": lengthWidthRatio,
-  origin,
   "ha": heartsAndArrows,
-  shade,
   "loc": location
 }`;
 export const DIAMONDS_PAGE_QUERY = `*[_type == "diamondsPage"][0]{
